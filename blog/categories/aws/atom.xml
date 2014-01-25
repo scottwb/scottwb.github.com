@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: aws | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/aws/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Always-On HTTPS With Nginx Behind an ELB]]></title>
+    <link href="http://scottwb.github.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/"/>
+    <updated>2013-10-28T18:42:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb</id>
+    <content type="html"><![CDATA[<p>A while back, I wrote about <a href="http://scottwb.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/">configuring a Rails app to always enforce HTTPS behind an ELB</a>. The main problem is that it's easy to setup the blanket requirement for HTTPS, but when you are behind an ELB, where the ELB is acting as the HTTPS endpoint and only sending HTTP traffic to your server, you break the ability to respond with an <code>HTTP 200 OK</code> response for the health check that the ELB needs. This is because your blanket HTTPS enforcement will redirect the ELB's health check from HTTP to HTTPS -- and that redirection is not considered to be a healthy response by the ELB.</p>
+
+<p>The same applies to any server you're running behind an ELB in this fashion.</p>
+
+<p>This posts discusses how to handle the same issue with Nginx.</p>
+
+<!-- MORE -->
+
+
+<p>In this scenario, we have an ELB accepting HTTPS traffic and proxying it over HTTP in the clear to an Nginx server listening on port 80. We want Nginx to force all requests that were not originally made with HTTPS to redirect to the same URL on HTTPS, <em>except</em> requests for the health check, which the ELB will make directly over HTTP. For this example, we are using Nginx as a reverse proxy to upstream server processes on the same instance, such as a unicorn webserver hosting a Sinatra app. (This would work well for Rails, too).</p>
+
+<h2>The Solution</h2>
+
+<p>There are two main components that make up this solution:</p>
+
+<ol>
+<li>A specific <code>location</code> directive for the health check URL that does not do any HTTPS enforcement.</li>
+<li>A redirect if the <code>X-Forwarded-Proto: https</code> header does not exist.</li>
+</ol>
+
+
+<p>For best-practice, we can add <a href="http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">HTTP Strict Transport Security</a> with the <code>add_header</code> directive here too. Below is an example of a simplified nginx config file demonstrating these.</p>
+
+<p>```
+upstream unicorn {
+  server localhost:3000;
+}</p>
+
+<p>server {
+  listen 90;
+  server_name example.com;
+  root /var/www/html;</p>
+
+<p>  # 1) Special, somewhat redundant location to always proxy
+  #    the health check to the upstream server, without checking
+  #    if the request came in over HTTP or HTTPS.
+  location /health_check {</p>
+
+<pre><code>proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header Host $http_host;
+proxy_redirect off;
+proxy_next_upstream error;
+proxy_pass http://unicorn;
+break;
+</code></pre>
+
+<p>  }</p>
+
+<p>  # Our main location to proxy everything else to the upstream
+  # server, but with the added logic for enforcing HTTPS.
+  location / {</p>
+
+<pre><code>proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header Host $http_host;
+proxy_redirect off;
+proxy_next_upstream error;
+
+# 2) Any request that did not originally come in to the ELB
+#    over HTTPS gets redirected.
+if ($http_x_forwarded_proto != "https") {
+  rewrite ^(.*)$ https://$server_name$1 permanent;
+}
+
+proxy_pass http://unicorn;
+
+# Add HTTP Strict Transport Security for good measure.
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains;";
+</code></pre>
+
+<p>  }
+}
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Always-On HTTPS With Rails Behind an ELB]]></title>
+    <link href="http://scottwb.github.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/"/>
+    <updated>2013-02-06T11:43:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb</id>
+    <content type="html"><![CDATA[<p>So you want to run your Rails site such that it always uses HTTPS, and you want all HTTP URLs to redirect to their HTTPS counterparts? Typically you use <code>config.force_ssl = true</code> in your initializer, or you use <code>force_ssl</code> in your controllers. For various reasons having to do with late-binding configuration, I have typically not been able to use the <code>config.force_ssl</code> method. This means the easiest way to force the whole site to use HTTPS has been to use <code>force_ssl</code> on the base <code>ApplicationController</code>, like this:</p>
+
+<p>``` ruby</p>
+
+<h1>app/controllers/application_controller.rb</h1>
+
+<p>class ApplicationController &lt; ActionController::Base
+  force_ssl
+end
+```</p>
+
+<p>However...when you deploy this to Amazon EC2 behind an ELB (Elastic Load Balancer), you can run into problems.</p>
+
+<!-- MORE -->
+
+
+<h2>Problem: ELB Health Check vs Rails force_ssl</h2>
+
+<p>Even if you have your ELB configured with your SSL certificate and you have it proxying port 443 to port 80 on your Rails app, you may still have trouble getting the ELB to accept your instance as an upstream server if it cannot get an <code>HTTP 200 OK</code> from the health check action.</p>
+
+<p>Once you have your Rails app using a global <code>force_ssl</code>, the ELB HealthCheck will hit your server over HTTP (because you don't actually have your Rails server setup as an SSL endpoint), and your server will return it a 301 redirect. This causes the ELB to think your instance is unhealthy and won't proxy any requests to it.</p>
+
+<h2>Solution: Custom HTTP-able Health Check Action</h2>
+
+<p>I've found the easiest way to deal with this is to create a special action that you use for the health check, and override the <code>force_ssl</code> for that action. Unfortunately, the stock implementation of <code>ActionController::Base.force_ssl</code>, when applied globally in the <code>ApplicationController</code>, does not allow other controllers to override that setting. That means we have to tackle this in two steps.</p>
+
+<p>First, re-implement the <code>force_ssl</code> method to allow controllers to override it:</p>
+
+<p>``` ruby</p>
+
+<h1>app/controllers/application_controller.rb</h1>
+
+<p>class ApplicationController &lt; ActionController::Base
+  def self.force_ssl(options = {})</p>
+
+<pre><code>host = options.delete(:host)
+before_filter(options) do
+  if !request.ssl? &amp;&amp; !Rails.env.development? &amp;&amp; !(respond_to?(:allow_http?) &amp;&amp; allow_http?)
+    redirect_options = {:protocol =&gt; 'https://', :status =&gt; :moved_permanently}
+    redirect_options.merge!(:host =&gt; host) if host
+    redirect_options.merge!(:params =&gt; request.query_parameters)
+    redirect_to redirect_options
+  end
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  force_ssl
+end
+```</p>
+
+<p>The above is a direct copy of this method from Rails 3.2, with the additional clause: <code>&amp;&amp; !(respond_to?(:allow_http?) &amp;&amp; allow_http?)</code>. That clause allows any controller to implement an <code>allow_http?</code> method, which is executed in the context of a request's <code>before_filter</code>. If this method exists and returns <code>true</code> for a given request, then it will be allowed to continue over HTTP without being redirected to HTTPS.</p>
+
+<p>For the second part, we need to create an unprotected action that can be used for the health check. The easiest way to do this is with a new controller (and matching route, if necessary):</p>
+
+<p>``` ruby</p>
+
+<h1>app/controllers/heath_check_controller.rb</h1>
+
+<p>class HealthCheckController &lt; ApplicationController
+  def index</p>
+
+<pre><code>render :text =&gt; "I am alive!\n"
+</code></pre>
+
+<p>  end</p>
+
+<p>  protected
+  def allow_http?</p>
+
+<pre><code>true
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>``` ruby</p>
+
+<h1>config/routes.rb</h1>
+
+<p>MyApp::Application.routes.draw do
+  get "health_check" => "health_check#index"
+  # ...
+end
+```</p>
+
+<p>Now, all you need to do is change your ELB Health Check to use <code>/health_check</code> instead of <code>/index.html</code>. This way the ELB will check that your Rails app is responding using HTTP (since that is the appropriate protocol between the ELB and Rails if you are using the ELB as your SSL endpoint). Your instance will register as healthy as long as your Rails app is up, and Rails will redirect all other HTTP traffic to HTTPS.</p>
+
+<p><em><strong>UPDATED Oct. 28, 2013:</strong> If you run your own reverse proxy in front of Rails, you can do this in the reverse proxy without having to modify your Rails app. See my <a href="http://scottwb.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/">post on doing this with nginx</a>.</em></p>
+]]></content>
+  </entry>
+  
+</feed>

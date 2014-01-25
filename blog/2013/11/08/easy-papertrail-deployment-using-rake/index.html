@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Easy Papertrail Deployment Using Rake - Scott W. Bradley</title>
+  <meta name="author" content="Scott W. Bradley">
+
+  
+  <meta name="description" content="Papertrail is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake">
+
+  
+  <link href="/favicon.png" rel="icon">
+
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Scott W. Bradley" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-28351625-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Scott W. Bradley</a></h1>
+  
+    <h2>in which scottwb thinks out loud</h2>
+  
+  <a href="http://github.com/scottwb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/camo.github.com/abad93f42020b733148435e2cd92ce15c542d320/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub"></a>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:scottwb.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/profile">Profile</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Easy Papertrail Deployment Using Rake</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-08T06:37:00-08:00" pubdate data-updated="true">Nov 8<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><a href="http://papertrailapp.com/">Papertrail</a> is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, across numerous hosts. Having all your logs in one place, live tail-able, searchable, and archived is key to debugging such systems in production.</p>
+
+<p>There are a few ways to set it up, as documented on their quick start page, such as a system-wide installation via <a href="http://community.opscode.com/cookbooks/papertrail-rsyslog">Chef</a>, or configuring your app to use the syslog protocol. They also provide a convenient Ruby gem called <a href="http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-text-log-files-in-unix">remote_syslog</a> that can be configured to read a configured set of log files and send them to Papertrail.</p>
+
+<p>I&#8217;ve found for simple Ruby project structures, it can often be easier to deploy Papertrail by installing this gem with Bundler via your project Gemfile, and then creating a simple set of Rake tasks to manage starting and stopping the service. This way it&#8217;s self-contained within your application repository, gets deployed with the same mechanism you deploy your application code, and can be used on your development and staging systems just as easily, without any Chef cookbooks or other configuration hassle.</p>
+
+<!-- MORE -->
+
+
+<h2>Rake-based Deployment</h2>
+
+<p>I typically build most of my production deployment with modular Rake tasks. This way your Capistrano/OpsWorks/Chef/whatever deployment tools can invoke Rake tasks &#8211; and you can use these same tasks manually on production and development systems alike.</p>
+
+<p>I have a <code>papertrail.rake</code> in my <a href="https://github.com/scottwb/rake-tasks">rake-tasks repository on GitHub</a> that demonstrates how I use this. The contents are shown below, but the rest of the repository demonstrates the other required ingredients, such as a the papertrail config file. With this file in your <code>tasks</code> directory, and the <code>remote_syslog</code> gem in your <code>Gemfile</code>, you now have access to three simple tasks:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>rake -T papertrail
+</span><span class='line'><span class="o">(</span>in /Users/scottwb/src/rake-tasks<span class="o">)</span>
+</span><span class='line'>rake papertrail:start   <span class="c"># Start papertrail remote_syslog daemon.</span>
+</span><span class='line'>rake papertrail:status  <span class="c"># Show status of papertrail remote_syslog daemon.</span>
+</span><span class='line'>rake papertrail:stop    <span class="c"># Stop papertrail remote_syslog daemon.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can now manually start logging to Papertrail with <code>rake papertrail:start</code>&#8230;or you can hook up the start/stop tasks to your automated deployment tools.</p>
+
+<p>Here are the contents of the main rakefile for this. See the <a href="https://github.com/scottwb/rake-tasks">rake-tasks repository</a> for example config file, Gemfile, and directory structure.</p>
+
+<h2>The papertrail.rake File</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">PAPERTRAIL_CONFIG</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="s2">&quot;../../config/remote_syslog.yml&quot;</span><span class="p">,</span> <span class="bp">__FILE__</span><span class="p">)</span>
+</span><span class='line'><span class="no">PAPERTRAIL_PID</span>    <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="s2">&quot;../../tmp/pids/remote_syslog.pid&quot;</span><span class="p">,</span> <span class="bp">__FILE__</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:papertrail</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">papertrail_is_running?</span>
+</span><span class='line'>    <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="no">PAPERTRAIL_PID</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nb">system</span><span class="p">(</span><span class="s2">&quot;ps x | grep `cat </span><span class="si">#{</span><span class="no">PAPERTRAIL_PID</span><span class="si">}</span><span class="s2">` 2&gt;&amp;1 &gt; /dev/null&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">desc</span> <span class="s2">&quot;Start papertrail remote_syslog daemon.&quot;</span>
+</span><span class='line'>  <span class="n">task</span> <span class="ss">:start</span> <span class="o">=&gt;</span> <span class="ss">:stop</span> <span class="k">do</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">papertrail_is_running?</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;Papertrail is already running.&quot;</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">sh</span> <span class="s2">&quot;remote_syslog -c </span><span class="si">#{</span><span class="no">PAPERTRAIL_CONFIG</span><span class="si">}</span><span class="s2"> --pid-file </span><span class="si">#{</span><span class="no">PAPERTRAIL_PID</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">desc</span> <span class="s2">&quot;Stop papertrail remote_syslog daemon.&quot;</span>
+</span><span class='line'>  <span class="n">task</span> <span class="ss">:stop</span> <span class="k">do</span>
+</span><span class='line'>    <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span> <span class="no">PAPERTRAIL_PID</span>
+</span><span class='line'>      <span class="n">sh</span> <span class="s2">&quot;kill `cat </span><span class="si">#{</span><span class="no">PAPERTRAIL_PID</span><span class="si">}</span><span class="s2">`&quot;</span>
+</span><span class='line'>      <span class="n">rm_f</span> <span class="no">PAPERTRAIL_PID</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">desc</span> <span class="s2">&quot;Show status of papertrail remote_syslog daemon.&quot;</span>
+</span><span class='line'>  <span class="n">task</span> <span class="ss">:status</span> <span class="k">do</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">papertrail_is_running?</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;Papertrail remote_syslog is running&quot;</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;Papertrail remote_syslog is stopped&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Scott W. Bradley</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-08T06:37:00-08:00" pubdate data-updated="true">Nov 8<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/papertrail/'>papertrail</a>, <a class='category' href='/blog/categories/rake/'>rake</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/tools/'>tools</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/" data-via="scottwb69" data-counturl="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/" title="Previous Post: Always-On HTTPS With Nginx Behind an ELB">&laquo; Always-On HTTPS With Nginx Behind an ELB</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/" title="next Post: Defeating The Infamous Mechanize "Too Many Connection Resets" Bug">Defeating The Infamous Mechanize "Too Many Connection Resets" Bug &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section class='aboutMe'>
+  <h1>About Me</h1>
+  <img class="left" src="/favicon.png" width="75" height="75">
+  <p>Husband. Father. Techie. Founder and Principal Engineer at <a href="http://facetdigital.com/">Facet Digital, LLC</a>. Fitness and health enthusiast. Seattle Sounders FC fan. All opinions are mine alone. All trademarks are property of their respective owners.</p>
+</section>
+<section>
+  <h1>Latest Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating The Infamous Mechanize "Too Many Connection Resets" Bug</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Easy Papertrail Deployment Using Rake</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("scottwb69", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/scottwb69" class="twitter-follow-button" data-show-count="true">Follow @scottwb69</a>
+  
+</section>
+
+
+<section>
+  <h1>Latest Code</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/scottwb">@scottwb</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        var blacklist = [];
+        
+          
+            blacklist.push('scottwb.github.com');
+          
+            blacklist.push('haml-block-bug');
+          
+        
+
+        github.showRepos({
+            user: 'scottwb',
+            count: 5,
+            skip_forks: true,
+            blacklist: blacklist,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106700002337561490782?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class='shelfari'>
+  <h1>Latest Books</h1>
+  <div id="ShelfariWidget203753"><a href='http://www.shelfari.com/'>Shelfari: Book reviews on your book blog</a><script src="http://www.shelfari.com/ws/203753/widget.js?r=41860" type="text/javascript" language="javascript"></script></div>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Scott W. Bradley -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'scottwb';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/';
+        var disqus_url = 'http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

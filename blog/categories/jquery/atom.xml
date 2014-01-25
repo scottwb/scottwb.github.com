@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: jquery | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/jquery/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Show jQuery Mobile Page Loading With Text And Spinner]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/"/>
+    <updated>2012-06-30T21:47:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner</id>
+    <content type="html"><![CDATA[<p>I like jQuery Mobile's page loading spinner. When you transition between pages it displays a nice subtle spinner while the page loads, only if the page load takes more than a configured number of milliseconds.</p>
+
+<p>So, I wanted to use their page-loading spinner for in-page wait times in my app. The user clicks something, I do some AJAX stuff and show them a nice spinner with a message telling them what's going on until the results come back. jQuery Mobile has javascript functions for this called <code>$.mobile.showPageLoadingMsg</code> and <code>$.hidePageLoadingMsg</code>. The problem is, you can either show a spinner only, or a text-message only. You can't show both a spinner <em>and</em> a text message, even though they clearly support it. Well, you <em>can</em> do that if you have the global setting <code>$.mobile.loadingMessageTextVisible = true</code>, but then you get a text with your normal page-load spinners.</p>
+
+<!-- MORE -->
+
+
+<p>I've created a workaround for this and included it in my <a href="https://github.com/scottwb/jquery.mobile.utils">jquery.mobile.utils</a> library. Using this you can call:</p>
+
+<p><code>javascript
+// Params: jqm theme swatch, and message text
+$.mobile.utils.showWaitBox("a", "Hang on while I do work...");
+// ... some time later...
+$.mobile.utils.hideWaitBox();
+</code></p>
+
+<p>That will let you leave the standard textless page-loading spinenrs alone, but be able to show a nice themed wait box with a spinner while your app is doing something the user needs to wait for, that looks like this:</p>
+
+<p><img class="center" src="http://img.skitch.com/20120701-met428ntqsxrest228pxgrrxjs.png"></p>
+
+<p>To use these methods, download the JavaScript or CoffeeScript version of the jquery.mobile.utils library from the <a href="https://github.com/scottwb/jquery.mobile.utils">project's github page</a> and include it in your jQuery Mobile page after <code>jquery.mobile-1.1.0.js</code> is loaded.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Reload The Same Page Without Blinking On jQuery Mobile]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile/"/>
+    <updated>2012-06-29T09:53:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile</id>
+    <content type="html"><![CDATA[<p>When using jQuery Mobile, if you try to reload the current page from javascript using the usual tactics of assigning <code>window.location.href</code>, you might notice some unsightly artifacts and page blinking. This is particularly noticeable on iOS Mobile Safari (mainly on iPhone), because the reload also causes the address bar to slide down and back up.</p>
+
+<p>Below is function I made to refresh the current page successfully with no visible artifacts: no blinking, no address bar showing, transitions:</p>
+
+<p>```javascript
+function refreshPage() {
+  $.mobile.changePage(</p>
+
+<pre><code>window.location.href,
+{
+  allowSamePageTransition : true,
+  transition              : 'none',
+  showLoadMsg             : false,
+  reloadPage              : true
+}
+</code></pre>
+
+<p>  );
+}
+```</p>
+
+<p><em>This was done on jQuery Mobile 1.1.0.</em></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[jQuery Mobile Breaks Your HREFs on iOS Mobile Safari]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
+    <updated>2012-06-29T00:00:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
+    <content type="html"><![CDATA[<p>Starting with verison 1.1.0RC1, jQuery Mobile changes the <code>href</code> of any link to be <code>#</code> when it is clicked, but <em>only on iOS Mobile Safari</em>. If you try to make a click handler that reads the <code>href</code> attribute, you will be surprised to find that it does not get the href you intended. For example:</p>
+
+<p><code>javascript
+$('a').click(function() {
+  console.log($(this).attr('href'));
+});
+</code></p>
+
+<p>When using jQuery Mobile, this code will print out the href you expect on every browser except Mobile Safari on iOS (both real devices and simulators, but <em>not with other browsers faking their User-Agent</em>). On Mobile Safari, this will print out that the href is "#".</p>
+
+<h2>The Problem</h2>
+
+<p>Obviously this is a problem if you have code that operates in a click handler that reads the clicked element's <code>href</code> attribute. jQuery Mobile changes that href before you get a chance to read it.</p>
+
+<p>One common place this is used is with the <code>link_to</code> helper in Ruby on Rails, for links that need to use other HTTP methods. For example, the standard RESTful way to delete a resource will be with a link that sets <code>:method</code> to <code>:delete</code>. Rails handles this with a library called jQuery UJS that needs to read the href from the link when it is clicked.</p>
+
+<p>Unfortunately for Rails users, this means that Rails method links don't work with jQuery Mobile on iOS Mobile Safari.</p>
+
+<!-- MORE -->
+
+
+<h2>The Reason</h2>
+
+<p>The jQuery Mobile team is doing this on purpose, to make it so the address bar on iPhone does not drop down when changing pages (and we all love that feature!). In <a href="https://github.com/jquery/jquery-mobile/issues/3777">this discussion</a> and <a href="https://github.com/jquery/jquery-mobile/issues/3686">this discussion</a>, they seem to understand that this makes custom click handlers get the wrong href, but decide to go ahead with it anyway.</p>
+
+<p>You can see it happen in this excerpt from the jQuery Mobile 1.1.0 source (reformatted for blog-friendlyness):</p>
+
+<p><code>javascript
+// By caching the href value to data and switching the href to a #,
+// we can avoid address bar showing in iOS. The click handler resets
+// the href during its initial steps if this data is present
+$( link )
+  .jqmData( "href", $( link  ).attr( "href" )  )
+  .attr( "href", "#" );
+</code></p>
+
+<h2>The Solution</h2>
+
+<p>Here's the part that seems to be undocumented other than in that comment: <em>they store the href in a data attribute!</em> This makes this problem easy to workaround. Simply change your click handler to check for the data attribute first and fall back to the href:</p>
+
+<p><code>javascript
+$('a').click(function() {
+  console.log($(this).data('href') || $(this).attr('href'));
+});
+</code></p>
+
+<p>That would be easy enough to encapsulate in a nice helper function...</p>
+
+<h2>Applying This To Rails jQuery UJS</h2>
+
+<p>If you use the Rails <code>link_to</code> helper with the <code>:method</code> option set to anything other than <code>:get</code>, links are handled by the <code>jquery_ujs</code> library that comes with Rails (often referred to as Rails UJS, jQuery UJS, rails.js). You'll notice, for example that none of your <code>:delete</code> links work with jQuery Mobile when you are on iOS Mobile Safari. You might see this as a missing route for your <code>show</code> or <code>edit</code> method depending on where you are linking from.</p>
+
+<p>It turns out the fix is easy. The jquery_ujs code already has a method to encapsulate getting the href from an element, complete with a comment telling you how you can override it. All it does out of the box is read <code>element.attr('href')</code>. All we have to do is override it and make it try the data attribute first.</p>
+
+<p>Somewhere after <code>jquery_ujs.js</code> is loaded, define this:</p>
+
+<p><code>javascript
+$.rails.href = function(element) {
+  return element.data('href') || element.attr('href');
+}
+</code></p>
+
+<p>Now your Rails <code>link_to</code> calls with custom <code>:method</code> options such as <code>:delete</code> will work just fine with jQuery Mobile 1.1.0 on iOS Mobile Safari, and you don't have to lose that clever bit that keeps the address bar hidden.</p>
+
+<hr />
+
+<p><em><strong>UPDATED Jan. 3, 2013:</strong> I have confirmed that this problem has been solved in jQuery Mobile 1.2.0, and this work-around is no longer required. I did try to upgrade one of my jQuery Mobile 1.1.0 apps to 1.1.1 (but rolled back for other reasons), and in that process I believe that the above solution was still required.</em></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[HTML5 Placeholder Polyfill With jQuery Mobile]]></title>
+    <link href="http://scottwb.github.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile/"/>
+    <updated>2012-02-22T11:29:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile</id>
+    <content type="html"><![CDATA[<p>IE9 doesn't support the <code>placeholder</code> attribute on <code>input</code> elements. Why does this matter for a jQuery Mobile site? If you want to build a single mobile-first page with jQuery Mobile, and use resposive design techiniques to display the same page on desktop browsers, you might appreciate the ability to use the HTML5 <code>placeholder</code> in your design, and still need to support at least IE9.</p>
+
+<p>Using a <code>placeholder</code> on an input field is a nice way to save space on a mobile form. It lets you forgo the field labels while still telling the user what the fields are for. In many cases its utility goes beyond labeling; you might need it to express input requirements such as what unit of measurement to use in a "distance" field. This is just as useful in a desktop design as it is in a mobile design.</p>
+
+<p>There is a growing movement of creating polyfills for this sort of thing - especially targeted at Internet Explorer. If you're not already using something like <a href="http://www.modernizr.com/">Modernizr</a> to fulfill all your HTML5 polyfill needs, and just want a solution for the <code>placeholder</code> attribute, you're in luck. The Modernizr wiki has a <a href="https://github.com/Modernizr/Modernizr/wiki/HTML5-Cross-browser-Polyfills">list of polyfills</a>. You'll see that there are quite a few placeholder polyfills...but they are not all created equal.</p>
+
+<!-- MORE -->
+
+
+<p>I tried a few of these, and read through the code, and realized that a few of them have some problems. Problems like not supporting password fields, or incorrectly styling non-focused input placeholders. After reviewing these, I decided that the best one to go with was <a href="http://mths.be/placeholder">jquery-placeholder</a> by <a href="http://mathiasbynens.be/">Mathias Bynens</a>. This one is easy to use, no-ops on browsers that natively support input placeholders, and nicely handles all the corner cases I tested for.</p>
+
+<p>To use jquery-placeholder, simply download <code>jquery.placeholder.js</code> from the <a href="http://mths.be/placeholder">project page</a> and make sure it gets included in your page after jQuery. Then you'll need to apply it to every element you want with a jQuery statement like:</p>
+
+<p><code>javascript
+$(selector).placeholder();
+</code></p>
+
+<p>If you want to use this with jQuery Mobile and its AJAX page-loading mode, you'll need to make sure to execute this statement on every page that gets loaded. You can do that in your main javascript for the document with something like this:</p>
+
+<p><code>javascript
+$(document).bind('pageshow', function() {
+  var activePage = $('.page.ui-page-active');
+  activePage.find('input[placeholder], textarea[placeholder]').placeholder();
+});
+</code></p>
+
+<p>From there, you may notice that the placeholder looks different on all the different browsers. You can style this to be consistent with CSS. You'll need to be a bit repetitive here, because of the way putting the placeholder selectors on the same line breaks some of the browsers. If you use a CSS preprocessor this gets a little easier. Here is an example using Sass's SCSS syntax:</p>
+
+<p>``` scss
+input, textarea {
+  &amp;.placeholder {</p>
+
+<pre><code>color: #A9A9A9;
+</code></pre>
+
+<p>  }
+  &amp;:-moz-placeholder {</p>
+
+<pre><code>color: #A9A9A9;
+</code></pre>
+
+<p>  }
+  &amp;::-webkit-input-placeholder {</p>
+
+<pre><code>color: #A9A9A9;
+</code></pre>
+
+<p>  }
+}
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[jQuery Mobile and Rails UJS Method Links]]></title>
+    <link href="http://scottwb.github.com/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links/"/>
+    <updated>2012-02-17T19:59:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links</id>
+    <content type="html"><![CDATA[<p>Rails UJS and jQuery Mobile do not play nice together when it comes to combining Rails UJS's handling of non-GET/POST links with jQuery Mobile's data attributes such as <code>data-ajax</code>, <code>data-direction</code>, and <code>data-transition</code>. This post demonstrates a quick hack you can use to remedy this.</p>
+
+<!-- MORE -->
+
+
+<p>The <code>rails.js</code> file from <a href="https://github.com/rails/jquery-ujs">rails/jquery-ujs</a> does some very cool stuff to let you emulate HTTP methods other than GET and POST. It does this by looking for a <code>data-method</code> attribute on your links. When it finds one, e.g.: <code>data-method='delete'</code>, it creates an invisible form to submit a POST with all your link details and a special <code>_method=delete</code> parameter that Rails handles in the backend as if it were a <code>DELETE</code> method. Using the <code>link_to</code> helper, that normally looks like this:</p>
+
+<p><code>erb
+&lt;%= link_to "Delete", @post, :confirm =&gt; "You sure?", :method =&gt; :delete %&gt;
+</code></p>
+
+<p>jQuery Mobile loads same-domain links and form submissions via AJAX and provide sexy page transitions. You control how these work by adding data attributes to the <code>&lt;a&gt;</code> or <code>&lt;form&gt;</code> element. One important one, that can affect the correct operation of your page, is the <code>data-ajax='false'</code> attribute. That makes disables the AJAX behavior, and loads the next page from your link or form as a new page. That normally looks like this:</p>
+
+<p><code>erb
+&lt;%= link_to "View", @post, "data-ajax" =&gt; "false" %&gt;
+</code></p>
+
+<p>One important time you may wish to exercise both tactics at the same time is in providing a delete link. You want to use a link to generate a DELETE request via Rails UJS, and you want to redirect to a new page without jQuery Mobile loading it via AJAX. This is how you would attempt that:</p>
+
+<p>``` erb
+&lt;%= link_to("Delete", @post, :confirm => "You sure?",</p>
+
+<pre><code>        :method =&gt; :delete, "data-ajax" =&gt; "false" %&gt;
+</code></pre>
+
+<p>```</p>
+
+<p>Sorry. That won't work.</p>
+
+<p>This is because Rails UJS does it's magic by creating a new <code>&lt;form&gt;</code> to submit when the link is clicked. It doesn't know or care about the <code>data-ajax</code> attribute, and the form it creates does not have that attribute. Then, when the form is submitted, jQuery Mobile handles it using AJAX by default because the form didn't specify otherwise.</p>
+
+<p>We need Rails UJS to copy the <code>data-ajax</code> attribute from the link to the form it creates. This is actually a pretty simple fix (hack) to the <code>handleMethod</code> funciton in <code>rails.js</code>. To just one-off this particular attribute, you can do somethign like this:</p>
+
+<p>``` diff rails.js.diff https://gist.github.com/1857315 View Gist
+diff --git a/src/rails.js b/src/rails.js
+index 06b4e0b..49ff0b2 100644
+--- a/src/rails.js
++++ b/src/rails.js
+@@ -174,6 +174,11 @@</p>
+
+<pre><code>   if (target) { form.attr('target', target); }
+</code></pre>
+
+<ul>
+<li>   var ajax = link.data('ajax');</li>
+<li>   if (ajax !== undefined) {</li>
+<li><pre><code> form.attr('data-ajax', ajax);
+</code></pre></li>
+<li>   }
++
+   form.hide().append(metadata_input).appendTo('body');
+   form.submit();
+ },
+```</li>
+</ul>
+
+
+<p>In fact, I've <a href="https://github.com/scottwb/jquery-ujs/commit/4d6bc50c4545ac2f492c1e584bef1e154cd61522">committed this patch</a> in a branch on my fork of rails/jquery-ujs.</p>
+
+<p>With this addition, the above combination of <code>:method =&gt; :delete</code> and <code>"data-ajax" =&gt; "false"</code> work beautifully together. You can imagine doing this for other data attributes you care about such as <code>data-direction</code> and <code>data-transition</code>.</p>
+
+<p>There's currently an <a href="https://github.com/rails/jquery-ujs/issues/189">outstanding issue</a> to address this, with some discussion on how to go about this generically. If you would like to see this make it into the main distro, head over to that issue and voice your support.</p>
+]]></content>
+  </entry>
+  
+</feed>

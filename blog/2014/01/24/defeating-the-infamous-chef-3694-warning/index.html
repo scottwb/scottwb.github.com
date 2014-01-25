@@ -1,0 +1,692 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Defeating The Infamous CHEF-3694 Warning - Scott W. Bradley</title>
+  <meta name="author" content="Scott W. Bradley">
+
+  
+  <meta name="description" content="TL;DR: I hate the CHEF-3694 warning, so I made a cookbook to get rid of it. YMMV. Resource cloning in Chef is a bit of a minefield. They have a &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning">
+
+  
+  <link href="/favicon.png" rel="icon">
+
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Scott W. Bradley" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-28351625-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Scott W. Bradley</a></h1>
+  
+    <h2>in which scottwb thinks out loud</h2>
+  
+  <a href="http://github.com/scottwb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/camo.github.com/abad93f42020b733148435e2cd92ce15c542d320/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub"></a>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:scottwb.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/profile">Profile</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Defeating the Infamous CHEF-3694 Warning</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-24T19:47:00-08:00" pubdate data-updated="true">Jan 24<span>th</span>, 2014</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><em><strong>TL;DR:</strong> I hate the CHEF-3694 warning, so I made a <a href="https://github.com/facetdigital/chef_resource_merging">cookbook</a> to get rid of it. YMMV.</em></p>
+
+<p>Resource cloning in Chef is a bit of a minefield. They have a ticket known as <a href="https://tickets.opscode.com/browse/CHEF-3694">CHEF-3694</a> saying that the feature should be removed, and indicating that it will be by the time Chef 12.0.0 comes out. However, a lot of their Opscode-developed community cookbooks use (abuse?) resource cloning. The result is that you get tons of warnings about resource cloning that look like this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[2014-01-24T16:15:55+00:00] WARN: Cloning resource attributes for package[perl] from prior resource (CHEF-3694)
+</span><span class='line'>[2014-01-24T16:15:55+00:00] WARN: Previous package[perl]: /tmp/vagrant-chef-1/chef-solo-1/cookbooks/perl/recipes/default.rb:26:in `block in from_file'
+</span><span class='line'>[2014-01-24T16:15:55+00:00] WARN: Current  package[perl]: /tmp/vagrant-chef-1/chef-solo-1/cookbooks/iptables/recipes/default.rb:21:in `from_file'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Where I come from, it&#8217;s considered an error to have a warning in your output. Ignorable warnings bury important ones. So&#8230;for better or worse, I embarked upon a journey to see what I could do to use resources correctly and avoid these warnings&#8230;</p>
+
+<!-- MORE -->
+
+
+<h2>What is resource cloning and why are you warning me about it?</h2>
+
+<p>The <a href="https://tickets.opscode.com/browse/CHEF-3694">discussion</a> about this this issue is an interesting read. You should be able to, for example, declare a service resource in one spot of your recipe, and later start it. You should also be able to have multiple recipes be able to install the same package resource and have it be idempotent, without having to worry about coordinating between cookbooks. That&#8217;s Chef&#8217;s job. To support this, Chef uses a technique they call <em>resource cloning</em>, which spews out warning messages because they plan to get rid of it. Proponents of the warning messages argue that if your cookbook relies on resource cloning, then you are doing something incorrectly and you have bigger problems. However, there are popular community cookbooks that won&#8217;t work without it.</p>
+
+<p>Here&#8217;s an example of stock <code>perl</code> and <code>iptables</code> cookbooks causing this problem:</p>
+
+<p><a href="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"><img class="center" src="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"></a></p>
+
+<p>I really wouldn&#8217;t want <code>perl</code> and <code>iptables</code> to have to coordinate between each other in order to avoid this warning. Perhaps there is a way to re-order them? Not that I could figure out&#8230;at least not without either making dangerous assumptions or editing stock community cookbook code.</p>
+
+<p>Even so&#8230;there are cookbooks that have this problem by themselves without the help of other cookbooks. For example, one of the most popular cookbooks, <code>apache2</code>:</p>
+
+<p><a href="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"><img class="center" src="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"></a></p>
+
+<h2>Can we just remove resource cloning?</h2>
+
+<p>Since it was well-argued that cookbooks shouldn&#8217;t rely on resource cloning, and that it would be removed in a future version of Chef, I decided to replace it myself with resource <em>duplication</em>. Resource cloning and its associated warning messages are handled in a method called <code>Chef::Resource::load_prior_resources</code>, so I just monkey-patched out that method to allow the duplicate resource without copying over any of the existing resources&#8217;s attributes, using a bit of code like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Chef</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Resource</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">load_prior_resource</span>
+</span><span class='line'>      <span class="no">Chef</span><span class="o">::</span><span class="no">Log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;I AIN&#39;T CLONING </span><span class="si">#{</span><span class="nb">self</span><span class="o">.</span><span class="n">to_s</span><span class="si">}</span><span class="s2">!!!&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="kp">true</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>NOPE! That doesn&#8217;t work. While this works for some of my cookbooks and certain resources, the community <code>apache2</code> recipes clearly rely on the soon-to-be-deprecated resource cloning behavior. These recipes define the <code>service[apache2]</code> resource a number of times to do things like enable/start/restart after config changes. Without resource cloning, the <code>apache2::logrotate</code> recipe, for example, fails to process a restart of the apache2 service because it <em>didn&#8217;t</em> inherit the necessary attributes that needed to be cloned from the original service definition, giving errors like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">================================================================================</span>
+</span><span class='line'><span class="no">Error</span> <span class="n">executing</span> <span class="n">action</span> <span class="sb">`restart`</span> <span class="n">on</span> <span class="n">resource</span> <span class="s1">&#39;service[apache2]&#39;</span>
+</span><span class='line'><span class="o">================================================================================</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Chef</span><span class="o">::</span><span class="no">Exceptions</span><span class="o">::</span><span class="no">Service</span>
+</span><span class='line'><span class="o">-------------------------</span>
+</span><span class='line'><span class="n">service</span><span class="o">[</span><span class="n">apache2</span><span class="o">]</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">locate</span> <span class="n">the</span> <span class="n">init</span><span class="o">.</span><span class="n">d</span> <span class="n">script!</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Resource</span> <span class="no">Declaration</span><span class="p">:</span>
+</span><span class='line'><span class="o">---------------------</span>
+</span><span class='line'><span class="c1"># In /tmp/vagrant-chef-1/chef-solo-1/cookbooks/apache2/recipes/logrotate.rb</span>
+</span><span class='line'>
+</span><span class='line'> <span class="mi">20</span><span class="p">:</span> <span class="n">apache_service</span> <span class="o">=</span> <span class="n">service</span> <span class="s1">&#39;apache2&#39;</span> <span class="k">do</span>
+</span><span class='line'> <span class="mi">21</span><span class="p">:</span>   <span class="n">action</span> <span class="ss">:nothing</span>
+</span><span class='line'> <span class="mi">22</span><span class="p">:</span> <span class="k">end</span>
+</span><span class='line'> <span class="mi">23</span><span class="p">:</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">Compiled</span> <span class="no">Resource</span><span class="p">:</span>
+</span><span class='line'><span class="o">------------------</span>
+</span><span class='line'><span class="c1"># Declared in /tmp/vagrant-chef-1/chef-solo-1/cookbooks/apache2/recipes/logrotate.rb:20:in `from_file&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">service</span><span class="p">(</span><span class="s2">&quot;apache2&quot;</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">action</span> <span class="o">[</span><span class="ss">:nothing</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">supports</span> <span class="p">{</span><span class="ss">:restart</span><span class="o">=&gt;</span><span class="kp">false</span><span class="p">,</span> <span class="ss">:reload</span><span class="o">=&gt;</span><span class="kp">false</span><span class="p">,</span> <span class="ss">:status</span><span class="o">=&gt;</span><span class="kp">true</span><span class="p">}</span>
+</span><span class='line'>  <span class="n">retries</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="n">retry_delay</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="n">service_name</span> <span class="s2">&quot;apache2&quot;</span>
+</span><span class='line'>  <span class="n">pattern</span> <span class="s2">&quot;apache2&quot;</span>
+</span><span class='line'>  <span class="n">startup_type</span> <span class="ss">:automatic</span>
+</span><span class='line'>  <span class="n">cookbook_name</span> <span class="ss">:apache2</span>
+</span><span class='line'>  <span class="n">recipe_name</span> <span class="s2">&quot;logrotate&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Then how about reusing the existing resource?</h2>
+
+<p>I think resource reuse is probably the intention in 99% of the use cases. Some commenters on this discussion have suggested making all their recipes look up the resource in the <em>resources collection</em> first, and using the existing one if possible, otherwise handling the not-found exception and creating the new resource. Not a bad suggestion&#8230;but there&#8217;s no way I&#8217;m going to modify every community cookbook to do that.</p>
+
+<p>As an experiment, I tried simply overriding the <code>service</code> DSL method (which is actually implemented in <code>method_missing</code>) to test this theory, with some monkey-patching like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Chef</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">DSL</span>
+</span><span class='line'>    <span class="k">module</span> <span class="nn">Recipe</span>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">service</span><span class="p">(</span><span class="n">svc</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">s</span> <span class="o">=</span> <span class="n">run_context</span><span class="o">.</span><span class="n">resource_collection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;service[</span><span class="si">#{</span><span class="n">svc</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">s</span><span class="o">.</span><span class="n">instance_eval</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span> <span class="k">if</span> <span class="n">block</span>
+</span><span class='line'>        <span class="n">s</span>
+</span><span class='line'>      <span class="k">rescue</span> <span class="no">Chef</span><span class="o">::</span><span class="no">Exceptions</span><span class="o">::</span><span class="no">ResourceNotFound</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>        <span class="nb">method_missing</span><span class="p">(</span><span class="s2">&quot;service&quot;</span><span class="p">,</span> <span class="n">svc</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&#8217;s close, but it doesn&#8217;t quite work. The most noticeable failure with this is that only the last <code>action</code> will be run. So for example, say you have something like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">service</span> <span class="s2">&quot;apache2&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">action</span> <span class="ss">:enable</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># ...some other stuff...</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">service</span> <span class="s2">&quot;apache2&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">action</span> <span class="ss">:start</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Normally, this creates two <code>service[apache2]</code> resources, each copying its configuration from the previous definition, and <em>overriding</em> the action(s). When executed, you&#8217;d end up with both actions being executed (but with a bunch of warnings that you&#8217;re using the dreaded resource cloning).</p>
+
+<p>With the reuse technique above, the problem is that, in this simple example, the <code>action: start</code> <em>overwrites</em> the <code>action: enable</code>. In the end, you have your service started&#8230;but <code>chkconfig</code> shows that it was never enabled. This can obviously be much worse in more complex scenarios.</p>
+
+<h2>The Workaround: resource merging</h2>
+
+<p>My workaround for this takes advantage of internal knowledge of how the <code>action</code> DSL method works&#8230;and it only applies to that one method. We&#8217;re in dark magic territory, so I am sure this could potentially break somebody&#8217;s cookbooks.</p>
+
+<p>Building on the resource reuse attempt above, I made it so that instead of letting the <code>action</code> of a resource stomp over the pre-existing resource&#8217;s action, it would <em>merge</em> the actions together. In the over-simplified version, this looks like replacing the single <code>instance_eval</code> line from above with code like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">combined_actions</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">action</span>
+</span><span class='line'><span class="k">if</span> <span class="n">block</span>
+</span><span class='line'>  <span class="n">s</span><span class="o">.</span><span class="n">instance_eval</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">combined_actions</span> <span class="o">+=</span> <span class="n">s</span><span class="o">.</span><span class="n">action</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="n">s</span><span class="o">.</span><span class="n">action</span> <span class="n">combined_actions</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Putting it together</h2>
+
+<p>There are a few details I glossed over, such as managing the <code>:nothing</code> action, different default actions for different types of resources, actions that are Arrays vs Symbols, etc. My final solution was to extend <code>Chef::DSL::Recipe</code> with a <code>reusable_resource</code> method that could be used by specific resource DSL overrides as much or as little as you want. Here&#8217;s what that looks like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Chef</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">DSL</span>
+</span><span class='line'>    <span class="k">module</span> <span class="nn">Recipe</span>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">reusable_resource</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">resource_type</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">resource_name</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">default_action</span><span class="p">,</span>
+</span><span class='line'>        <span class="o">&amp;</span><span class="n">block</span>
+</span><span class='line'>      <span class="p">)</span>
+</span><span class='line'>        <span class="n">resource_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">resource_type</span><span class="si">}</span><span class="s2">[</span><span class="si">#{</span><span class="n">resource_name</span><span class="si">}</span><span class="s2">]&quot;</span>
+</span><span class='line'>        <span class="n">existing_resource</span> <span class="o">=</span> <span class="n">run_context</span><span class="o">.</span><span class="n">resource_collection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">resource_str</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">actions_before</span> <span class="o">=</span> <span class="n">existing_resource</span><span class="o">.</span><span class="n">action</span>
+</span><span class='line'>        <span class="n">actions_before</span> <span class="o">=</span> <span class="o">[</span><span class="n">actions_before</span><span class="o">]</span> <span class="k">unless</span> <span class="n">actions_before</span><span class="o">.</span><span class="n">is_a?</span> <span class="nb">Array</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">block</span>
+</span><span class='line'>          <span class="n">existing_resource</span><span class="o">.</span><span class="n">instance_eval</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>          <span class="n">actions_after</span> <span class="o">=</span> <span class="n">existing_resource</span><span class="o">.</span><span class="n">action</span>
+</span><span class='line'>        <span class="k">else</span>
+</span><span class='line'>          <span class="n">actions_after</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">actions_after</span><span class="o">.</span><span class="n">nil?</span> <span class="o">||</span> <span class="n">actions_after</span><span class="o">.</span><span class="n">empty?</span>
+</span><span class='line'>          <span class="n">actions_after</span> <span class="o">=</span> <span class="o">[</span><span class="n">default_action</span><span class="o">]</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>        <span class="n">combined_actions</span> <span class="o">=</span> <span class="n">actions_before</span> <span class="o">+</span> <span class="n">actions_after</span>
+</span><span class='line'>        <span class="n">combined_actions</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="ss">:nothing</span><span class="p">)</span> <span class="k">if</span> <span class="n">combined_actions</span><span class="o">.</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span>
+</span><span class='line'>        <span class="n">existing_resource</span><span class="o">.</span><span class="n">action</span> <span class="n">combined_actions</span>
+</span><span class='line'>        <span class="n">existing_resource</span>
+</span><span class='line'>      <span class="k">rescue</span> <span class="no">Chef</span><span class="o">::</span><span class="no">Exceptions</span><span class="o">::</span><span class="no">ResourceNotFound</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>        <span class="nb">method_missing</span><span class="p">(</span><span class="n">resource_type</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With that, if you only wanted to override the default behavior for <code>package</code> and <code>service</code> resources, you could monkey-patch those in like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Chef</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">DSL</span>
+</span><span class='line'>    <span class="k">module</span> <span class="nn">Recipe</span>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">reusable_resource</span>
+</span><span class='line'>        <span class="c1"># Omitted for brevity</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">package</span><span class="p">(</span><span class="n">pkg</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">reusable_resource</span><span class="p">(</span><span class="s2">&quot;package&quot;</span><span class="p">,</span> <span class="n">pkg</span><span class="p">,</span> <span class="ss">:install</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">service</span><span class="p">(</span><span class="n">svc</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">reusable_resource</span><span class="p">(</span><span class="s2">&quot;service&quot;</span><span class="p">,</span> <span class="n">svc</span><span class="p">,</span> <span class="ss">:nothing</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now all those warnings are gone. My complete initial install works great without complaint. So do my subsequent re-runs.</p>
+
+<p>I&#8217;ve packaged this all up as a cookbook that has nothing but a library applying these monkey-patches. You can <a href="https://github.com/facetdigital/chef_resource_merging">grab it from GitHub</a> and put it at the front of your run_list with <code>recipe[chef_resource_merging]</code>.</p>
+
+<h2>Limitations</h2>
+
+<p>This technique will probably fail in scenarios where you want to have multiple resources with the same name that have differing attributes other than <code>action</code>. For example, two different <code>bash</code> resources in two different places, with two different <code>command</code> scripts, with the same name. Either resource cloning or resource duplication would work&#8230;but resource merging the way I&#8217;ve implemented it is going to crash and burn. Of course you can simply name these resources differently, but given that resources share a global namespace, there&#8217;s always a risk unless you make sure to prefix your resource names with something uniquely yours.</p>
+
+<p>This is why I factored this technique into a <code>reusable_resource</code> DSL method. You can use it directly in custom cookbooks if you want. You can override specific types of resources as I have shown in the example, only touching <code>package</code> and <code>service</code>. Or, you can override those with additional logic to only do in in narrower cases (e.g., only if there is no block given). That&#8217;s up to you. Your Mileage May Vary.</p>
+
+<h2>Discussion</h2>
+
+<p>I welcome any and all discussion on this. Especially from someone who knows the internals of Chef much more deeply than I do, who can tell me if I&#8217;m getting myself into too much trouble here.</p>
+
+<p>I&#8217;m hoping that some day there is a proper mechanism for resource reuse, when that is what is intended, or perhaps some way to detect if two resources internals are the same and make a smart decision about whether to reuse or duplicate. Maybe a real resource merging solution could happen, where the entire blocks are chained and executed? Or perhaps we&#8217;ll see some resource namespace solution (though that would not have solved any of the issues I&#8217;ve had).</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Scott W. Bradley</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-24T19:47:00-08:00" pubdate data-updated="true">Jan 24<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/bugs/'>bugs</a>, <a class='category' href='/blog/categories/chef/'>chef</a>, <a class='category' href='/blog/categories/hacks/'>hacks</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/" data-via="scottwb69" data-counturl="http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/" title="Previous Post: Optimistic Locking With Couchbase and Ruby">&laquo; Optimistic Locking With Couchbase and Ruby</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section class='aboutMe'>
+  <h1>About Me</h1>
+  <img class="left" src="/favicon.png" width="75" height="75">
+  <p>Husband. Father. Techie. Founder and Principal Engineer at <a href="http://facetdigital.com/">Facet Digital, LLC</a>. Fitness and health enthusiast. Seattle Sounders FC fan. All opinions are mine alone. All trademarks are property of their respective owners.</p>
+</section>
+<section>
+  <h1>Latest Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating The Infamous Mechanize "Too Many Connection Resets" Bug</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Easy Papertrail Deployment Using Rake</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("scottwb69", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/scottwb69" class="twitter-follow-button" data-show-count="true">Follow @scottwb69</a>
+  
+</section>
+
+
+<section>
+  <h1>Latest Code</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/scottwb">@scottwb</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        var blacklist = [];
+        
+          
+            blacklist.push('scottwb.github.com');
+          
+            blacklist.push('haml-block-bug');
+          
+        
+
+        github.showRepos({
+            user: 'scottwb',
+            count: 5,
+            skip_forks: true,
+            blacklist: blacklist,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106700002337561490782?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class='shelfari'>
+  <h1>Latest Books</h1>
+  <div id="ShelfariWidget203753"><a href='http://www.shelfari.com/'>Shelfari: Book reviews on your book blog</a><script src="http://www.shelfari.com/ws/203753/widget.js?r=41860" type="text/javascript" language="javascript"></script></div>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Scott W. Bradley -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'scottwb';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/';
+        var disqus_url = 'http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

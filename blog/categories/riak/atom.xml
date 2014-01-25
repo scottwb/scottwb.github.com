@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: riak | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/riak/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Customize Attribute Accessors on Ripple Models]]></title>
+    <link href="http://scottwb.github.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models/"/>
+    <updated>2012-07-12T09:18:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models</id>
+    <content type="html"><![CDATA[<p>Sometimes in your Ruby on Rails models, you want to override the attribute accessors to do additional processing on the values on their way in and out of the data storage layer. Custom serialization is a common use of this.</p>
+
+<p>For example, when using ActiveRecord for your Rails models, you can provide custom attribute accessors, say to serialize a Hash to JSON, using the <code>read_attribute</code> and <code>write_attribute</code> methods like this:</p>
+
+<p>```ruby</p>
+
+<h1>Assume a text column named 'stuff'</h1>
+
+<p>class User &lt; ActiveRecord::Base
+  def stuff</p>
+
+<pre><code>JSON.parse(read_attribute(:stuff))
+</code></pre>
+
+<p>  end</p>
+
+<p>  def stuff=(new_val)</p>
+
+<pre><code>write_attribute(:stuff, new_val.json)
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>With this, you can assign a Hash to the <code>stuff</code> attribute of <code>User</code>, and when you access it via <code>User#stuff</code>, you get a Hash back. All the while, it's read and written to and from the database as a JSON string.</p>
+
+<h3>Doing it with Ripple on top of Riak</h3>
+
+<p><a href="https://github.com/seancribbs/ripple/">Ripple</a> is the Ruby modeling layer for the distributed NoSQL store, <a href="http://basho.com/products/riak-overview/">Riak</a>. It tries very hard to provide a lot of the same interfaces as ActiveRecord. However, this is one of the areas it diverges: <code>Ripple::Document</code> objects do not support the <code>read_attribute</code> and <code>write_attribute</code> methods.</p>
+
+<p>Instead, they implement the <code>[]</code> and <code>[]=</code> methods. Translating the code above to work with Ripple is pretty easy:</p>
+
+<p>```ruby
+class User
+  include Ripple::Document</p>
+
+<p>  property :stuff, Hash</p>
+
+<p>  def stuff</p>
+
+<pre><code>JSON.parse(self[:stuff])
+</code></pre>
+
+<p>  end</p>
+
+<p>  def stuff=(new_val)</p>
+
+<pre><code>self[:stuff] = new_val.to_json
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<h3>Bonus Points</h3>
+
+<p>Using this tactic, you can easily add some memoization so that your getter doesn't need to parse the JSON text on every access. To do this, we'll use an instance variable as a cache that we'll invalidate in the setter, like so:</p>
+
+<p>```ruby
+class User
+  include Ripple::Document</p>
+
+<p>  property :stuff, Hash</p>
+
+<p>  def stuff</p>
+
+<pre><code>@cached_stuff ||= JSON.parse(self[:stuff])
+</code></pre>
+
+<p>  end</p>
+
+<p>  def stuff=(new_val)</p>
+
+<pre><code>@cached_stuff = nil
+self[:stuff] = new_val.to_json
+</code></pre>
+
+<p>  end
+end
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

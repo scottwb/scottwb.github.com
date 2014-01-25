@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: scripts | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/scripts/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Twitter Image Search and Download]]></title>
+    <link href="http://scottwb.github.com/blog/2012/01/14/twitter-image-search-and-download/"/>
+    <updated>2012-01-14T14:03:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/01/14/twitter-image-search-and-download</id>
+    <content type="html"><![CDATA[<p>Last night the sunset in the Seattle area was in rare form. You might have thought there was a <a href="http://www.funnyordie.com/videos/dcf83410c7/insane-double-rainbow-guy">double rainbow</a> by the way everyone was going on about it. My wife even noted that her Facebook feed was filled with pictures of it.</p>
+
+<p>So I thought it would be funny to scour Twitter for all the pictures of it that I could find and post them to Facebook just to be a smart-ass.</p>
+
+<p>I sat down to whip out a quick-and-dirty script to do this for me. By the time it was ready, I had lost the smart-ass urge to post them to Facebook, but what I ended up with turns out to be a handy little tool.</p>
+
+<!-- MORE -->
+
+
+<p>You can grab it from my github page at <a href="https://github.com/scottwb/twitter-image-search">https://github.com/scottwb/twitter-image-search</a></p>
+
+<p>It's pretty easy to use. You give it a search term and it creates a directory and downloads a bunch of matching images.</p>
+
+<p>The sunset may have passed, but this morning we have over a millimeter of snow in the Seattle area and all hell is breaking loose. It's SNOWPOCALPSE 2012!!! So, of course I ran this script:</p>
+
+<p><code>bash
+$ ./twitter-image-search.rb "seattle #snowpocalypse2012"
+</code></p>
+
+<p>And you can see from the results, people are clearly a bit worked up about the snow:</p>
+
+<p><img src="https://img.skitch.com/20120114-kbehj5uxyghxr4p9nic6rh7wp3.png"></p>
+]]></content>
+  </entry>
+  
+</feed>

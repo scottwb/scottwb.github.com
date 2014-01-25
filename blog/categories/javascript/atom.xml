@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: javascript | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/javascript/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Show jQuery Mobile Page Loading With Text And Spinner]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/"/>
+    <updated>2012-06-30T21:47:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner</id>
+    <content type="html"><![CDATA[<p>I like jQuery Mobile's page loading spinner. When you transition between pages it displays a nice subtle spinner while the page loads, only if the page load takes more than a configured number of milliseconds.</p>
+
+<p>So, I wanted to use their page-loading spinner for in-page wait times in my app. The user clicks something, I do some AJAX stuff and show them a nice spinner with a message telling them what's going on until the results come back. jQuery Mobile has javascript functions for this called <code>$.mobile.showPageLoadingMsg</code> and <code>$.hidePageLoadingMsg</code>. The problem is, you can either show a spinner only, or a text-message only. You can't show both a spinner <em>and</em> a text message, even though they clearly support it. Well, you <em>can</em> do that if you have the global setting <code>$.mobile.loadingMessageTextVisible = true</code>, but then you get a text with your normal page-load spinners.</p>
+
+<!-- MORE -->
+
+
+<p>I've created a workaround for this and included it in my <a href="https://github.com/scottwb/jquery.mobile.utils">jquery.mobile.utils</a> library. Using this you can call:</p>
+
+<p><code>javascript
+// Params: jqm theme swatch, and message text
+$.mobile.utils.showWaitBox("a", "Hang on while I do work...");
+// ... some time later...
+$.mobile.utils.hideWaitBox();
+</code></p>
+
+<p>That will let you leave the standard textless page-loading spinenrs alone, but be able to show a nice themed wait box with a spinner while your app is doing something the user needs to wait for, that looks like this:</p>
+
+<p><img class="center" src="http://img.skitch.com/20120701-met428ntqsxrest228pxgrrxjs.png"></p>
+
+<p>To use these methods, download the JavaScript or CoffeeScript version of the jquery.mobile.utils library from the <a href="https://github.com/scottwb/jquery.mobile.utils">project's github page</a> and include it in your jQuery Mobile page after <code>jquery.mobile-1.1.0.js</code> is loaded.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Reload The Same Page Without Blinking On jQuery Mobile]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile/"/>
+    <updated>2012-06-29T09:53:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile</id>
+    <content type="html"><![CDATA[<p>When using jQuery Mobile, if you try to reload the current page from javascript using the usual tactics of assigning <code>window.location.href</code>, you might notice some unsightly artifacts and page blinking. This is particularly noticeable on iOS Mobile Safari (mainly on iPhone), because the reload also causes the address bar to slide down and back up.</p>
+
+<p>Below is function I made to refresh the current page successfully with no visible artifacts: no blinking, no address bar showing, transitions:</p>
+
+<p>```javascript
+function refreshPage() {
+  $.mobile.changePage(</p>
+
+<pre><code>window.location.href,
+{
+  allowSamePageTransition : true,
+  transition              : 'none',
+  showLoadMsg             : false,
+  reloadPage              : true
+}
+</code></pre>
+
+<p>  );
+}
+```</p>
+
+<p><em>This was done on jQuery Mobile 1.1.0.</em></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[jQuery Mobile Breaks Your HREFs on iOS Mobile Safari]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
+    <updated>2012-06-29T00:00:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
+    <content type="html"><![CDATA[<p>Starting with verison 1.1.0RC1, jQuery Mobile changes the <code>href</code> of any link to be <code>#</code> when it is clicked, but <em>only on iOS Mobile Safari</em>. If you try to make a click handler that reads the <code>href</code> attribute, you will be surprised to find that it does not get the href you intended. For example:</p>
+
+<p><code>javascript
+$('a').click(function() {
+  console.log($(this).attr('href'));
+});
+</code></p>
+
+<p>When using jQuery Mobile, this code will print out the href you expect on every browser except Mobile Safari on iOS (both real devices and simulators, but <em>not with other browsers faking their User-Agent</em>). On Mobile Safari, this will print out that the href is "#".</p>
+
+<h2>The Problem</h2>
+
+<p>Obviously this is a problem if you have code that operates in a click handler that reads the clicked element's <code>href</code> attribute. jQuery Mobile changes that href before you get a chance to read it.</p>
+
+<p>One common place this is used is with the <code>link_to</code> helper in Ruby on Rails, for links that need to use other HTTP methods. For example, the standard RESTful way to delete a resource will be with a link that sets <code>:method</code> to <code>:delete</code>. Rails handles this with a library called jQuery UJS that needs to read the href from the link when it is clicked.</p>
+
+<p>Unfortunately for Rails users, this means that Rails method links don't work with jQuery Mobile on iOS Mobile Safari.</p>
+
+<!-- MORE -->
+
+
+<h2>The Reason</h2>
+
+<p>The jQuery Mobile team is doing this on purpose, to make it so the address bar on iPhone does not drop down when changing pages (and we all love that feature!). In <a href="https://github.com/jquery/jquery-mobile/issues/3777">this discussion</a> and <a href="https://github.com/jquery/jquery-mobile/issues/3686">this discussion</a>, they seem to understand that this makes custom click handlers get the wrong href, but decide to go ahead with it anyway.</p>
+
+<p>You can see it happen in this excerpt from the jQuery Mobile 1.1.0 source (reformatted for blog-friendlyness):</p>
+
+<p><code>javascript
+// By caching the href value to data and switching the href to a #,
+// we can avoid address bar showing in iOS. The click handler resets
+// the href during its initial steps if this data is present
+$( link )
+  .jqmData( "href", $( link  ).attr( "href" )  )
+  .attr( "href", "#" );
+</code></p>
+
+<h2>The Solution</h2>
+
+<p>Here's the part that seems to be undocumented other than in that comment: <em>they store the href in a data attribute!</em> This makes this problem easy to workaround. Simply change your click handler to check for the data attribute first and fall back to the href:</p>
+
+<p><code>javascript
+$('a').click(function() {
+  console.log($(this).data('href') || $(this).attr('href'));
+});
+</code></p>
+
+<p>That would be easy enough to encapsulate in a nice helper function...</p>
+
+<h2>Applying This To Rails jQuery UJS</h2>
+
+<p>If you use the Rails <code>link_to</code> helper with the <code>:method</code> option set to anything other than <code>:get</code>, links are handled by the <code>jquery_ujs</code> library that comes with Rails (often referred to as Rails UJS, jQuery UJS, rails.js). You'll notice, for example that none of your <code>:delete</code> links work with jQuery Mobile when you are on iOS Mobile Safari. You might see this as a missing route for your <code>show</code> or <code>edit</code> method depending on where you are linking from.</p>
+
+<p>It turns out the fix is easy. The jquery_ujs code already has a method to encapsulate getting the href from an element, complete with a comment telling you how you can override it. All it does out of the box is read <code>element.attr('href')</code>. All we have to do is override it and make it try the data attribute first.</p>
+
+<p>Somewhere after <code>jquery_ujs.js</code> is loaded, define this:</p>
+
+<p><code>javascript
+$.rails.href = function(element) {
+  return element.data('href') || element.attr('href');
+}
+</code></p>
+
+<p>Now your Rails <code>link_to</code> calls with custom <code>:method</code> options such as <code>:delete</code> will work just fine with jQuery Mobile 1.1.0 on iOS Mobile Safari, and you don't have to lose that clever bit that keeps the address bar hidden.</p>
+
+<hr />
+
+<p><em><strong>UPDATED Jan. 3, 2013:</strong> I have confirmed that this problem has been solved in jQuery Mobile 1.2.0, and this work-around is no longer required. I did try to upgrade one of my jQuery Mobile 1.1.0 apps to 1.1.1 (but rolled back for other reasons), and in that process I believe that the above solution was still required.</em></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Custom Error Handling With Express Resource Auto-Loading]]></title>
+    <link href="http://scottwb.github.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading/"/>
+    <updated>2012-04-19T14:05:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading</id>
+    <content type="html"><![CDATA[<p><span class='pullquote-right' data-pullquote='You get no control over how the errors are handled, and the default mechanism is ignorant of the requested format.'>
+<a href="https://github.com/visionmedia/express-resource">Express Resource</a> adds RESTful resource routing on top of the <a href="http://expressjs.com/">Express</a> framework for <a href="http://nodejs.org/">Node.js</a>. It includes a nice feature called "Auto-Loading" that allows you to define a single <code>load</code> method that will automatically be used to load your resource object from a URL id parameter and set it in the request object to be accessed by your conventional RESTful methods that need it. Another great feature of Express Resource is what they call "Content-Negotiation". URLs with format extensions like <code>.xml</code> or <code>.json</code> automatically set an indicator of the format in the request so your actions can respond accordingly.</p>
+
+<p>However, a problem arises when you use the recommended method for handling and reporting errors from within your <code>load</code> method: You get no control over how the errors are handled, and the default mechanism is ignorant of the requested format. This makes it tough to return nice JSON errors, for example, from a REST API that uses this technique.
+</span></p>
+
+<!-- MORE -->
+
+
+<h2>The Problem</h2>
+
+<p>The canonical example in the Express Resource documentation describes implementing a <code>load</code> method on your resource that calls a callback with an error and/or the loaded object, like so:</p>
+
+<p><code>javascript
+exports.load = function(req, id, fn) {
+  var user  = yourLookupUserFunction(id);
+  var error = user ? null : new Error("User Not Found");
+  fn(error, user);
+};
+</code></p>
+
+<p>This is great, except there are a few problems:</p>
+
+<ol>
+<li><p><strong>You can't override what Express Resource does with this error.</strong> The way Express Resource works here is to use a param callback. If you pass an error, its param callback simply passes the error to the next method in the chain via <code>next(err)</code>, which ends up invoking the default error handling before any of your methods or <code>app.error()</code> handlers are called. This means that a RESTful API call expecting a JSON response won't get a JSON response. If you want your JSON API 404s to return JSON data in the payload, you are out of luck.</p></li>
+<li><p><strong>There is no response object passed to your auto-load function.</strong> This makes it difficult to bypass Express Resource's intended error handling and issue a response directly on your own.</p></li>
+<li><p><strong>The content-negotiation hasn't happened yet at this point in the chain.</strong> This means, even if you could respond directly from your <code>load</code> function, you wouldn't be able to use the conventional Express Resource mechanism of testing <code>req.format</code> to know whether or not to response with JSON, HTML, XML, whatever.</p></li>
+</ol>
+
+
+<h2>The Solution</h2>
+
+<p>It turns out there are some simple solutions to these problems. Let's tackle them in reverse order.</p>
+
+<ol>
+<li><p>Even though Express Resource has not parsed the route's format yet, and set <code>req.format</code> for you, the core routing framework has already done this as params matching. Instead of <code>req.format</code>, for this method you need to use <code>req.params.format</code>.</p></li>
+<li><p>Even though Express Resource does not pass the <code>res</code> object into your <code>load</code> function, node.js has conveniently linked the two together for us. In this method, instead of using <code>res</code>, you need to use <code>req.res</code>. This may be a little dangerous since it relies on the internal structure of the request object, but this linkage seems relatively stable.</p></li>
+<li><p>Don't have your <code>load</code> function call the given callback if there is an error. Only call it in the success case. If there is an error, render the response yourself using the tactics described above for #1 and #2.</p></li>
+</ol>
+
+
+<h2>Putting it all together</h2>
+
+<p>Here is an example of what all that might look like for your <code>load</code> function:</p>
+
+<p>```javascript
+exports.load = function(req, id, fn) {
+  var user = yourLookupUserFunction(id);
+  if (user) {</p>
+
+<pre><code>fn(null, user);
+</code></pre>
+
+<p>  }
+  else {</p>
+
+<pre><code>switch (req.params.format) {
+
+case 'json':
+  req.res.json({'error' : 'User Not Found'}, 404);
+  break;
+
+case 'html':
+default:
+  // Regular 404...or render your own template if you like
+  req.res.send(404);
+}
+</code></pre>
+
+<p>  }
+};
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

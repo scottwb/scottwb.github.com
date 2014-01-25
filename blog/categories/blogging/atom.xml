@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: blogging | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/blogging/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Embedded Tweet Tag For Jekyll]]></title>
+    <link href="http://scottwb.github.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll/"/>
+    <updated>2012-01-29T15:54:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll</id>
+    <content type="html"><![CDATA[<p>A nice way to quote a tweet in your blog post is to use Twitter's <a href="https://dev.twitter.com/docs/embedded-tweets">Embedded Tweet</a> feature. Not only does it provide a familiar Twitter style, it also provides features like being able to directly retweet, follow, etc., without leaving your page. For example:</p>
+
+<p><div class='embed tweet'><blockquote class="twitter-tweet" align="center" width="350"><p>Best analogy I find so far for explain concept of ScrumMaster to new devops is Tooth Fairy.</p>&mdash; DevOps Borat (@DEVOPS_BORAT) <a href="https://twitter.com/DEVOPS_BORAT/statuses/159849628819402752">January 19, 2012</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></div></p>
+
+<p>If you use Octopress or Jekyll, you can easily embed tweets using the <a href="https://github.com/scottwb/jekyll-tweet-tag">Jekyll Tweet Tag</a>. All you need to do is download <a href="https://raw.github.com/scottwb/jekyll-tweet-tag/master/tweet_tag.rb">tweet_tag.rb</a> and store it in your Jekyll <code>plugins</code> directory.</p>
+
+<!-- MORE -->
+
+
+<p>Then, when you see a tweet you want to quote, click the "Embed this Tweet" link.</p>
+
+<p><img src="https://img.skitch.com/20120129-r8p92x27s6ipncji5bstxeiuqf.png"></p>
+
+<p>When that pops up the dialog, choose the "Shortcode" tab, select your desired alignment, and copy the resulting code into your blog post.</p>
+
+<p><img src="https://img.skitch.com/20120130-8mw9jdrwcph98eu9igeanhm13c.png"></p>
+
+<p><strong><em>IMPORANT NOTE:</em></strong> Since Twitter generates shortcodes for Wordpress, you still have one more step: convert that code to a Liquid-style tag. All that means is replacing the <code>[...]</code> with <code>{% ... %}</code>. For example:</p>
+
+<p><code>
+{% tweet https://twitter.com/DEVOPS_BORAT/status/159849628819402752 align='center' %}
+</code></p>
+
+<p>For full documentation, see the project <a href="https://github.com/scottwb/jekyll-tweet-tag/blob/master/README.md">README</a>.</p>
+
+<p>That's all there is to it. If you're using Octopress with your own fork of the repository, you might be interested in my <a href="https://github.com/imathis/octopress/pull/399">pull request</a> that imports the <code>jekyll-tweet-tag</code> plugin.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[I've Moved My Blog To Github]]></title>
+    <link href="http://scottwb.github.com/blog/2012/01/12/ive-moved-my-blog-to-github/"/>
+    <updated>2012-01-12T17:09:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/01/12/ive-moved-my-blog-to-github</id>
+    <content type="html"><![CDATA[<p>It seems like more and more in the development community, I'm seeing blog posts titled "I've moved my blog to Github". After hearing so much about the combination of <a href="http://octopress.org/">Octopress</a> and <a href="http://pages.github.com">Github Pages</a>, I figured I'd give it a look.</p>
+
+<p>The result is what you see here. This is of course still a work-in-progress. I'd like to customize my own theme and style, but the default one provided by Octopress is so nice that I'm perfectly happy to let this sit for a while.</p>
+
+<p>I could go on and on about how great Octopress is, and how I love the workflow based on git and rake, but dozens of others have already done this for me. For example: <a href="http://jtimberman.housepub.org/blog/2011/09/29/blog-moved-to-github-pages/">http://jtimberman.housepub.org/blog/2011/09/29/blog-moved-to-github-pages/</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[A Link To My Old Blog]]></title>
+    <link href="http://scottwb.github.com/blog/2012/01/11/a-link-to-my-old-blog/"/>
+    <updated>2012-01-11T17:27:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/01/11/a-link-to-my-old-blog</id>
+    <content type="html"><![CDATA[<p>I am starting a new blog here at scottwb.com, and moving away from my old blog <a href="http://sleeplesscoding.blogspot.com/">Sleepless Coding</a>.</p>
+
+<p>There are a few reasons for this:</p>
+
+<ul>
+<li><p>The name "Sleepless Coding" reflects the young, machismo, code-all-night attitude that I used to live by. This is no longer the way I choose to best further all my goals in life. That's a subject for another post, but in short, I have found that I am way more productive when I'm "in the zone". Like any athlete, to be "in the zone", I need to get enough sleep at regular, natural hours.</p></li>
+<li><p>Blogger is terrible. Why is that post-entry box so small? It's as if they still think we all have 640x480 monitors. There are many things I dislike about Blogger. One of which is that it is not well-suited for sharing code.</p></li>
+<li><p>I prefer to be able to have intimate control. I <em>want</em> to dig in to the CSS.</p></li>
+<li><p>I want my site to become more than just a blog. Hosting it myself will give me better freedom to do that.</p></li>
+</ul>
+
+
+<p>The new blog is still in its early stages, but it will be published soon and I'll start tweaking it incrementally.</p>
+
+<p>All of my old posts can still be seen at my old blog <a href="http://sleeplesscoding.blogspot.com/">Sleepless Coding</a>.</p>
+]]></content>
+  </entry>
+  
+</feed>

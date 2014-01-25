@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: express | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/express/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Custom Error Handling With Express Resource Auto-Loading]]></title>
+    <link href="http://scottwb.github.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading/"/>
+    <updated>2012-04-19T14:05:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading</id>
+    <content type="html"><![CDATA[<p><span class='pullquote-right' data-pullquote='You get no control over how the errors are handled, and the default mechanism is ignorant of the requested format.'>
+<a href="https://github.com/visionmedia/express-resource">Express Resource</a> adds RESTful resource routing on top of the <a href="http://expressjs.com/">Express</a> framework for <a href="http://nodejs.org/">Node.js</a>. It includes a nice feature called "Auto-Loading" that allows you to define a single <code>load</code> method that will automatically be used to load your resource object from a URL id parameter and set it in the request object to be accessed by your conventional RESTful methods that need it. Another great feature of Express Resource is what they call "Content-Negotiation". URLs with format extensions like <code>.xml</code> or <code>.json</code> automatically set an indicator of the format in the request so your actions can respond accordingly.</p>
+
+<p>However, a problem arises when you use the recommended method for handling and reporting errors from within your <code>load</code> method: You get no control over how the errors are handled, and the default mechanism is ignorant of the requested format. This makes it tough to return nice JSON errors, for example, from a REST API that uses this technique.
+</span></p>
+
+<!-- MORE -->
+
+
+<h2>The Problem</h2>
+
+<p>The canonical example in the Express Resource documentation describes implementing a <code>load</code> method on your resource that calls a callback with an error and/or the loaded object, like so:</p>
+
+<p><code>javascript
+exports.load = function(req, id, fn) {
+  var user  = yourLookupUserFunction(id);
+  var error = user ? null : new Error("User Not Found");
+  fn(error, user);
+};
+</code></p>
+
+<p>This is great, except there are a few problems:</p>
+
+<ol>
+<li><p><strong>You can't override what Express Resource does with this error.</strong> The way Express Resource works here is to use a param callback. If you pass an error, its param callback simply passes the error to the next method in the chain via <code>next(err)</code>, which ends up invoking the default error handling before any of your methods or <code>app.error()</code> handlers are called. This means that a RESTful API call expecting a JSON response won't get a JSON response. If you want your JSON API 404s to return JSON data in the payload, you are out of luck.</p></li>
+<li><p><strong>There is no response object passed to your auto-load function.</strong> This makes it difficult to bypass Express Resource's intended error handling and issue a response directly on your own.</p></li>
+<li><p><strong>The content-negotiation hasn't happened yet at this point in the chain.</strong> This means, even if you could respond directly from your <code>load</code> function, you wouldn't be able to use the conventional Express Resource mechanism of testing <code>req.format</code> to know whether or not to response with JSON, HTML, XML, whatever.</p></li>
+</ol>
+
+
+<h2>The Solution</h2>
+
+<p>It turns out there are some simple solutions to these problems. Let's tackle them in reverse order.</p>
+
+<ol>
+<li><p>Even though Express Resource has not parsed the route's format yet, and set <code>req.format</code> for you, the core routing framework has already done this as params matching. Instead of <code>req.format</code>, for this method you need to use <code>req.params.format</code>.</p></li>
+<li><p>Even though Express Resource does not pass the <code>res</code> object into your <code>load</code> function, node.js has conveniently linked the two together for us. In this method, instead of using <code>res</code>, you need to use <code>req.res</code>. This may be a little dangerous since it relies on the internal structure of the request object, but this linkage seems relatively stable.</p></li>
+<li><p>Don't have your <code>load</code> function call the given callback if there is an error. Only call it in the success case. If there is an error, render the response yourself using the tactics described above for #1 and #2.</p></li>
+</ol>
+
+
+<h2>Putting it all together</h2>
+
+<p>Here is an example of what all that might look like for your <code>load</code> function:</p>
+
+<p>```javascript
+exports.load = function(req, id, fn) {
+  var user = yourLookupUserFunction(id);
+  if (user) {</p>
+
+<pre><code>fn(null, user);
+</code></pre>
+
+<p>  }
+  else {</p>
+
+<pre><code>switch (req.params.format) {
+
+case 'json':
+  req.res.json({'error' : 'User Not Found'}, 404);
+  break;
+
+case 'html':
+default:
+  // Regular 404...or render your own template if you like
+  req.res.send(404);
+}
+</code></pre>
+
+<p>  }
+};
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: newrelic | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/newrelic/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Using NewRelic With Custom Ruby Worker Daemons]]></title>
+    <link href="http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/"/>
+    <updated>2013-05-23T07:48:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons</id>
+    <content type="html"><![CDATA[<p>The NewRelic Ruby Agent comes with great support for Rails, Sinatra, and other frameworks and web servers out of the box. It also supports background jobs for frameworks like DelayedJob and Resque.</p>
+
+<p>But what if you have your own custom background worker mechanism?</p>
+
+<p>It's fairly simple to get NewRelic working to report your custom background workers, but finding the right combination of setup calls in their docs can be a little tricky. The biggest issue is dealing with background tasks that daemonize and fork child worker processes. This is because the NewRelic agent needs to do unique instrumenting, monitoring, and reporting per process. Setting it up that way can be tricky if you're using Bundler or another mechanism to load the <code>newrelic_rpm</code> gem <em>before</em> the child processes are forked.</p>
+
+<!-- MORE -->
+
+
+<p>Assuming you are already familiar with the mechanics of Ruby-based daemon processes, here are the key ingredients you need to integrate the NewRelic Ruby Agent:</p>
+
+<ol>
+<li>Store your <code>newrelic.yml</code> config file somewhere and make a place for its log file to be written.</li>
+<li>Setup the environment variables <code>RUBY_ENV</code>, <code>NRCONFIG</code>, and <code>NEW_RELIC_LOG</code> to take the place of <code>RAILS_ENV</code> and default config and log paths you may be used to in Rails.</li>
+<li>Require the <code>newrelic_rpm</code> gem or add it to your <code>Gemfile</code> and require it via Bundler.</li>
+<li>Add instrumentation to your main job class with <code>include ::NewRelic::Agent::Instrumentation::ControllerInstrumentation</code></li>
+<li>Add a tracer to your main job execution method, e.g.: <code>add_transation_tracer :execute, :category =&gt; :task</code>, in your main job class.</li>
+<li>Before you daemonize and fork child processes, make sure to call <code>::NewRelic::Agent.manual_start</code>.</li>
+<li>In the child process, right after it's been forked, make sure to call <code>::NewRelic::Agent.after_fork(:force_reconnection =&gt; true)</code>.</li>
+</ol>
+
+
+<p>This will now make sure that the NewRelic Agent is started correctly for each child process and will report metrics on the <code>execute</code> method of your job class.</p>
+
+<h2>Example</h2>
+
+<p>While it's not my intention to go into detail on how to build out a daemonized forking worker mechanism, below is a very simple worker script that demonstrates all of these pieces together. It assumes the use of Bundler and a directory structure like this:</p>
+
+<p>```
+project_dir
+  |
+  +--Gemfile
+  |
+  +--worker.rb
+  |
+  +--config
+  |    |
+  |    +--newrelic.yml
+  |
+  +--log</p>
+
+<pre><code>   |
+   +--newrelic_agent.log
+</code></pre>
+
+<p>```</p>
+
+<p>This example <code>worker.rb</code> script forks 4 worker daemon processes, each of which will report timing metrics to NewRelic for the jobs it runs. Note the comments correlating to the bullet points above.</p>
+
+<p>``` ruby</p>
+
+<h1>!/usr/bin/env ruby</h1>
+
+<h1>STEP 2:</h1>
+
+<p>#</p>
+
+<h1>Setup NewRelic environment before NewRelic gets loaded by Bundler. This</h1>
+
+<h1>is necessary because we don't have the luxury of relying on the NewRelic</h1>
+
+<h1>defaults that are geared towards Rails.</h1>
+
+<p>ENV['RUBY_ENV'] = 'production'
+ENV['NRCONFIG'] ||= File.expand_path('../config/newrelic.yml', <strong>FILE</strong>)
+ENV['NEW_RELIC_LOG'] ||= File.expand_path('../log/newrelic_agent.log', <strong>FILE</strong>)</p>
+
+<h1>STEP 3:</h1>
+
+<p>#</p>
+
+<h1>Setup Bundler and use it to require all the gems from Gemfile, including</h1>
+
+<h1>the <code>newrelic_rpm</code> gem.</h1>
+
+<p>require 'rubygems'
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', <strong>FILE</strong>)
+require 'bundler/setup' if File.exists?(ENV['BUNDLE_GEMFILE'])
+if defined?(Bundler)
+  Bundler.require(:default, 'production')
+end</p>
+
+<p>class Job
+  # STEP 4: Add instrumation to main job class.
+  include ::NewRelic::Agent::Instrumentation::ControllerInstrumentation</p>
+
+<p>  def execute</p>
+
+<pre><code># do work
+</code></pre>
+
+<p>  end</p>
+
+<p>  # STEP 5: Add a tracer to the main job execution method
+  add_transaction_tracer :execute, :category => :task
+end</p>
+
+<p>class Worker
+  def run(num_processes = 1)</p>
+
+<pre><code># STEP 6: Set NewRelic Agent to manual start before daemonizing.
+::NewRelic::Agent.manual_start
+
+# Double fork daemonize so that forked child processes do not get SIGHUP
+# when the controlling tty dies.
+fork and exit
+Process.setsid
+fork and exit
+
+num_processes.times do
+  if pid = Process.fork
+    Process.detach(pid)
+  else
+    # STEP 7: Force NewRelic Agent to reconnect in forked child process.
+    ::NewRelic::Agent.after_fork(:force_reconnection =&gt; true)
+
+    loop { next_job.execute }
+  end
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  private</p>
+
+<p>  def next_job</p>
+
+<pre><code># TODO: Do whatever you do to get your next Job instance to execute.
+#       Read from a queue, etc...
+</code></pre>
+
+<p>  end
+end</p>
+
+<h1>Run 4 forked worker daemon processes.</h1>
+
+<p>Worker.new.run(4)
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

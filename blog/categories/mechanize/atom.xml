@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: mechanize | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/mechanize/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Defeating The Infamous Mechanize "Too Many Connection Resets" Bug]]></title>
+    <link href="http://scottwb.github.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/"/>
+    <updated>2013-11-09T07:56:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug</id>
+    <content type="html"><![CDATA[<p>Have you ever seen this nasty, obnoxious error when using the Mechanize gem to write a screen scraper in Ruby?</p>
+
+<p><code>
+Net::HTTP::Persistent::Error: too many connection resets (due to Connection reset by peer - Errno::ECONNRESET) after 2 requests on 14759220
+</code></p>
+
+<p>This has plagued Mechanize users for years, and it's never been properly fixed. There are a lot of voodoo suggestions and incantations rumored to address this, but none of them seem to really work. You can read all about it on <a href="https://github.com/sparklemotion/mechanize/issues/123">Mechanize Issue #123</a>.</p>
+
+<p>I believe the root cause is how the underlying Net::HTTP handles reusing persistent connections after a POST -- and there is some evidence on the aforementioned github issue that supports this theory. Based on that assumption, I crafted a solution that has been working 100% of the time for me in production for a few months now.</p>
+
+<!-- MORE -->
+
+
+<h2>The Workaround</h2>
+
+<p>This is not really a fix for Mechanize or Net::HTTP::Persistent, and there are sure to be some corner cases where you legitimately want this error to be bubbled up, but in practice, I have found that simply handling a persistent connection being reset with the "too many connection resets" error, <em>forcing the connection to be shutdown and recreated</em>, and simply trying again has worked 100% of the time in high-volume production for scrapers that suffered this problem intermittently.</p>
+
+<p>This is done by creating a wrapper for <code>Mechanize::HTTP::Agent#fetch</code>, the low level HTTP request method that is used to do GETs, PUTs, POSTs, HEADs, etc. This wrapper catches this annoying little exception, and uses the <code>shutdown</code> method to effectively create a new HTTP connection, and then tries the <code>fetch</code> again.</p>
+
+<p>Loading the following monkey-patch somewhere in your application ought to shutup this annoying error for you for most use cases:</p>
+
+<p>```ruby
+class Mechanize::HTTP::Agent
+  MAX_RESET_RETRIES = 10</p>
+
+<p>  # We need to replace the core Mechanize HTTP method:
+  #
+  #   Mechanize::HTTP::Agent#fetch
+  #
+  # with a wrapper that handles the infamous "too many connection resets"
+  # Mechanize bug that is described here:
+  #
+  #   https://github.com/sparklemotion/mechanize/issues/123
+  #
+  # The wrapper shuts down the persistent HTTP connection when it fails with
+  # this error, and simply tries again. In practice, this only ever needs to
+  # be retried once, but I am going to let it retry a few times
+  # (MAX_RESET_RETRIES), just in case.
+  #
+  def fetch_with_retry(</p>
+
+<pre><code>uri,
+method    = :get,
+headers   = {},
+params    = [],
+referer   = current_page,
+redirects = 0
+</code></pre>
+
+<p>  )</p>
+
+<pre><code>action      = "#{method.to_s.upcase} #{uri.to_s}"
+retry_count = 0
+
+begin
+  fetch_without_retry(uri, method, headers, params, referer, redirects)
+rescue Net::HTTP::Persistent::Error =&gt; e
+  # Pass on any other type of error.
+  raise unless e.message =~ /too many connection resets/
+
+  # Pass on the error if we've tried too many times.
+  if retry_count &gt;= MAX_RESET_RETRIES
+    puts "**** WARN: Mechanize retried connection reset #{MAX_RESET_RETRIES} times and never succeeded: #{action}"
+    raise
+  end
+
+  # Otherwise, shutdown the persistent HTTP connection and try again.
+  puts "**** WARN: Mechanize retrying connection reset error: #{action}"
+  retry_count += 1
+  self.http.shutdown
+  retry
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  # Alias so #fetch actually uses our new #fetch_with_retry to wrap the
+  # old one aliased as #fetch_without_retry.
+  alias_method :fetch_without_retry, :fetch
+  alias_method :fetch, :fetch_with_retry
+end
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ruby | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/ruby/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Defeating The Infamous CHEF-3694 Warning]]></title>
+    <link href="http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/"/>
+    <updated>2014-01-24T19:47:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning</id>
+    <content type="html"><![CDATA[<p><em><strong>TL;DR:</strong> I hate the CHEF-3694 warning, so I made a <a href="https://github.com/facetdigital/chef_resource_merging">cookbook</a> to get rid of it. YMMV.</em></p>
+
+<p>Resource cloning in Chef is a bit of a minefield. They have a ticket known as <a href="https://tickets.opscode.com/browse/CHEF-3694">CHEF-3694</a> saying that the feature should be removed, and indicating that it will be by the time Chef 12.0.0 comes out. However, a lot of their Opscode-developed community cookbooks use (abuse?) resource cloning. The result is that you get tons of warnings about resource cloning that look like this:</p>
+
+<p><code>
+[2014-01-24T16:15:55+00:00] WARN: Cloning resource attributes for package[perl] from prior resource (CHEF-3694)
+[2014-01-24T16:15:55+00:00] WARN: Previous package[perl]: /tmp/vagrant-chef-1/chef-solo-1/cookbooks/perl/recipes/default.rb:26:in `block in from_file'
+[2014-01-24T16:15:55+00:00] WARN: Current  package[perl]: /tmp/vagrant-chef-1/chef-solo-1/cookbooks/iptables/recipes/default.rb:21:in `from_file'
+</code></p>
+
+<p>Where I come from, it's considered an error to have a warning in your output. Ignorable warnings bury important ones. So...for better or worse, I embarked upon a journey to see what I could do to use resources correctly and avoid these warnings...</p>
+
+<!-- MORE -->
+
+
+<h2>What is resource cloning and why are you warning me about it?</h2>
+
+<p>The <a href="https://tickets.opscode.com/browse/CHEF-3694">discussion</a> about this this issue is an interesting read. You should be able to, for example, declare a service resource in one spot of your recipe, and later start it. You should also be able to have multiple recipes be able to install the same package resource and have it be idempotent, without having to worry about coordinating between cookbooks. That's Chef's job. To support this, Chef uses a technique they call <em>resource cloning</em>, which spews out warning messages because they plan to get rid of it. Proponents of the warning messages argue that if your cookbook relies on resource cloning, then you are doing something incorrectly and you have bigger problems. However, there are popular community cookbooks that won't work without it.</p>
+
+<p>Here's an example of stock <code>perl</code> and <code>iptables</code> cookbooks causing this problem:</p>
+
+<p><a href="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"><img class="center" src="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"></a></p>
+
+<p>I really wouldn't want <code>perl</code> and <code>iptables</code> to have to coordinate between each other in order to avoid this warning. Perhaps there is a way to re-order them? Not that I could figure out...at least not without either making dangerous assumptions or editing stock community cookbook code.</p>
+
+<p>Even so...there are cookbooks that have this problem by themselves without the help of other cookbooks. For example, one of the most popular cookbooks, <code>apache2</code>:</p>
+
+<p><a href="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"><img class="center" src="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"></a></p>
+
+<h2>Can we just remove resource cloning?</h2>
+
+<p>Since it was well-argued that cookbooks shouldn't rely on resource cloning, and that it would be removed in a future version of Chef, I decided to replace it myself with resource <em>duplication</em>. Resource cloning and its associated warning messages are handled in a method called <code>Chef::Resource::load_prior_resources</code>, so I just monkey-patched out that method to allow the duplicate resource without copying over any of the existing resources's attributes, using a bit of code like this:</p>
+
+<p>``` ruby
+class Chef
+  class Resource</p>
+
+<pre><code>def load_prior_resource
+  Chef::Log.warn("I AIN'T CLONING #{self.to_s}!!!")
+  true
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>NOPE! That doesn't work. While this works for some of my cookbooks and certain resources, the community <code>apache2</code> recipes clearly rely on the soon-to-be-deprecated resource cloning behavior. These recipes define the <code>service[apache2]</code> resource a number of times to do things like enable/start/restart after config changes. Without resource cloning, the <code>apache2::logrotate</code> recipe, for example, fails to process a restart of the apache2 service because it <em>didn't</em> inherit the necessary attributes that needed to be cloned from the original service definition, giving errors like this:</p>
+
+<h1>```</h1>
+
+<h1>Error executing action <code>restart</code> on resource 'service[apache2]'</h1>
+
+<h2>Chef::Exceptions::Service</h2>
+
+<p>service[apache2]: unable to locate the init.d script!</p>
+
+<h2>Resource Declaration:</h2>
+
+<h1>In /tmp/vagrant-chef-1/chef-solo-1/cookbooks/apache2/recipes/logrotate.rb</h1>
+
+<p> 20: apache_service = service 'apache2' do
+ 21:   action :nothing
+ 22: end
+ 23:</p>
+
+<h2>Compiled Resource:</h2>
+
+<h1>Declared in /tmp/vagrant-chef-1/chef-solo-1/cookbooks/apache2/recipes/logrotate.rb:20:in `from_file'</h1>
+
+<p>service("apache2") do
+  action [:nothing]
+  supports {:restart=>false, :reload=>false, :status=>true}
+  retries 0
+  retry_delay 2
+  service_name "apache2"
+  pattern "apache2"
+  startup_type :automatic
+  cookbook_name :apache2
+  recipe_name "logrotate"
+end
+```</p>
+
+<h2>Then how about reusing the existing resource?</h2>
+
+<p>I think resource reuse is probably the intention in 99% of the use cases. Some commenters on this discussion have suggested making all their recipes look up the resource in the <em>resources collection</em> first, and using the existing one if possible, otherwise handling the not-found exception and creating the new resource. Not a bad suggestion...but there's no way I'm going to modify every community cookbook to do that.</p>
+
+<p>As an experiment, I tried simply overriding the <code>service</code> DSL method (which is actually implemented in <code>method_missing</code>) to test this theory, with some monkey-patching like this:</p>
+
+<p>``` ruby
+class Chef
+  module DSL</p>
+
+<pre><code>module Recipe
+  def service(svc, &amp;block)
+    s = run_context.resource_collection.find("service[#{svc}]")
+    s.instance_eval(&amp;block) if block
+    s
+  rescue Chef::Exceptions::ResourceNotFound =&gt; e
+    method_missing("service", svc, &amp;block)
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>That's close, but it doesn't quite work. The most noticeable failure with this is that only the last <code>action</code> will be run. So for example, say you have something like this:</p>
+
+<p>``` ruby
+service "apache2" do
+  action :enable
+end</p>
+
+<h1>...some other stuff...</h1>
+
+<p>service "apache2" do
+  action :start
+end
+```</p>
+
+<p>Normally, this creates two <code>service[apache2]</code> resources, each copying its configuration from the previous definition, and <em>overriding</em> the action(s). When executed, you'd end up with both actions being executed (but with a bunch of warnings that you're using the dreaded resource cloning).</p>
+
+<p>With the reuse technique above, the problem is that, in this simple example, the <code>action: start</code> <em>overwrites</em> the <code>action: enable</code>. In the end, you have your service started...but <code>chkconfig</code> shows that it was never enabled. This can obviously be much worse in more complex scenarios.</p>
+
+<h2>The Workaround: resource merging</h2>
+
+<p>My workaround for this takes advantage of internal knowledge of how the <code>action</code> DSL method works...and it only applies to that one method. We're in dark magic territory, so I am sure this could potentially break somebody's cookbooks.</p>
+
+<p>Building on the resource reuse attempt above, I made it so that instead of letting the <code>action</code> of a resource stomp over the pre-existing resource's action, it would <em>merge</em> the actions together. In the over-simplified version, this looks like replacing the single <code>instance_eval</code> line from above with code like this:</p>
+
+<p><code>ruby
+combined_actions = s.action
+if block
+  s.instance_eval(&amp;block)
+  combined_actions += s.action
+end
+s.action combined_actions
+</code></p>
+
+<h2>Putting it together</h2>
+
+<p>There are a few details I glossed over, such as managing the <code>:nothing</code> action, different default actions for different types of resources, actions that are Arrays vs Symbols, etc. My final solution was to extend <code>Chef::DSL::Recipe</code> with a <code>reusable_resource</code> method that could be used by specific resource DSL overrides as much or as little as you want. Here's what that looks like:</p>
+
+<p>``` ruby
+class Chef
+  module DSL</p>
+
+<pre><code>module Recipe
+  def reusable_resource(
+    resource_type,
+    resource_name,
+    default_action,
+    &amp;block
+  )
+    resource_str = "#{resource_type}[#{resource_name}]"
+    existing_resource = run_context.resource_collection.find(resource_str)
+    actions_before = existing_resource.action
+    actions_before = [actions_before] unless actions_before.is_a? Array
+    if block
+      existing_resource.instance_eval(&amp;block)
+      actions_after = existing_resource.action
+    else
+      actions_after = []
+    end
+    if actions_after.nil? || actions_after.empty?
+      actions_after = [default_action]
+    end
+    combined_actions = actions_before + actions_after
+    combined_actions.delete(:nothing) if combined_actions.count &gt; 1
+    existing_resource.action combined_actions
+    existing_resource
+  rescue Chef::Exceptions::ResourceNotFound =&gt; e
+    method_missing(resource_type, resource_name, &amp;block)
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>With that, if you only wanted to override the default behavior for <code>package</code> and <code>service</code> resources, you could monkey-patch those in like this:</p>
+
+<p>``` ruby
+class Chef
+  module DSL</p>
+
+<pre><code>module Recipe
+  def reusable_resource
+    # Omitted for brevity
+  end
+
+  def package(pkg, &amp;block)
+    reusable_resource("package", pkg, :install, &amp;block)
+  end
+
+  def service(svc, &amp;block)
+    reusable_resource("service", svc, :nothing, &amp;block)
+  end
+
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Now all those warnings are gone. My complete initial install works great without complaint. So do my subsequent re-runs.</p>
+
+<p>I've packaged this all up as a cookbook that has nothing but a library applying these monkey-patches. You can <a href="https://github.com/facetdigital/chef_resource_merging">grab it from GitHub</a> and put it at the front of your run_list with <code>recipe[chef_resource_merging]</code>.</p>
+
+<h2>Limitations</h2>
+
+<p>This technique will probably fail in scenarios where you want to have multiple resources with the same name that have differing attributes other than <code>action</code>. For example, two different <code>bash</code> resources in two different places, with two different <code>command</code> scripts, with the same name. Either resource cloning or resource duplication would work...but resource merging the way I've implemented it is going to crash and burn. Of course you can simply name these resources differently, but given that resources share a global namespace, there's always a risk unless you make sure to prefix your resource names with something uniquely yours.</p>
+
+<p>This is why I factored this technique into a <code>reusable_resource</code> DSL method. You can use it directly in custom cookbooks if you want. You can override specific types of resources as I have shown in the example, only touching <code>package</code> and <code>service</code>. Or, you can override those with additional logic to only do in in narrower cases (e.g., only if there is no block given). That's up to you. Your Mileage May Vary.</p>
+
+<h2>Discussion</h2>
+
+<p>I welcome any and all discussion on this. Especially from someone who knows the internals of Chef much more deeply than I do, who can tell me if I'm getting myself into too much trouble here.</p>
+
+<p>I'm hoping that some day there is a proper mechanism for resource reuse, when that is what is intended, or perhaps some way to detect if two resources internals are the same and make a smart decision about whether to reuse or duplicate. Maybe a real resource merging solution could happen, where the entire blocks are chained and executed? Or perhaps we'll see some resource namespace solution (though that would not have solved any of the issues I've had).</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Optimistic Locking With Couchbase and Ruby]]></title>
+    <link href="http://scottwb.github.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/"/>
+    <updated>2013-11-11T10:35:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby</id>
+    <content type="html"><![CDATA[<p>Concurrent modification of shared data can be a problem in any distributed system regardless of what data store you are using. With ACID-compliant relational databases, a common tactic is to use pessimistic locking at the table or row level. Most NoSQL data stores do not have a pessimistic lock operation, and even when they do, it is often considered a performance hazard. So, most applications do not lock objects before writing them to a NoSQL datastore (or they use an external lock of some sort). This can quickly become a problem when you have a distributed system with write contention, as shown in the figure below:</p>
+
+<p><img class="center" src="/images/posts/2013-11-11-optimistic-locking-with-couchbase-and-ruby/wrong.png"></p>
+
+<p>One of the nice features of Couchbase is its "CAS" operation. This provides the ability to do an atomic check-and-set operation. You can set the value of a key, providing the last known version identifier (called a "CAS value"). The write will succeed if the document has not been modified since you read it, or it will fail if it has been modified and now has a different CAS value.</p>
+
+<p>Using this operation, we can easily build a higher-level operation to provide <a href="http://en.wikipedia.org/wiki/Optimistic_concurrency_control">optimistic locking</a> on our documents, using a CAS retry loop. The idea is simple: get the latest version of the document, apply your update(s), and write it back to Couchbase. If there are no conflicts, then all is well, and you can move on. If there is a conflict, you <em>re-get</em> the latest version of the document, <em>fully reapply</em> your modifications, and try again to write the document back to Couchbase. Repeat until the write succeeds.</p>
+
+<!-- MORE -->
+
+
+<p>With this, the figure above would look like this:</p>
+
+<p><img class="center" src="/images/posts/2013-11-11-optimistic-locking-with-couchbase-and-ruby/right.png"></p>
+
+<p>There are a few things that are important to note about this technique.</p>
+
+<ol>
+<li>You should have no unsaved modifications to the document before doing this. They will be lost.</li>
+<li>Your modification code <em>must</em> be re-runnable and not have undesired side-effects, because it may be run an unpredictable number of times.</li>
+<li>Your modification code <em>should</em> be <a href="http://en.wikipedia.org/wiki/Commutative_property">commutative</a>, since multiple clients may be operating at the same time, and we cannot guarantee order.</li>
+<li>If your modification is not commutative, you should be comfortable that this roughly amounts to a Last Writer Wins (LWW) strategy (although that is not strictly guaranteed without a real vector clock).</li>
+</ol>
+
+
+<h2>Example Code</h2>
+
+<p>I have created a <a href="https://github.com/scottwb/couchbase-optimistic-locking">GitHub repository</a> that implements this technique by extending the Couchbase Ruby client's <code>Couchbase::Bucket</code> class on which you normally call <code>get</code> and <code>set</code> methods. You can, of course, put this elsewhere so that you don't need to monkey-patch someone else's library. Here is a look at the code:</p>
+
+<p>``` ruby
+require 'couchbase'</p>
+
+<p>module Couchbase
+  class Bucket</p>
+
+<pre><code># IMPORTANT:
+#   This method assumes that the doc you pass in is unmodified.
+#   Any unsaved changes to it will be discarded.
+#
+#   It loads a clean copy of the doc and passes it to the given
+#   block, which should apply changes to that document that can
+#   be retried from scratch multiple times until they are successful.
+#
+#   This method will return the final state of the saved doc.
+#   The caller should use this afterward, instead of the object it has
+#   passed in to the method call.
+#
+def update_with_retry(key, doc, &amp;block)
+  begin
+    doc, flags, cas = get(key, :extended =&gt; true)
+    yield doc
+    set(key, doc, :flags =&gt; flags, :cas =&gt; cas)
+  rescue Couchbase::Error::KeyExists
+    retry
+  end
+  doc
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>With this monkey-patch loaded, you can now do the following:</p>
+
+<p>``` ruby
+cb = Couchbase.connect(:bucket => 'my_bucket', :hostname => 'localhost')
+doc = cb.get('some-key')</p>
+
+<p>doc = cb.update_with_retry('some-key', doc) do |d|
+  # Modify <code>d</code> to your heart's content
+end</p>
+
+<h1>Now doc has safely been updated by the block and saved without collision.</h1>
+
+<p>```</p>
+
+<p>It is important to note that, if your changes are not commutative, like our simple increment example, the code in your modification block will probably want to be smart enough to do some kind of merge logic for conflict resolution. It must recognize that the state of the document before calling <code>update_with_retry</code> may not actually be the same state that the successful block operates on.</p>
+
+<p><a href="https://github.com/scottwb/couchbase-optimistic-locking/blob/master/spec/lib/couchbase_bucket_spec.rb">Test code for this method</a> can be seen in the GitHub repository.</p>
+
+<p><strong>Also note:</strong> My colleague <a href="http://www.linkedin.com/in/jgroh9/">Jeremy Groh</a> has a similar post with sample code for doing <a href="http://www.ramsmusings.com/2013/06/11/optimistic-locking-with-couchbase/">optimistic locking on Couchbase using C#</a>.</p>
+
+<p><em><strong>UPDATED Nov. 15, 2013:</strong> As <a href="https://twitter.com/avsej">Sergey Avseyev</a> pointed out, there is a very similar method <code>Couchbase::Bucket#cas</code> that already exists in the couchbase-ruby-client. The only thing it doesn't do that I described above, is the retry upon collision. At his suggestion, I've <a href="https://github.com/couchbase/couchbase-ruby-client/commit/4c9b6761d6afb1320a852a58104678335dcb7909">extended that method</a> to take a <code>retry</code> option. This is probably a better solution anyway, since it handles both synchronous and asynchronous modes. Look for it in an upcoming release of the couchbase-ruby-client gem.</em></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Defeating The Infamous Mechanize "Too Many Connection Resets" Bug]]></title>
+    <link href="http://scottwb.github.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/"/>
+    <updated>2013-11-09T07:56:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug</id>
+    <content type="html"><![CDATA[<p>Have you ever seen this nasty, obnoxious error when using the Mechanize gem to write a screen scraper in Ruby?</p>
+
+<p><code>
+Net::HTTP::Persistent::Error: too many connection resets (due to Connection reset by peer - Errno::ECONNRESET) after 2 requests on 14759220
+</code></p>
+
+<p>This has plagued Mechanize users for years, and it's never been properly fixed. There are a lot of voodoo suggestions and incantations rumored to address this, but none of them seem to really work. You can read all about it on <a href="https://github.com/sparklemotion/mechanize/issues/123">Mechanize Issue #123</a>.</p>
+
+<p>I believe the root cause is how the underlying Net::HTTP handles reusing persistent connections after a POST -- and there is some evidence on the aforementioned github issue that supports this theory. Based on that assumption, I crafted a solution that has been working 100% of the time for me in production for a few months now.</p>
+
+<!-- MORE -->
+
+
+<h2>The Workaround</h2>
+
+<p>This is not really a fix for Mechanize or Net::HTTP::Persistent, and there are sure to be some corner cases where you legitimately want this error to be bubbled up, but in practice, I have found that simply handling a persistent connection being reset with the "too many connection resets" error, <em>forcing the connection to be shutdown and recreated</em>, and simply trying again has worked 100% of the time in high-volume production for scrapers that suffered this problem intermittently.</p>
+
+<p>This is done by creating a wrapper for <code>Mechanize::HTTP::Agent#fetch</code>, the low level HTTP request method that is used to do GETs, PUTs, POSTs, HEADs, etc. This wrapper catches this annoying little exception, and uses the <code>shutdown</code> method to effectively create a new HTTP connection, and then tries the <code>fetch</code> again.</p>
+
+<p>Loading the following monkey-patch somewhere in your application ought to shutup this annoying error for you for most use cases:</p>
+
+<p>```ruby
+class Mechanize::HTTP::Agent
+  MAX_RESET_RETRIES = 10</p>
+
+<p>  # We need to replace the core Mechanize HTTP method:
+  #
+  #   Mechanize::HTTP::Agent#fetch
+  #
+  # with a wrapper that handles the infamous "too many connection resets"
+  # Mechanize bug that is described here:
+  #
+  #   https://github.com/sparklemotion/mechanize/issues/123
+  #
+  # The wrapper shuts down the persistent HTTP connection when it fails with
+  # this error, and simply tries again. In practice, this only ever needs to
+  # be retried once, but I am going to let it retry a few times
+  # (MAX_RESET_RETRIES), just in case.
+  #
+  def fetch_with_retry(</p>
+
+<pre><code>uri,
+method    = :get,
+headers   = {},
+params    = [],
+referer   = current_page,
+redirects = 0
+</code></pre>
+
+<p>  )</p>
+
+<pre><code>action      = "#{method.to_s.upcase} #{uri.to_s}"
+retry_count = 0
+
+begin
+  fetch_without_retry(uri, method, headers, params, referer, redirects)
+rescue Net::HTTP::Persistent::Error =&gt; e
+  # Pass on any other type of error.
+  raise unless e.message =~ /too many connection resets/
+
+  # Pass on the error if we've tried too many times.
+  if retry_count &gt;= MAX_RESET_RETRIES
+    puts "**** WARN: Mechanize retried connection reset #{MAX_RESET_RETRIES} times and never succeeded: #{action}"
+    raise
+  end
+
+  # Otherwise, shutdown the persistent HTTP connection and try again.
+  puts "**** WARN: Mechanize retrying connection reset error: #{action}"
+  retry_count += 1
+  self.http.shutdown
+  retry
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  # Alias so #fetch actually uses our new #fetch_with_retry to wrap the
+  # old one aliased as #fetch_without_retry.
+  alias_method :fetch_without_retry, :fetch
+  alias_method :fetch, :fetch_with_retry
+end
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Easy Papertrail Deployment Using Rake]]></title>
+    <link href="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
+    <updated>2013-11-08T06:37:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
+    <content type="html"><![CDATA[<p><a href="http://papertrailapp.com/">Papertrail</a> is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, across numerous hosts. Having all your logs in one place, live tail-able, searchable, and archived is key to debugging such systems in production.</p>
+
+<p>There are a few ways to set it up, as documented on their quick start page, such as a system-wide installation via <a href="http://community.opscode.com/cookbooks/papertrail-rsyslog">Chef</a>, or configuring your app to use the syslog protocol. They also provide a convenient Ruby gem called <a href="http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-text-log-files-in-unix">remote_syslog</a> that can be configured to read a configured set of log files and send them to Papertrail.</p>
+
+<p>I've found for simple Ruby project structures, it can often be easier to deploy Papertrail by installing this gem with Bundler via your project Gemfile, and then creating a simple set of Rake tasks to manage starting and stopping the service. This way it's self-contained within your application repository, gets deployed with the same mechanism you deploy your application code, and can be used on your development and staging systems just as easily, without any Chef cookbooks or other configuration hassle.</p>
+
+<!-- MORE -->
+
+
+<h2>Rake-based Deployment</h2>
+
+<p>I typically build most of my production deployment with modular Rake tasks. This way your Capistrano/OpsWorks/Chef/whatever deployment tools can invoke Rake tasks -- and you can use these same tasks manually on production and development systems alike.</p>
+
+<p>I have a <code>papertrail.rake</code> in my <a href="https://github.com/scottwb/rake-tasks">rake-tasks repository on GitHub</a> that demonstrates how I use this. The contents are shown below, but the rest of the repository demonstrates the other required ingredients, such as a the papertrail config file. With this file in your <code>tasks</code> directory, and the <code>remote_syslog</code> gem in your <code>Gemfile</code>, you now have access to three simple tasks:</p>
+
+<p><code>bash
+$ rake -T papertrail
+(in /Users/scottwb/src/rake-tasks)
+rake papertrail:start   # Start papertrail remote_syslog daemon.
+rake papertrail:status  # Show status of papertrail remote_syslog daemon.
+rake papertrail:stop    # Stop papertrail remote_syslog daemon.
+</code></p>
+
+<p>You can now manually start logging to Papertrail with <code>rake papertrail:start</code>...or you can hook up the start/stop tasks to your automated deployment tools.</p>
+
+<p>Here are the contents of the main rakefile for this. See the <a href="https://github.com/scottwb/rake-tasks">rake-tasks repository</a> for example config file, Gemfile, and directory structure.</p>
+
+<h2>The papertrail.rake File</h2>
+
+<p>``` ruby
+PAPERTRAIL_CONFIG = File.expand_path("../../config/remote_syslog.yml", <strong>FILE</strong>)
+PAPERTRAIL_PID    = File.expand_path("../../tmp/pids/remote_syslog.pid", <strong>FILE</strong>)</p>
+
+<p>namespace :papertrail do</p>
+
+<p>  def papertrail_is_running?</p>
+
+<pre><code>File.exists?(PAPERTRAIL_PID) &amp;&amp; system("ps x | grep `cat #{PAPERTRAIL_PID}` 2&gt;&amp;1 &gt; /dev/null")
+</code></pre>
+
+<p>  end</p>
+
+<p>  desc "Start papertrail remote_syslog daemon."
+  task :start => :stop do</p>
+
+<pre><code>if papertrail_is_running?
+  puts "Papertrail is already running."
+else
+  sh "remote_syslog -c #{PAPERTRAIL_CONFIG} --pid-file #{PAPERTRAIL_PID}"
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  desc "Stop papertrail remote_syslog daemon."
+  task :stop do</p>
+
+<pre><code>if File.exists? PAPERTRAIL_PID
+  sh "kill `cat #{PAPERTRAIL_PID}`"
+  rm_f PAPERTRAIL_PID
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  desc "Show status of papertrail remote_syslog daemon."
+  task :status do</p>
+
+<pre><code>if papertrail_is_running?
+  puts "Papertrail remote_syslog is running"
+else
+  puts "Papertrail remote_syslog is stopped"
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Quick and Dirty CampaignMonitor Webhook Management]]></title>
+    <link href="http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/"/>
+    <updated>2013-06-24T16:33:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management</id>
+    <content type="html"><![CDATA[<p>You've got a CampaignMonitor mailing list and you're using their API to add/update/remove subscribers as they sign up for your app and opt-in to your mailing list. Great. But you also want to know when they unsubscribe from your newsletter, or when an existing user subscribes via a separate newsletter form on your website, and be able to keep that information sync'd with your user database.</p>
+
+<p>CampaignMonitor provides the ability to create <a href="http://www.campaignmonitor.com/api/webhooks/">Webhooks</a> that will drive an HTTP POST callback to your app when subscribe/unsubscribe events happen. Once you dive into this, you'll realize that you also need a way to deploy and update your webhooks. They only allow you to do this through their API -- there is no GUI for it.</p>
+
+<!-- MORE -->
+
+
+<p>I threw together a quick-and-dirty Rakefile using the <code>createsend</code> gem. First make sure you have either done <code>gem install createsend</code> or have added the <code>createsend</code> gem to your Gemfile. Then, you can create a Rakefile that looks something like this:</p>
+
+<p>``` ruby
+API_KEY = 'your_secret_api_key_here'
+LIST_ID = 'your_mailing_list_id_here'  # Get this from the "change type" page for the list
+WEBHOOK_URL = 'http://example.com/path/to/your_webhook.json'</p>
+
+<p>def campaign_monitor_list
+  CreateSend::List.new({:api_key => API_KEY}, LIST_ID)
+end</p>
+
+<h1>NOTE: That I depend on :environment for all of these. That is to load the</h1>
+
+<h1>Rails environment I use them in. You can change that and require 'createsend'</h1>
+
+<h1>explicitly if you like.</h1>
+
+<p>namespace :campaign_monitor do
+  namespace :webhooks do</p>
+
+<pre><code>desc "List all the CampaignMonitor webhooks"
+task :list =&gt; :environment do
+  puts campaign_monitor_list.webhooks.inspect
+end
+
+desc "Register all our CampaignMonitor webhooks"
+task :create =&gt; :environment do
+  campaign_monitor_list.create_webhook(
+    ["Subscribe", "Deactivate"],
+    WEBHOOK_URL,
+    'json'
+  )
+end
+
+desc "Test all our CampaignMonitor webhooks"
+task :test =&gt; :environment do
+  list = campaign_monitor_list
+  list.webhooks.each do |hook|
+    list.test_webhook(hook[:WebhookID])
+  end
+end
+
+desc "Uninstall all our CampaignMonitor webhooks"
+task :clear =&gt; :environment do
+  list = campaign_monitor_list
+  list.webhooks.each do |hook|
+    list.delete_webhook(hook[:WebhookID])
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>With this saved as <code>campaign_monitor.rake</code> and loaded by rake, you will now have the following tasks you can integrate into your deployment system:</p>
+
+<p><code>bash
+% rake -T campaign_monitor:webhooks
+rake campaign_monitor:webhooks:clear   # Uninstall all our CampaignMonitor webhooks
+rake campaign_monitor:webhooks:create  # Register all our CampaignMonitor webhooks
+rake campaign_monitor:webhooks:list    # List all the CampaignMonitor webhooks
+rake campaign_monitor:webhooks:test    # Test all our CampaignMonitor webhooks
+</code></p>
+]]></content>
+  </entry>
+  
+</feed>

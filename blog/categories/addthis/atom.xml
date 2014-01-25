@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: addthis | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/addthis/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Using AddThis With jQuery Mobile]]></title>
+    <link href="http://scottwb.github.com/blog/2012/01/23/using-addthis-with-jquery-mobile/"/>
+    <updated>2012-01-23T14:38:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/01/23/using-addthis-with-jquery-mobile</id>
+    <content type="html"><![CDATA[<p>Because of the way AddThis works, it can be tricky to use the <a href="http://www.addthis.com/">AddThis</a> sharing widget within sections of a page that are dynamically vloaded via AJAX. The main <a href="http://www.addthis.com/forum/viewtopic.php?f=8&amp;t=13982&amp;st=0&amp;sk=t&amp;sd=a&amp;start=20">trick they suggest in their forum</a> is to re-initialize the script after you've dynamically added or modified an AddThis widget. This can be done with a method like this:</p>
+
+<p>``` javascript
+if (window.addthis) {</p>
+
+<pre><code>window.addthis = null;
+</code></pre>
+
+<p>}
+$.getScript("http://s7.addthis.com/js/250/addthis_widget.js#domready=1");
+```</p>
+
+<p>Now...when you're using jQuery Mobile, you are very likely loading each page via AJAX instead of a full page request. This is the default behavior. Say you have a series of photos, and each click of a NEXT or PREV button slides in the next/prev photo in a series, as a full page dislay with AddThis buttons. You will need to reload AddThis every time a new page comes in to view.</p>
+
+<!-- MORE -->
+
+
+<p>You also have to be careful not to reload AddThis for every page being rendered. If you are using jQuery Mobile's page prefetching, you could get quite a few reloads per page this way. You might also miss a necessary reload of AddThis when the user clicks the BACK button, or transitions to an already-cached page.</p>
+
+<p>Fortunately jQuery Mobile gives an easy event to bind to that gives us just the right hook: <code>pageshow</code>. This event is triggered when the transition animation has completed for a transition from one page to another. Just the right time to reload AddThis. Put this all together and you get:</p>
+
+<p>``` javascript
+function reloadAddThis() {</p>
+
+<pre><code>if (window.addthis) {
+    window.addthis = null;
+}
+$.getScript("http://s7.addthis.com/js/250/addthis_widget.js#domready=1");
+</code></pre>
+
+<p>}</p>
+
+<p>$(document).bind('pageshow', function() {</p>
+
+<pre><code>reloadAddThis();
+</code></pre>
+
+<p>});
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

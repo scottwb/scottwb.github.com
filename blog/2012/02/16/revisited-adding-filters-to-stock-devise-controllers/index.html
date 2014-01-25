@@ -1,0 +1,424 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Revisited: Adding Filters to Stock Devise Controllers - Scott W. Bradley</title>
+  <meta name="author" content="Scott W. Bradley">
+
+  
+  <meta name="description" content="Six months ago, I wrote a quick blog post about adding custom filters to stock Devise controllers without subclassing all the Devise controllers. At &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://scottwb.github.com/blog/2012/02/16/revisited-adding-filters-to-stock-devise-controllers">
+
+  
+  <link href="/favicon.png" rel="icon">
+
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Scott W. Bradley" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-28351625-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Scott W. Bradley</a></h1>
+  
+    <h2>in which scottwb thinks out loud</h2>
+  
+  <a href="http://github.com/scottwb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/camo.github.com/abad93f42020b733148435e2cd92ce15c542d320/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub"></a>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:scottwb.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/profile">Profile</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Revisited: Adding Filters to Stock Devise Controllers</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-16T23:54:00-08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Six months ago, I wrote a quick blog post about <a href="http://sleeplesscoding.blogspot.com/2011/08/adding-filters-to-stock-device.html">adding custom filters to stock Devise controllers</a> without subclassing all the Devise controllers. At the end of the post I noted that the prescribed method only worked in the production environment, and not in development.</p>
+
+<p>Today I come to you with a solution that works in development as well as production. The basic mechanics are the same, but we&#8217;ll factor it slightly differently.</p>
+
+<p>First, we&#8217;ll create a module in <code>config/initializers/devise_filters.rb</code> where we&#8217;ll implement a method to add all the filters to Devise that we want. We also need to make sure this module calls this method upon initialization so that our filters get added upon startup (important for the production environment).</p>
+
+<figure class='code'><figcaption><span>devise_filters.rb </span><a href='https://gist.github.com/1851733'>View Gist</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Put this somewhere it will get auto-loaded, like config/initializers</span>
+</span><span class='line'><span class="k">module</span> <span class="nn">DeviseFilters</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">add_filters</span>
+</span><span class='line'>    <span class="c1"># Example of adding a before_filter to all the Devise controller</span>
+</span><span class='line'>    <span class="c1"># actions we care about.</span>
+</span><span class='line'>    <span class="o">[</span>
+</span><span class='line'>      <span class="no">Devise</span><span class="o">::</span><span class="no">SessionsController</span><span class="p">,</span>
+</span><span class='line'>      <span class="no">Devise</span><span class="o">::</span><span class="no">RegistrationsController</span><span class="p">,</span>
+</span><span class='line'>      <span class="no">Devise</span><span class="o">::</span><span class="no">PasswordsController</span>
+</span><span class='line'>    <span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">controller</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">controller</span><span class="o">.</span><span class="n">before_filter</span> <span class="ss">:prepare_for_mobile</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Example of adding one selective before_filter.</span>
+</span><span class='line'>    <span class="no">Devise</span><span class="o">::</span><span class="no">RegistrationsController</span><span class="o">.</span><span class="n">before_filter</span> <span class="ss">:check_invite_code</span><span class="p">,</span> <span class="ss">:only</span> <span class="o">=&gt;</span> <span class="ss">:new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">add_filters</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>At this point, we&#8217;re in the same place we left off back in August: we can add filters to Devise controller actions, but in development mode the second request reloads all the Devise classes and all our filters are gone.</p>
+
+<p>To address this, we need to add a bit of code to the end of the initializer block in <code>config/environments/development.rb</code> like so:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">MyApp</span><span class="o">::</span><span class="no">Application</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># ...the usual stuff ...</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Stuff to do on each request</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">to_prepare</span> <span class="k">do</span>
+</span><span class='line'>    <span class="no">DeviseFilters</span><span class="o">.</span><span class="n">add_filters</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This tells Rails to call your <code>DeviseFilters.add_filters</code> method before each new request in development mode, after the classes have been reloaded.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Scott W. Bradley</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-16T23:54:00-08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/devise/'>devise</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://scottwb.github.com/blog/2012/02/16/revisited-adding-filters-to-stock-devise-controllers/" data-via="scottwb69" data-counturl="http://scottwb.github.com/blog/2012/02/16/revisited-adding-filters-to-stock-devise-controllers/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/02/16/enumerate-rails-3-controller-filters/" title="Previous Post: Enumerate Rails 3 Controller Filters">&laquo; Enumerate Rails 3 Controller Filters</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/02/17/auto-focus-the-first-form-element-with-jquery-mobile/" title="next Post: Auto-Focus The First Form Element With jQuery Mobile">Auto-Focus The First Form Element With jQuery Mobile &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section class='aboutMe'>
+  <h1>About Me</h1>
+  <img class="left" src="/favicon.png" width="75" height="75">
+  <p>Husband. Father. Techie. Founder and Principal Engineer at <a href="http://facetdigital.com/">Facet Digital, LLC</a>. Fitness and health enthusiast. Seattle Sounders FC fan. All opinions are mine alone. All trademarks are property of their respective owners.</p>
+</section>
+<section>
+  <h1>Latest Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating The Infamous Mechanize "Too Many Connection Resets" Bug</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Easy Papertrail Deployment Using Rake</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("scottwb69", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/scottwb69" class="twitter-follow-button" data-show-count="true">Follow @scottwb69</a>
+  
+</section>
+
+
+<section>
+  <h1>Latest Code</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/scottwb">@scottwb</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        var blacklist = [];
+        
+          
+            blacklist.push('scottwb.github.com');
+          
+            blacklist.push('haml-block-bug');
+          
+        
+
+        github.showRepos({
+            user: 'scottwb',
+            count: 5,
+            skip_forks: true,
+            blacklist: blacklist,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106700002337561490782?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class='shelfari'>
+  <h1>Latest Books</h1>
+  <div id="ShelfariWidget203753"><a href='http://www.shelfari.com/'>Shelfari: Book reviews on your book blog</a><script src="http://www.shelfari.com/ws/203753/widget.js?r=41860" type="text/javascript" language="javascript"></script></div>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Scott W. Bradley -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'scottwb';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://scottwb.github.com/blog/2012/02/16/revisited-adding-filters-to-stock-devise-controllers/';
+        var disqus_url = 'http://scottwb.github.com/blog/2012/02/16/revisited-adding-filters-to-stock-devise-controllers/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

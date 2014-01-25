@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rails | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/rails/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Always-On HTTPS With Rails Behind an ELB]]></title>
+    <link href="http://scottwb.github.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/"/>
+    <updated>2013-02-06T11:43:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb</id>
+    <content type="html"><![CDATA[<p>So you want to run your Rails site such that it always uses HTTPS, and you want all HTTP URLs to redirect to their HTTPS counterparts? Typically you use <code>config.force_ssl = true</code> in your initializer, or you use <code>force_ssl</code> in your controllers. For various reasons having to do with late-binding configuration, I have typically not been able to use the <code>config.force_ssl</code> method. This means the easiest way to force the whole site to use HTTPS has been to use <code>force_ssl</code> on the base <code>ApplicationController</code>, like this:</p>
+
+<p>``` ruby</p>
+
+<h1>app/controllers/application_controller.rb</h1>
+
+<p>class ApplicationController &lt; ActionController::Base
+  force_ssl
+end
+```</p>
+
+<p>However...when you deploy this to Amazon EC2 behind an ELB (Elastic Load Balancer), you can run into problems.</p>
+
+<!-- MORE -->
+
+
+<h2>Problem: ELB Health Check vs Rails force_ssl</h2>
+
+<p>Even if you have your ELB configured with your SSL certificate and you have it proxying port 443 to port 80 on your Rails app, you may still have trouble getting the ELB to accept your instance as an upstream server if it cannot get an <code>HTTP 200 OK</code> from the health check action.</p>
+
+<p>Once you have your Rails app using a global <code>force_ssl</code>, the ELB HealthCheck will hit your server over HTTP (because you don't actually have your Rails server setup as an SSL endpoint), and your server will return it a 301 redirect. This causes the ELB to think your instance is unhealthy and won't proxy any requests to it.</p>
+
+<h2>Solution: Custom HTTP-able Health Check Action</h2>
+
+<p>I've found the easiest way to deal with this is to create a special action that you use for the health check, and override the <code>force_ssl</code> for that action. Unfortunately, the stock implementation of <code>ActionController::Base.force_ssl</code>, when applied globally in the <code>ApplicationController</code>, does not allow other controllers to override that setting. That means we have to tackle this in two steps.</p>
+
+<p>First, re-implement the <code>force_ssl</code> method to allow controllers to override it:</p>
+
+<p>``` ruby</p>
+
+<h1>app/controllers/application_controller.rb</h1>
+
+<p>class ApplicationController &lt; ActionController::Base
+  def self.force_ssl(options = {})</p>
+
+<pre><code>host = options.delete(:host)
+before_filter(options) do
+  if !request.ssl? &amp;&amp; !Rails.env.development? &amp;&amp; !(respond_to?(:allow_http?) &amp;&amp; allow_http?)
+    redirect_options = {:protocol =&gt; 'https://', :status =&gt; :moved_permanently}
+    redirect_options.merge!(:host =&gt; host) if host
+    redirect_options.merge!(:params =&gt; request.query_parameters)
+    redirect_to redirect_options
+  end
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  force_ssl
+end
+```</p>
+
+<p>The above is a direct copy of this method from Rails 3.2, with the additional clause: <code>&amp;&amp; !(respond_to?(:allow_http?) &amp;&amp; allow_http?)</code>. That clause allows any controller to implement an <code>allow_http?</code> method, which is executed in the context of a request's <code>before_filter</code>. If this method exists and returns <code>true</code> for a given request, then it will be allowed to continue over HTTP without being redirected to HTTPS.</p>
+
+<p>For the second part, we need to create an unprotected action that can be used for the health check. The easiest way to do this is with a new controller (and matching route, if necessary):</p>
+
+<p>``` ruby</p>
+
+<h1>app/controllers/heath_check_controller.rb</h1>
+
+<p>class HealthCheckController &lt; ApplicationController
+  def index</p>
+
+<pre><code>render :text =&gt; "I am alive!\n"
+</code></pre>
+
+<p>  end</p>
+
+<p>  protected
+  def allow_http?</p>
+
+<pre><code>true
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>``` ruby</p>
+
+<h1>config/routes.rb</h1>
+
+<p>MyApp::Application.routes.draw do
+  get "health_check" => "health_check#index"
+  # ...
+end
+```</p>
+
+<p>Now, all you need to do is change your ELB Health Check to use <code>/health_check</code> instead of <code>/index.html</code>. This way the ELB will check that your Rails app is responding using HTTP (since that is the appropriate protocol between the ELB and Rails if you are using the ELB as your SSL endpoint). Your instance will register as healthy as long as your Rails app is up, and Rails will redirect all other HTTP traffic to HTTPS.</p>
+
+<p><em><strong>UPDATED Oct. 28, 2013:</strong> If you run your own reverse proxy in front of Rails, you can do this in the reverse proxy without having to modify your Rails app. See my <a href="http://scottwb.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/">post on doing this with nginx</a>.</em></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[HSTS on Rails]]></title>
+    <link href="http://scottwb.github.com/blog/2013/02/06/hsts-on-rails/"/>
+    <updated>2013-02-06T09:47:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/02/06/hsts-on-rails</id>
+    <content type="html"><![CDATA[<p><a href="http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">HTTP Strict Transport Security</a> (HSTS) is a recent specification aimed at stopping a certain type of man-in-the-middle attack known as <em>SSL Stripping</em>. By default, when a user types "example.com" into their browser, the browser prefixes that with "http://". A man-in-the-middle attack can hijack the connection before the server redirect to HTTPS gets back to the browser, spoofing the site and potentially luring the user into providing sensitive data to the attacker.</p>
+
+<p>You can read a nice explanation of this attack, and how HSTS helps to prevent it <a href="http://www.imperialviolet.org/2012/07/19/hope9talk.html">here</a>.</p>
+
+<p>The <a href="http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">wikipedia page on HSTS</a> provides some examples on how to enable this in your web server (apache, nginx, etc). However, when running behind an ELB in Amazon Web Services, where you cannot configure this at the reverse proxy, you may wish to do this in your application.</p>
+
+<p>Here is how to achieve that in Ruby on Rails, using a <code>before_filter</code> in your base <code>ApplicationController</code>:</p>
+
+<p>``` ruby
+class ApplicationController &lt; ActionController::Base
+  before_filter :strict_transport_security
+  def strict_transport_security</p>
+
+<pre><code>if request.ssl?
+  response.headers['Strict-Transport-Security'] = "max-age=31536000; includeSubDomains"
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Customize Attribute Accessors on Ripple Models]]></title>
+    <link href="http://scottwb.github.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models/"/>
+    <updated>2012-07-12T09:18:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models</id>
+    <content type="html"><![CDATA[<p>Sometimes in your Ruby on Rails models, you want to override the attribute accessors to do additional processing on the values on their way in and out of the data storage layer. Custom serialization is a common use of this.</p>
+
+<p>For example, when using ActiveRecord for your Rails models, you can provide custom attribute accessors, say to serialize a Hash to JSON, using the <code>read_attribute</code> and <code>write_attribute</code> methods like this:</p>
+
+<p>```ruby</p>
+
+<h1>Assume a text column named 'stuff'</h1>
+
+<p>class User &lt; ActiveRecord::Base
+  def stuff</p>
+
+<pre><code>JSON.parse(read_attribute(:stuff))
+</code></pre>
+
+<p>  end</p>
+
+<p>  def stuff=(new_val)</p>
+
+<pre><code>write_attribute(:stuff, new_val.json)
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>With this, you can assign a Hash to the <code>stuff</code> attribute of <code>User</code>, and when you access it via <code>User#stuff</code>, you get a Hash back. All the while, it's read and written to and from the database as a JSON string.</p>
+
+<h3>Doing it with Ripple on top of Riak</h3>
+
+<p><a href="https://github.com/seancribbs/ripple/">Ripple</a> is the Ruby modeling layer for the distributed NoSQL store, <a href="http://basho.com/products/riak-overview/">Riak</a>. It tries very hard to provide a lot of the same interfaces as ActiveRecord. However, this is one of the areas it diverges: <code>Ripple::Document</code> objects do not support the <code>read_attribute</code> and <code>write_attribute</code> methods.</p>
+
+<p>Instead, they implement the <code>[]</code> and <code>[]=</code> methods. Translating the code above to work with Ripple is pretty easy:</p>
+
+<p>```ruby
+class User
+  include Ripple::Document</p>
+
+<p>  property :stuff, Hash</p>
+
+<p>  def stuff</p>
+
+<pre><code>JSON.parse(self[:stuff])
+</code></pre>
+
+<p>  end</p>
+
+<p>  def stuff=(new_val)</p>
+
+<pre><code>self[:stuff] = new_val.to_json
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<h3>Bonus Points</h3>
+
+<p>Using this tactic, you can easily add some memoization so that your getter doesn't need to parse the JSON text on every access. To do this, we'll use an instance variable as a cache that we'll invalidate in the setter, like so:</p>
+
+<p>```ruby
+class User
+  include Ripple::Document</p>
+
+<p>  property :stuff, Hash</p>
+
+<p>  def stuff</p>
+
+<pre><code>@cached_stuff ||= JSON.parse(self[:stuff])
+</code></pre>
+
+<p>  end</p>
+
+<p>  def stuff=(new_val)</p>
+
+<pre><code>@cached_stuff = nil
+self[:stuff] = new_val.to_json
+</code></pre>
+
+<p>  end
+end
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Compile A Single CoffeeScript File From Your Rails Project]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project/"/>
+    <updated>2012-06-30T20:56:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project</id>
+    <content type="html"><![CDATA[<p>Using Rails 3.2 (or 3.1 for that matter), you typically have CoffeeScript (and a javascript engine like therubyracer/V8) installed as gems - probably via Bundler from your Gemfile, possibly in a per-project RVM gemset.</p>
+
+<p>It doesn't seem that this type of setup includes direct access to the <code>coffee</code> command-line compiler. Instead the <code>coffee-script</code> gem uses calls directly to the compiler. Sometimes I'd just like to compile one of the CoffeeScript files in my Rails app just to look at the javascript, or maybe to export it somewhere that I'm not using CoffeeScript.</p>
+
+<p>To do this, I've made a simple Rake task. Just drop this into <code>lib/tasks/coffee.rake</code> in your Rails project:</p>
+
+<p>``` ruby coffee.rake https://gist.github.com/3026787 View Gist
+namespace :coffee do
+  task :compile, :filename do |t, args|</p>
+
+<pre><code>filename = args.filename
+puts CoffeeScript.compile(File.open(filename))
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Then, you can compile a single file from like this:</p>
+
+<p><code>bash
+$ rake coffee:compile[app/assets/javascripts/mystuff.js.coffee]
+</code></p>
+
+<p>This will output it to stdout so you can redirect that to a file, or the <code>gist</code> command, or whatever.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[jQuery Mobile Breaks Your HREFs on iOS Mobile Safari]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
+    <updated>2012-06-29T00:00:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
+    <content type="html"><![CDATA[<p>Starting with verison 1.1.0RC1, jQuery Mobile changes the <code>href</code> of any link to be <code>#</code> when it is clicked, but <em>only on iOS Mobile Safari</em>. If you try to make a click handler that reads the <code>href</code> attribute, you will be surprised to find that it does not get the href you intended. For example:</p>
+
+<p><code>javascript
+$('a').click(function() {
+  console.log($(this).attr('href'));
+});
+</code></p>
+
+<p>When using jQuery Mobile, this code will print out the href you expect on every browser except Mobile Safari on iOS (both real devices and simulators, but <em>not with other browsers faking their User-Agent</em>). On Mobile Safari, this will print out that the href is "#".</p>
+
+<h2>The Problem</h2>
+
+<p>Obviously this is a problem if you have code that operates in a click handler that reads the clicked element's <code>href</code> attribute. jQuery Mobile changes that href before you get a chance to read it.</p>
+
+<p>One common place this is used is with the <code>link_to</code> helper in Ruby on Rails, for links that need to use other HTTP methods. For example, the standard RESTful way to delete a resource will be with a link that sets <code>:method</code> to <code>:delete</code>. Rails handles this with a library called jQuery UJS that needs to read the href from the link when it is clicked.</p>
+
+<p>Unfortunately for Rails users, this means that Rails method links don't work with jQuery Mobile on iOS Mobile Safari.</p>
+
+<!-- MORE -->
+
+
+<h2>The Reason</h2>
+
+<p>The jQuery Mobile team is doing this on purpose, to make it so the address bar on iPhone does not drop down when changing pages (and we all love that feature!). In <a href="https://github.com/jquery/jquery-mobile/issues/3777">this discussion</a> and <a href="https://github.com/jquery/jquery-mobile/issues/3686">this discussion</a>, they seem to understand that this makes custom click handlers get the wrong href, but decide to go ahead with it anyway.</p>
+
+<p>You can see it happen in this excerpt from the jQuery Mobile 1.1.0 source (reformatted for blog-friendlyness):</p>
+
+<p><code>javascript
+// By caching the href value to data and switching the href to a #,
+// we can avoid address bar showing in iOS. The click handler resets
+// the href during its initial steps if this data is present
+$( link )
+  .jqmData( "href", $( link  ).attr( "href" )  )
+  .attr( "href", "#" );
+</code></p>
+
+<h2>The Solution</h2>
+
+<p>Here's the part that seems to be undocumented other than in that comment: <em>they store the href in a data attribute!</em> This makes this problem easy to workaround. Simply change your click handler to check for the data attribute first and fall back to the href:</p>
+
+<p><code>javascript
+$('a').click(function() {
+  console.log($(this).data('href') || $(this).attr('href'));
+});
+</code></p>
+
+<p>That would be easy enough to encapsulate in a nice helper function...</p>
+
+<h2>Applying This To Rails jQuery UJS</h2>
+
+<p>If you use the Rails <code>link_to</code> helper with the <code>:method</code> option set to anything other than <code>:get</code>, links are handled by the <code>jquery_ujs</code> library that comes with Rails (often referred to as Rails UJS, jQuery UJS, rails.js). You'll notice, for example that none of your <code>:delete</code> links work with jQuery Mobile when you are on iOS Mobile Safari. You might see this as a missing route for your <code>show</code> or <code>edit</code> method depending on where you are linking from.</p>
+
+<p>It turns out the fix is easy. The jquery_ujs code already has a method to encapsulate getting the href from an element, complete with a comment telling you how you can override it. All it does out of the box is read <code>element.attr('href')</code>. All we have to do is override it and make it try the data attribute first.</p>
+
+<p>Somewhere after <code>jquery_ujs.js</code> is loaded, define this:</p>
+
+<p><code>javascript
+$.rails.href = function(element) {
+  return element.data('href') || element.attr('href');
+}
+</code></p>
+
+<p>Now your Rails <code>link_to</code> calls with custom <code>:method</code> options such as <code>:delete</code> will work just fine with jQuery Mobile 1.1.0 on iOS Mobile Safari, and you don't have to lose that clever bit that keeps the address bar hidden.</p>
+
+<hr />
+
+<p><em><strong>UPDATED Jan. 3, 2013:</strong> I have confirmed that this problem has been solved in jQuery Mobile 1.2.0, and this work-around is no longer required. I did try to upgrade one of my jQuery Mobile 1.1.0 apps to 1.1.1 (but rolled back for other reasons), and in that process I believe that the above solution was still required.</em></p>
+]]></content>
+  </entry>
+  
+</feed>

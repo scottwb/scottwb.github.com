@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Fix Rails Mishandling of HTTP Accept Header - Scott W. Bradley</title>
+  <meta name="author" content="Scott W. Bradley">
+
+  
+  <meta name="description" content="There are two Rails issues in its handling of the HTTP Accept header
+which cause spurious ActionView::MissingTemplate exceptions.
+This can be &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://scottwb.github.com/blog/2012/02/06/fix-rails-mishandling-of-http-accept-header">
+
+  
+  <link href="/favicon.png" rel="icon">
+
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Scott W. Bradley" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-28351625-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Scott W. Bradley</a></h1>
+  
+    <h2>in which scottwb thinks out loud</h2>
+  
+  <a href="http://github.com/scottwb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/camo.github.com/abad93f42020b733148435e2cd92ce15c542d320/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub"></a>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:scottwb.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/profile">Profile</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Fix Rails Mishandling of HTTP Accept Header</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-06T13:15:00-08:00" pubdate data-updated="true">Feb 6<span>th</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>There are two Rails issues in its handling of the HTTP <code>Accept</code> header
+which cause spurious <code>ActionView::MissingTemplate</code> exceptions.
+This can be annoying when you are receiving emails on these via <a href="http://airbrakeapp.com/">Airbrake</a>,
+especially given that most of these come from web spiders. I am encountering
+this on Rails 3.0.7. One of these is fixed in a later version of Rails, but
+for other reasons I can&#8217;t upgrade right now. The other bug is still present in
+Rails 3.2 and in master at the time of this writing.</p>
+
+<p>I have worked up a gist with monkey-patches that fix both issues:</p>
+
+<p><a href="https://gist.github.com/1754727">https://gist.github.com/1754727</a></p>
+
+<p>Read on to learn more about these issues and how my patches work&#8230;</p>
+
+<!-- MORE -->
+
+
+<h2>Rails Issue #736</h2>
+
+<p><a href="https://github.com/rails/rails/issues/736">Issue #736</a> is that Rails does not correctly parse a q-value in an Accept header when there is only one content-type specified. For example:</p>
+
+<pre><code>Accept: text/html;q=0.9
+</code></pre>
+
+<p>Will likely cause a <code>MissingTemplate</code> exception because the request will not properly set <code>formats=[:html]</code>. <strong><em>This bug has existed since at least Rails 2.3, and still exists in Rails 3.2 and in master as of this writing.</em></strong></p>
+
+<h2>Rails Issue #860</h2>
+
+<p><a href="https://github.com/rails/rails/issues/860">Issue #860</a> is that Rails does not properly parse wildcard content-types such as <code>text/*</code>, <code>application/*</code>, and <code>image/*</code>. For example:</p>
+
+<pre><code>Accept: text/*
+</code></pre>
+
+<p>will likely cause a <code>MissingTemplate</code> exception because the request will not properly set <code>formats[:html,:text,:js,:css,:ics,:csv,:xml,:yaml:json]</code>. <strong><em>This bug was fixed sometime later than Rails 3.0.7.</em></strong> That fix, however, only solved the cases for <code>text/*</code> and <code>application/*</code>. The monkey-patch for this is largely based off of their solution, but also includes a fix for <code>image/*</code>.</p>
+
+<h2>Testing This Patch</h2>
+
+<p><a href="https://gist.github.com/1754727">The gist</a> includes a file named <code>mime_type_spec.rb</code>, which is an RSpec example that you can drop into your rspec directory somewhere and run with the rest of your tests. It tests for both issues. Try it before dropping in the other files and see the failure. Then, add in the other files and see the tests pass.</p>
+
+<p>When you change to a different version of Rails, the patches will be disabled, and the tests may fail. If they do, edit the patches to change the Rails version they are constrained to, and see if the tests pass. If not, you may need to do more investigation as the internals of Rails may have changed. On the other hand, if you upgrade to a new version of Rails and the tests still pass, then this means the bugs have been fixed in your version of Rails and you can delete these patches.</p>
+
+<h2>Applying This Patch</h2>
+
+<p><a href="https://gist.github.com/1754727">The gist</a> contains files named <code>rails_issue_736.rb</code> and <code>rails_issue_860.rb</code>. These are the monkey-patches for these two issues, respectively. Place them somewhere in your Rails project where they will be loaded. I put them in <code>config/initializers</code>, but you should be able to put them anywhere that will get them loaded in your project.</p>
+
+<p>You can take one or both files at your discretion.</p>
+
+<p>You&#8217;ll notice at the top of each of these is a test against the version of Rails you are running, that looks like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="no">Rails</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;3.0.7&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You will want to edit this to be equal to your version of Rails. This makes it so that the monkey-patch gets applied, but only for your current version of Rails. This way, when you upgrade Rails, the patch is disabled. Then, if your tests no longer fail, you know Rails has fixed it and you can delete this monkey-patch. Otherwise, you can go back and edit that version number again and see if it makes the tests pass again.</p>
+
+<h2>The Future</h2>
+
+<p>In my opinion, some simple refactoring of <code>Mime::Types.parse</code> would eliminate the maintenance hazard that causes these issues. Currently there are two blocks of code in this method: one that handles a single content-type, and one that handles a list of multiple content-types. This should really just treat the single case as a list of one content-type. This way, fixes made to one don&#8217;t have to be applied to the other &#8211; which is likely the main cause of these problems. Both these issues are non-issues in the multiple content-type case, but are not addressed in the single content-type case.</p>
+
+<p>I&#8217;ll probably work up a pull request to address this, so hopefully these will be fixed in the mainline Rails someday.</p>
+
+<p><em><strong>UPDATED Feb 7, 2012:</strong> I submitted a <a href="https://github.com/rails/rails/pull/4918">pull request</a> yesterday to fix this correctly in Edge Rails, and it has now been merged into <code>master</code>.</em></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Scott W. Bradley</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-06T13:15:00-08:00" pubdate data-updated="true">Feb 6<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/bugs/'>bugs</a>, <a class='category' href='/blog/categories/hacks/'>hacks</a>, <a class='category' href='/blog/categories/rails/'>rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://scottwb.github.com/blog/2012/02/06/fix-rails-mishandling-of-http-accept-header/" data-via="scottwb69" data-counturl="http://scottwb.github.com/blog/2012/02/06/fix-rails-mishandling-of-http-accept-header/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/02/01/off-the-grid/" title="Previous Post: Off The Grid">&laquo; Off The Grid</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/02/09/inspiration-is-perishable/" title="next Post: Inspiration is Perishable">Inspiration is Perishable &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section class='aboutMe'>
+  <h1>About Me</h1>
+  <img class="left" src="/favicon.png" width="75" height="75">
+  <p>Husband. Father. Techie. Founder and Principal Engineer at <a href="http://facetdigital.com/">Facet Digital, LLC</a>. Fitness and health enthusiast. Seattle Sounders FC fan. All opinions are mine alone. All trademarks are property of their respective owners.</p>
+</section>
+<section>
+  <h1>Latest Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating The Infamous Mechanize "Too Many Connection Resets" Bug</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Easy Papertrail Deployment Using Rake</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("scottwb69", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/scottwb69" class="twitter-follow-button" data-show-count="true">Follow @scottwb69</a>
+  
+</section>
+
+
+<section>
+  <h1>Latest Code</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/scottwb">@scottwb</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        var blacklist = [];
+        
+          
+            blacklist.push('scottwb.github.com');
+          
+            blacklist.push('haml-block-bug');
+          
+        
+
+        github.showRepos({
+            user: 'scottwb',
+            count: 5,
+            skip_forks: true,
+            blacklist: blacklist,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106700002337561490782?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class='shelfari'>
+  <h1>Latest Books</h1>
+  <div id="ShelfariWidget203753"><a href='http://www.shelfari.com/'>Shelfari: Book reviews on your book blog</a><script src="http://www.shelfari.com/ws/203753/widget.js?r=41860" type="text/javascript" language="javascript"></script></div>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Scott W. Bradley -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'scottwb';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://scottwb.github.com/blog/2012/02/06/fix-rails-mishandling-of-http-accept-header/';
+        var disqus_url = 'http://scottwb.github.com/blog/2012/02/06/fix-rails-mishandling-of-http-accept-header/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,1 +1,753 @@
-My Octopress Page is coming soon &hellip;
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Scott W. Bradley</title>
+  <meta name="author" content="Scott W. Bradley">
+
+  
+  <meta name="description" content="TL;DR: I hate the CHEF-3694 warning, so I made a cookbook to get rid of it. YMMV. Resource cloning in Chef is a bit of a minefield. They have a &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://scottwb.github.com">
+
+  
+  <link href="/favicon.png" rel="icon">
+
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Scott W. Bradley" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-28351625-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Scott W. Bradley</a></h1>
+  
+    <h2>in which scottwb thinks out loud</h2>
+  
+  <a href="http://github.com/scottwb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/camo.github.com/abad93f42020b733148435e2cd92ce15c542d320/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub"></a>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:scottwb.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/profile">Profile</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating the Infamous CHEF-3694 Warning</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-24T19:47:00-08:00" pubdate data-updated="true">Jan 24<span>th</span>, 2014</time>
+        
+         | <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><em><strong>TL;DR:</strong> I hate the CHEF-3694 warning, so I made a <a href="https://github.com/facetdigital/chef_resource_merging">cookbook</a> to get rid of it. YMMV.</em></p>
+
+<p>Resource cloning in Chef is a bit of a minefield. They have a ticket known as <a href="https://tickets.opscode.com/browse/CHEF-3694">CHEF-3694</a> saying that the feature should be removed, and indicating that it will be by the time Chef 12.0.0 comes out. However, a lot of their Opscode-developed community cookbooks use (abuse?) resource cloning. The result is that you get tons of warnings about resource cloning that look like this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[2014-01-24T16:15:55+00:00] WARN: Cloning resource attributes for package[perl] from prior resource (CHEF-3694)
+</span><span class='line'>[2014-01-24T16:15:55+00:00] WARN: Previous package[perl]: /tmp/vagrant-chef-1/chef-solo-1/cookbooks/perl/recipes/default.rb:26:in `block in from_file'
+</span><span class='line'>[2014-01-24T16:15:55+00:00] WARN: Current  package[perl]: /tmp/vagrant-chef-1/chef-solo-1/cookbooks/iptables/recipes/default.rb:21:in `from_file'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Where I come from, it&#8217;s considered an error to have a warning in your output. Ignorable warnings bury important ones. So&#8230;for better or worse, I embarked upon a journey to see what I could do to use resources correctly and avoid these warnings&#8230;</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-11T10:35:00-08:00" pubdate data-updated="true">Nov 11<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Concurrent modification of shared data can be a problem in any distributed system regardless of what data store you are using. With ACID-compliant relational databases, a common tactic is to use pessimistic locking at the table or row level. Most NoSQL data stores do not have a pessimistic lock operation, and even when they do, it is often considered a performance hazard. So, most applications do not lock objects before writing them to a NoSQL datastore (or they use an external lock of some sort). This can quickly become a problem when you have a distributed system with write contention, as shown in the figure below:</p>
+
+<p><img class="center" src="/images/posts/2013-11-11-optimistic-locking-with-couchbase-and-ruby/wrong.png"></p>
+
+<p>One of the nice features of Couchbase is its &#8220;CAS&#8221; operation. This provides the ability to do an atomic check-and-set operation. You can set the value of a key, providing the last known version identifier (called a &#8220;CAS value&#8221;). The write will succeed if the document has not been modified since you read it, or it will fail if it has been modified and now has a different CAS value.</p>
+
+<p>Using this operation, we can easily build a higher-level operation to provide <a href="http://en.wikipedia.org/wiki/Optimistic_concurrency_control">optimistic locking</a> on our documents, using a CAS retry loop. The idea is simple: get the latest version of the document, apply your update(s), and write it back to Couchbase. If there are no conflicts, then all is well, and you can move on. If there is a conflict, you <em>re-get</em> the latest version of the document, <em>fully reapply</em> your modifications, and try again to write the document back to Couchbase. Repeat until the write succeeds.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-10T06:47:00-08:00" pubdate data-updated="true">Nov 10<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/11/10/5-things-your-code-must-be/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>If you work for me, with me, or near me, there are certain qualities of your code that must be met before I will let you get away with calling it &#8220;done&#8221;. Developers love to brag about a piece of code being done the second it sort of works for the main &#8220;happy path&#8221; use case it was intended for&#8230;on their development system. Developers are also optimists when it comes to estimation. Some of that has to do with their enthusiasm for achieving the &#8220;done&#8221; state based on their own notion of just having solved the base problem they set out to solve.</p>
+
+<p>This creates all kinds of schedule problems, expectation/reality mismatch problems with management, marketing, sales, etc.</p>
+
+<p>There are tons of details that go into the definition of &#8220;done&#8221;, and they vary depending on the project and the organization&#8217;s software development lifecycle. Rather than try to rigorously enumerate these &#8211; which would be the topic of an entire book &#8211; I tend to lean on 5 keystone requirements that we can assess about the code before we can call it &#8220;done&#8221;. There are many tactical rules for developing good software, but at a strategic level, following these keystone requirements generally leads us to cover most of those details.</p>
+
+<p>So&#8230;before you can call it &#8220;done&#8221;, your code module must be:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/10/5-things-your-code-must-be/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating the Infamous Mechanize &#8220;Too Many Connection Resets&#8221; Bug</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-09T07:56:00-08:00" pubdate data-updated="true">Nov 9<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Have you ever seen this nasty, obnoxious error when using the Mechanize gem to write a screen scraper in Ruby?</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Net::HTTP::Persistent::Error: too many connection resets (due to Connection reset by peer - Errno::ECONNRESET) after 2 requests on 14759220</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This has plagued Mechanize users for years, and it&#8217;s never been properly fixed. There are a lot of voodoo suggestions and incantations rumored to address this, but none of them seem to really work. You can read all about it on <a href="https://github.com/sparklemotion/mechanize/issues/123">Mechanize Issue #123</a>.</p>
+
+<p>I believe the root cause is how the underlying Net::HTTP handles reusing persistent connections after a POST &#8211; and there is some evidence on the aforementioned github issue that supports this theory. Based on that assumption, I crafted a solution that has been working 100% of the time for me in production for a few months now.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Easy Papertrail Deployment Using Rake</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-08T06:37:00-08:00" pubdate data-updated="true">Nov 8<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://papertrailapp.com/">Papertrail</a> is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, across numerous hosts. Having all your logs in one place, live tail-able, searchable, and archived is key to debugging such systems in production.</p>
+
+<p>There are a few ways to set it up, as documented on their quick start page, such as a system-wide installation via <a href="http://community.opscode.com/cookbooks/papertrail-rsyslog">Chef</a>, or configuring your app to use the syslog protocol. They also provide a convenient Ruby gem called <a href="http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-text-log-files-in-unix">remote_syslog</a> that can be configured to read a configured set of log files and send them to Papertrail.</p>
+
+<p>I&#8217;ve found for simple Ruby project structures, it can often be easier to deploy Papertrail by installing this gem with Bundler via your project Gemfile, and then creating a simple set of Rake tasks to manage starting and stopping the service. This way it&#8217;s self-contained within your application repository, gets deployed with the same mechanism you deploy your application code, and can be used on your development and staging systems just as easily, without any Chef cookbooks or other configuration hassle.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/">Always-On HTTPS With Nginx Behind an ELB</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-28T18:42:00-07:00" pubdate data-updated="true">Oct 28<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>A while back, I wrote about <a href="http://scottwb.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/">configuring a Rails app to always enforce HTTPS behind an ELB</a>. The main problem is that it&#8217;s easy to setup the blanket requirement for HTTPS, but when you are behind an ELB, where the ELB is acting as the HTTPS endpoint and only sending HTTP traffic to your server, you break the ability to respond with an <code>HTTP 200 OK</code> response for the health check that the ELB needs. This is because your blanket HTTPS enforcement will redirect the ELB&#8217;s health check from HTTP to HTTPS &#8211; and that redirection is not considered to be a healthy response by the ELB.</p>
+
+<p>The same applies to any server you&#8217;re running behind an ELB in this fashion.</p>
+
+<p>This posts discusses how to handle the same issue with Nginx.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/">Quick and Dirty CampaignMonitor Webhook Management</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-24T16:33:00-07:00" pubdate data-updated="true">Jun 24<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>You&#8217;ve got a CampaignMonitor mailing list and you&#8217;re using their API to add/update/remove subscribers as they sign up for your app and opt-in to your mailing list. Great. But you also want to know when they unsubscribe from your newsletter, or when an existing user subscribes via a separate newsletter form on your website, and be able to keep that information sync&#8217;d with your user database.</p>
+
+<p>CampaignMonitor provides the ability to create <a href="http://www.campaignmonitor.com/api/webhooks/">Webhooks</a> that will drive an HTTP POST callback to your app when subscribe/unsubscribe events happen. Once you dive into this, you&#8217;ll realize that you also need a way to deploy and update your webhooks. They only allow you to do this through their API &#8211; there is no GUI for it.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/21/spicy-summer-drink/">Spicy Summer Drink</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-21T20:08:00-07:00" pubdate data-updated="true">Jun 21<span>st</span>, 2013</time>
+        
+         | <a href="/blog/2013/06/21/spicy-summer-drink/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Introducing the &#8220;Picante Paloma&#8221;. It&#8217;s a sweet, spicy, and refreshing drink that&#8217;s perfect for the first day of summer. This is a mix of a recipe my wife and I found on the internet, a drink we tasted at a friend&#8217;s wedding called &#8220;Late For Work&#8221;, and our own experimentation. It&#8217;s more-or-less paleo-friendly, depending on how picky you are about the ingredients.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/06/21/spicy-summer-drink/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/">Using NewRelic With Custom Ruby Worker Daemons</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-23T07:48:00-07:00" pubdate data-updated="true">May 23<span>rd</span>, 2013</time>
+        
+         | <a href="/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>The NewRelic Ruby Agent comes with great support for Rails, Sinatra, and other frameworks and web servers out of the box. It also supports background jobs for frameworks like DelayedJob and Resque.</p>
+
+<p>But what if you have your own custom background worker mechanism?</p>
+
+<p>It&#8217;s fairly simple to get NewRelic working to report your custom background workers, but finding the right combination of setup calls in their docs can be a little tricky. The biggest issue is dealing with background tasks that daemonize and fork child worker processes. This is because the NewRelic agent needs to do unique instrumenting, monitoring, and reporting per process. Setting it up that way can be tricky if you&#8217;re using Bundler or another mechanism to load the <code>newrelic_rpm</code> gem <em>before</em> the child processes are forked.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/">Always-On HTTPS With Rails Behind an ELB</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-06T11:43:00-08:00" pubdate data-updated="true">Feb 6<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>So you want to run your Rails site such that it always uses HTTPS, and you want all HTTP URLs to redirect to their HTTPS counterparts? Typically you use <code>config.force_ssl = true</code> in your initializer, or you use <code>force_ssl</code> in your controllers. For various reasons having to do with late-binding configuration, I have typically not been able to use the <code>config.force_ssl</code> method. This means the easiest way to force the whole site to use HTTPS has been to use <code>force_ssl</code> on the base <code>ApplicationController</code>, like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># app/controllers/application_controller.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">force_ssl</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>However&#8230;when you deploy this to Amazon EC2 behind an ELB (Elastic Load Balancer), you can run into problems.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="/blog/page/2/">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section class='aboutMe'>
+  <h1>About Me</h1>
+  <img class="left" src="/favicon.png" width="75" height="75">
+  <p>Husband. Father. Techie. Founder and Principal Engineer at <a href="http://facetdigital.com/">Facet Digital, LLC</a>. Fitness and health enthusiast. Seattle Sounders FC fan. All opinions are mine alone. All trademarks are property of their respective owners.</p>
+</section>
+<section>
+  <h1>Latest Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating The Infamous Mechanize &#8220;Too Many Connection Resets&#8221; Bug</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Easy Papertrail Deployment Using Rake</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("scottwb69", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/scottwb69" class="twitter-follow-button" data-show-count="true">Follow @scottwb69</a>
+  
+</section>
+
+
+<section>
+  <h1>Latest Code</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/scottwb">@scottwb</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        var blacklist = [];
+        
+          
+            blacklist.push('scottwb.github.com');
+          
+            blacklist.push('haml-block-bug');
+          
+        
+
+        github.showRepos({
+            user: 'scottwb',
+            count: 5,
+            skip_forks: true,
+            blacklist: blacklist,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106700002337561490782?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class='shelfari'>
+  <h1>Latest Books</h1>
+  <div id="ShelfariWidget203753"><a href='http://www.shelfari.com/'>Shelfari: Book reviews on your book blog</a><script src="http://www.shelfari.com/ws/203753/widget.js?r=41860" type="text/javascript" language="javascript"></script></div>
+</section>
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Scott W. Bradley -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'scottwb';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

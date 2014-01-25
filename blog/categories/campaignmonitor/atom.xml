@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: campaignmonitor | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/campaignmonitor/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Quick and Dirty CampaignMonitor Webhook Management]]></title>
+    <link href="http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/"/>
+    <updated>2013-06-24T16:33:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management</id>
+    <content type="html"><![CDATA[<p>You've got a CampaignMonitor mailing list and you're using their API to add/update/remove subscribers as they sign up for your app and opt-in to your mailing list. Great. But you also want to know when they unsubscribe from your newsletter, or when an existing user subscribes via a separate newsletter form on your website, and be able to keep that information sync'd with your user database.</p>
+
+<p>CampaignMonitor provides the ability to create <a href="http://www.campaignmonitor.com/api/webhooks/">Webhooks</a> that will drive an HTTP POST callback to your app when subscribe/unsubscribe events happen. Once you dive into this, you'll realize that you also need a way to deploy and update your webhooks. They only allow you to do this through their API -- there is no GUI for it.</p>
+
+<!-- MORE -->
+
+
+<p>I threw together a quick-and-dirty Rakefile using the <code>createsend</code> gem. First make sure you have either done <code>gem install createsend</code> or have added the <code>createsend</code> gem to your Gemfile. Then, you can create a Rakefile that looks something like this:</p>
+
+<p>``` ruby
+API_KEY = 'your_secret_api_key_here'
+LIST_ID = 'your_mailing_list_id_here'  # Get this from the "change type" page for the list
+WEBHOOK_URL = 'http://example.com/path/to/your_webhook.json'</p>
+
+<p>def campaign_monitor_list
+  CreateSend::List.new({:api_key => API_KEY}, LIST_ID)
+end</p>
+
+<h1>NOTE: That I depend on :environment for all of these. That is to load the</h1>
+
+<h1>Rails environment I use them in. You can change that and require 'createsend'</h1>
+
+<h1>explicitly if you like.</h1>
+
+<p>namespace :campaign_monitor do
+  namespace :webhooks do</p>
+
+<pre><code>desc "List all the CampaignMonitor webhooks"
+task :list =&gt; :environment do
+  puts campaign_monitor_list.webhooks.inspect
+end
+
+desc "Register all our CampaignMonitor webhooks"
+task :create =&gt; :environment do
+  campaign_monitor_list.create_webhook(
+    ["Subscribe", "Deactivate"],
+    WEBHOOK_URL,
+    'json'
+  )
+end
+
+desc "Test all our CampaignMonitor webhooks"
+task :test =&gt; :environment do
+  list = campaign_monitor_list
+  list.webhooks.each do |hook|
+    list.test_webhook(hook[:WebhookID])
+  end
+end
+
+desc "Uninstall all our CampaignMonitor webhooks"
+task :clear =&gt; :environment do
+  list = campaign_monitor_list
+  list.webhooks.each do |hook|
+    list.delete_webhook(hook[:WebhookID])
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>With this saved as <code>campaign_monitor.rake</code> and loaded by rake, you will now have the following tasks you can integrate into your deployment system:</p>
+
+<p><code>bash
+% rake -T campaign_monitor:webhooks
+rake campaign_monitor:webhooks:clear   # Uninstall all our CampaignMonitor webhooks
+rake campaign_monitor:webhooks:create  # Register all our CampaignMonitor webhooks
+rake campaign_monitor:webhooks:list    # List all the CampaignMonitor webhooks
+rake campaign_monitor:webhooks:test    # Test all our CampaignMonitor webhooks
+</code></p>
+]]></content>
+  </entry>
+  
+</feed>

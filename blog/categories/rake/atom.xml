@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rake | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/rake/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Easy Papertrail Deployment Using Rake]]></title>
+    <link href="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
+    <updated>2013-11-08T06:37:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
+    <content type="html"><![CDATA[<p><a href="http://papertrailapp.com/">Papertrail</a> is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, across numerous hosts. Having all your logs in one place, live tail-able, searchable, and archived is key to debugging such systems in production.</p>
+
+<p>There are a few ways to set it up, as documented on their quick start page, such as a system-wide installation via <a href="http://community.opscode.com/cookbooks/papertrail-rsyslog">Chef</a>, or configuring your app to use the syslog protocol. They also provide a convenient Ruby gem called <a href="http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-text-log-files-in-unix">remote_syslog</a> that can be configured to read a configured set of log files and send them to Papertrail.</p>
+
+<p>I've found for simple Ruby project structures, it can often be easier to deploy Papertrail by installing this gem with Bundler via your project Gemfile, and then creating a simple set of Rake tasks to manage starting and stopping the service. This way it's self-contained within your application repository, gets deployed with the same mechanism you deploy your application code, and can be used on your development and staging systems just as easily, without any Chef cookbooks or other configuration hassle.</p>
+
+<!-- MORE -->
+
+
+<h2>Rake-based Deployment</h2>
+
+<p>I typically build most of my production deployment with modular Rake tasks. This way your Capistrano/OpsWorks/Chef/whatever deployment tools can invoke Rake tasks -- and you can use these same tasks manually on production and development systems alike.</p>
+
+<p>I have a <code>papertrail.rake</code> in my <a href="https://github.com/scottwb/rake-tasks">rake-tasks repository on GitHub</a> that demonstrates how I use this. The contents are shown below, but the rest of the repository demonstrates the other required ingredients, such as a the papertrail config file. With this file in your <code>tasks</code> directory, and the <code>remote_syslog</code> gem in your <code>Gemfile</code>, you now have access to three simple tasks:</p>
+
+<p><code>bash
+$ rake -T papertrail
+(in /Users/scottwb/src/rake-tasks)
+rake papertrail:start   # Start papertrail remote_syslog daemon.
+rake papertrail:status  # Show status of papertrail remote_syslog daemon.
+rake papertrail:stop    # Stop papertrail remote_syslog daemon.
+</code></p>
+
+<p>You can now manually start logging to Papertrail with <code>rake papertrail:start</code>...or you can hook up the start/stop tasks to your automated deployment tools.</p>
+
+<p>Here are the contents of the main rakefile for this. See the <a href="https://github.com/scottwb/rake-tasks">rake-tasks repository</a> for example config file, Gemfile, and directory structure.</p>
+
+<h2>The papertrail.rake File</h2>
+
+<p>``` ruby
+PAPERTRAIL_CONFIG = File.expand_path("../../config/remote_syslog.yml", <strong>FILE</strong>)
+PAPERTRAIL_PID    = File.expand_path("../../tmp/pids/remote_syslog.pid", <strong>FILE</strong>)</p>
+
+<p>namespace :papertrail do</p>
+
+<p>  def papertrail_is_running?</p>
+
+<pre><code>File.exists?(PAPERTRAIL_PID) &amp;&amp; system("ps x | grep `cat #{PAPERTRAIL_PID}` 2&gt;&amp;1 &gt; /dev/null")
+</code></pre>
+
+<p>  end</p>
+
+<p>  desc "Start papertrail remote_syslog daemon."
+  task :start => :stop do</p>
+
+<pre><code>if papertrail_is_running?
+  puts "Papertrail is already running."
+else
+  sh "remote_syslog -c #{PAPERTRAIL_CONFIG} --pid-file #{PAPERTRAIL_PID}"
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  desc "Stop papertrail remote_syslog daemon."
+  task :stop do</p>
+
+<pre><code>if File.exists? PAPERTRAIL_PID
+  sh "kill `cat #{PAPERTRAIL_PID}`"
+  rm_f PAPERTRAIL_PID
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  desc "Show status of papertrail remote_syslog daemon."
+  task :status do</p>
+
+<pre><code>if papertrail_is_running?
+  puts "Papertrail remote_syslog is running"
+else
+  puts "Papertrail remote_syslog is stopped"
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Compile A Single CoffeeScript File From Your Rails Project]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project/"/>
+    <updated>2012-06-30T20:56:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project</id>
+    <content type="html"><![CDATA[<p>Using Rails 3.2 (or 3.1 for that matter), you typically have CoffeeScript (and a javascript engine like therubyracer/V8) installed as gems - probably via Bundler from your Gemfile, possibly in a per-project RVM gemset.</p>
+
+<p>It doesn't seem that this type of setup includes direct access to the <code>coffee</code> command-line compiler. Instead the <code>coffee-script</code> gem uses calls directly to the compiler. Sometimes I'd just like to compile one of the CoffeeScript files in my Rails app just to look at the javascript, or maybe to export it somewhere that I'm not using CoffeeScript.</p>
+
+<p>To do this, I've made a simple Rake task. Just drop this into <code>lib/tasks/coffee.rake</code> in your Rails project:</p>
+
+<p>``` ruby coffee.rake https://gist.github.com/3026787 View Gist
+namespace :coffee do
+  task :compile, :filename do |t, args|</p>
+
+<pre><code>filename = args.filename
+puts CoffeeScript.compile(File.open(filename))
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Then, you can compile a single file from like this:</p>
+
+<p><code>bash
+$ rake coffee:compile[app/assets/javascripts/mystuff.js.coffee]
+</code></p>
+
+<p>This will output it to stdout so you can redirect that to a file, or the <code>gist</code> command, or whatever.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Middleman Deployment Rakefile]]></title>
+    <link href="http://scottwb.github.com/blog/2012/02/24/middleman-deployment-rakefile/"/>
+    <updated>2012-02-24T09:30:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/02/24/middleman-deployment-rakefile</id>
+    <content type="html"><![CDATA[<p>I started tinkering with <a href="http://middlemanapp.com/">Middleman</a> the other day to build a small static website.</p>
+
+<p>In the past, I've used <a href="http://staticmatic.rubyforge.org/">StaticMatic</a>, <a href="http://jekyllrb.com/">Jekyll</a>, or <a href="http://octopress.org/">Octopress</a> for this sort of thing. Jekyll and Octopress are great for blogs. StaticMatic is great for prototyping a static site with Haml and Sass that you can easily migrate to your Rails app.</p>
+
+<p><span class='pullquote-right' data-pullquote='any custom middleware you add to the stack gets invoked for all the pages it generates.'>
+I've been using Middleman for less than 24 hours at this point, but so far it seems great. One of the things I like about it is that it's actually serving your site dynamically with Sinatra, and comes out of the box with Haml, Sass, Compass, view helpers, lorem ipsum generators, CSS and Javascript minification, and more. Plus, you can throw in any other Rack middleware you like, for example, the Google Analytics middleware. While you're developing the site, you run the preview server and your changes are immediately visible without restarting it. The cool part is that when you deploy, it actually generates all the static pages by executing the Rack server and running requests through it. This means any custom middleware you add to the stack gets invoked for all the pages it generates.
+</span></p>
+
+<p>Middleman imposes very little structure. This is refreshing if you're just making a one- or two-page site. It lets you get started right away and build whatever organization you want for yourself. It doesn't tell you how to deploy your site. That's I'm here to do. :)</p>
+
+<p>I took a little inspiration from Octopress's Rakefile and put together a simple Rakefile for use with Middleman that helps you deploy your static site via rsync. It also adds a few little wrapper tasks for things like remembering to add the <code>--clean</code> flag, and an Octopress-like <code>rake gen_deploy</code> task that regenerates and deploys in one step.</p>
+
+<p><code>bash
+$ rake -T
+rake build       # Build the website from source
+rake deploy      # Deploy website via rsync
+rake gen_deploy  # Build and deploy website
+rake preview     # Run the preview server at http://localhost:4567
+</code></p>
+
+<p>Simply drop this Rakefile into the root of your Middleman project and edit the SSH variables at the top.</p>
+
+<p>``` ruby Rakefile https://gist.github.com/1902178 View Gist
+SSH_USER = 'root'
+SSH_HOST = 'www.example.com'
+SSH_DIR  = '/var/www/html/www.example.com'</p>
+
+<p>desc "Build the website from source"
+task :build do
+  puts "## Building website"
+  status = system("middleman build --clean")
+  puts status ? "OK" : "FAILED"
+end</p>
+
+<p>desc "Run the preview server at http://localhost:4567"
+task :preview do
+  system("middleman server")
+end</p>
+
+<p>desc "Deploy website via rsync"
+task :deploy do
+  puts "## Deploying website via rsync to #{SSH_HOST}"
+  status = system("rsync -avze 'ssh' --delete build/ #{SSH_USER}@#{SSH_HOST}:#{SSH_DIR}")
+  puts status ? "OK" : "FAILED"
+end</p>
+
+<p>desc "Build and deploy website"
+task :gen_deploy => [:build, :deploy] do
+end
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

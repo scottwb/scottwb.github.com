@@ -1,0 +1,547 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Using NewRelic With Custom Ruby Worker Daemons - Scott W. Bradley</title>
+  <meta name="author" content="Scott W. Bradley">
+
+  
+  <meta name="description" content="The NewRelic Ruby Agent comes with great support for Rails, Sinatra, and other frameworks and web servers out of the box. It also supports background &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons">
+
+  
+  <link href="/favicon.png" rel="icon">
+
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Scott W. Bradley" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-28351625-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Scott W. Bradley</a></h1>
+  
+    <h2>in which scottwb thinks out loud</h2>
+  
+  <a href="http://github.com/scottwb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/camo.github.com/abad93f42020b733148435e2cd92ce15c542d320/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub"></a>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:scottwb.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/profile">Profile</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Using NewRelic With Custom Ruby Worker Daemons</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-23T07:48:00-07:00" pubdate data-updated="true">May 23<span>rd</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>The NewRelic Ruby Agent comes with great support for Rails, Sinatra, and other frameworks and web servers out of the box. It also supports background jobs for frameworks like DelayedJob and Resque.</p>
+
+<p>But what if you have your own custom background worker mechanism?</p>
+
+<p>It&#8217;s fairly simple to get NewRelic working to report your custom background workers, but finding the right combination of setup calls in their docs can be a little tricky. The biggest issue is dealing with background tasks that daemonize and fork child worker processes. This is because the NewRelic agent needs to do unique instrumenting, monitoring, and reporting per process. Setting it up that way can be tricky if you&#8217;re using Bundler or another mechanism to load the <code>newrelic_rpm</code> gem <em>before</em> the child processes are forked.</p>
+
+<!-- MORE -->
+
+
+<p>Assuming you are already familiar with the mechanics of Ruby-based daemon processes, here are the key ingredients you need to integrate the NewRelic Ruby Agent:</p>
+
+<ol>
+<li>Store your <code>newrelic.yml</code> config file somewhere and make a place for its log file to be written.</li>
+<li>Setup the environment variables <code>RUBY_ENV</code>, <code>NRCONFIG</code>, and <code>NEW_RELIC_LOG</code> to take the place of <code>RAILS_ENV</code> and default config and log paths you may be used to in Rails.</li>
+<li>Require the <code>newrelic_rpm</code> gem or add it to your <code>Gemfile</code> and require it via Bundler.</li>
+<li>Add instrumentation to your main job class with <code>include ::NewRelic::Agent::Instrumentation::ControllerInstrumentation</code></li>
+<li>Add a tracer to your main job execution method, e.g.: <code>add_transation_tracer :execute, :category =&gt; :task</code>, in your main job class.</li>
+<li>Before you daemonize and fork child processes, make sure to call <code>::NewRelic::Agent.manual_start</code>.</li>
+<li>In the child process, right after it&#8217;s been forked, make sure to call <code>::NewRelic::Agent.after_fork(:force_reconnection =&gt; true)</code>.</li>
+</ol>
+
+
+<p>This will now make sure that the NewRelic Agent is started correctly for each child process and will report metrics on the <code>execute</code> method of your job class.</p>
+
+<h2>Example</h2>
+
+<p>While it&#8217;s not my intention to go into detail on how to build out a daemonized forking worker mechanism, below is a very simple worker script that demonstrates all of these pieces together. It assumes the use of Bundler and a directory structure like this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>project_dir
+</span><span class='line'>  |
+</span><span class='line'>  +--Gemfile
+</span><span class='line'>  |
+</span><span class='line'>  +--worker.rb
+</span><span class='line'>  |
+</span><span class='line'>  +--config
+</span><span class='line'>  |    |
+</span><span class='line'>  |    +--newrelic.yml
+</span><span class='line'>  |
+</span><span class='line'>  +--log
+</span><span class='line'>       |
+</span><span class='line'>       +--newrelic_agent.log</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This example <code>worker.rb</code> script forks 4 worker daemon processes, each of which will report timing metrics to NewRelic for the jobs it runs. Note the comments correlating to the bullet points above.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#!/usr/bin/env ruby</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># STEP 2:</span>
+</span><span class='line'><span class="c1">#</span>
+</span><span class='line'><span class="c1"># Setup NewRelic environment before NewRelic gets loaded by Bundler. This</span>
+</span><span class='line'><span class="c1"># is necessary because we don&#39;t have the luxury of relying on the NewRelic</span>
+</span><span class='line'><span class="c1"># defaults that are geared towards Rails.</span>
+</span><span class='line'><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;RUBY_ENV&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="s1">&#39;production&#39;</span>
+</span><span class='line'><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;NRCONFIG&#39;</span><span class="o">]</span> <span class="o">||=</span> <span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="s1">&#39;../config/newrelic.yml&#39;</span><span class="p">,</span> <span class="bp">__FILE__</span><span class="p">)</span>
+</span><span class='line'><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;NEW_RELIC_LOG&#39;</span><span class="o">]</span> <span class="o">||=</span> <span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="s1">&#39;../log/newrelic_agent.log&#39;</span><span class="p">,</span> <span class="bp">__FILE__</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># STEP 3:</span>
+</span><span class='line'><span class="c1">#</span>
+</span><span class='line'><span class="c1"># Setup Bundler and use it to require all the gems from Gemfile, including</span>
+</span><span class='line'><span class="c1"># the `newrelic_rpm` gem.</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
+</span><span class='line'><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;BUNDLE_GEMFILE&#39;</span><span class="o">]</span> <span class="o">||=</span> <span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="s1">&#39;../../Gemfile&#39;</span><span class="p">,</span> <span class="bp">__FILE__</span><span class="p">)</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;bundler/setup&#39;</span> <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;BUNDLE_GEMFILE&#39;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="n">defined?</span><span class="p">(</span><span class="no">Bundler</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">Bundler</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:default</span><span class="p">,</span> <span class="s1">&#39;production&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Job</span>
+</span><span class='line'>  <span class="c1"># STEP 4: Add instrumation to main job class.</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="o">::</span><span class="no">NewRelic</span><span class="o">::</span><span class="no">Agent</span><span class="o">::</span><span class="no">Instrumentation</span><span class="o">::</span><span class="no">ControllerInstrumentation</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">execute</span>
+</span><span class='line'>    <span class="c1"># do work</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># STEP 5: Add a tracer to the main job execution method</span>
+</span><span class='line'>  <span class="n">add_transaction_tracer</span> <span class="ss">:execute</span><span class="p">,</span> <span class="ss">:category</span> <span class="o">=&gt;</span> <span class="ss">:task</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Worker</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">num_processes</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1"># STEP 6: Set NewRelic Agent to manual start before daemonizing.</span>
+</span><span class='line'>    <span class="o">::</span><span class="no">NewRelic</span><span class="o">::</span><span class="no">Agent</span><span class="o">.</span><span class="n">manual_start</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Double fork daemonize so that forked child processes do not get SIGHUP</span>
+</span><span class='line'>    <span class="c1"># when the controlling tty dies.</span>
+</span><span class='line'>    <span class="nb">fork</span> <span class="ow">and</span> <span class="nb">exit</span>
+</span><span class='line'>    <span class="no">Process</span><span class="o">.</span><span class="n">setsid</span>
+</span><span class='line'>    <span class="nb">fork</span> <span class="ow">and</span> <span class="nb">exit</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">num_processes</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span>
+</span><span class='line'>      <span class="k">if</span> <span class="n">pid</span> <span class="o">=</span> <span class="no">Process</span><span class="o">.</span><span class="n">fork</span>
+</span><span class='line'>        <span class="no">Process</span><span class="o">.</span><span class="n">detach</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="c1"># STEP 7: Force NewRelic Agent to reconnect in forked child process.</span>
+</span><span class='line'>        <span class="o">::</span><span class="no">NewRelic</span><span class="o">::</span><span class="no">Agent</span><span class="o">.</span><span class="n">after_fork</span><span class="p">(</span><span class="ss">:force_reconnection</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kp">loop</span> <span class="p">{</span> <span class="n">next_job</span><span class="o">.</span><span class="n">execute</span> <span class="p">}</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">next_job</span>
+</span><span class='line'>    <span class="c1"># TODO: Do whatever you do to get your next Job instance to execute.</span>
+</span><span class='line'>    <span class="c1">#       Read from a queue, etc...</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Run 4 forked worker daemon processes.</span>
+</span><span class='line'><span class="no">Worker</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Scott W. Bradley</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-23T07:48:00-07:00" pubdate data-updated="true">May 23<span>rd</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/newrelic/'>newrelic</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/tools/'>tools</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/" data-via="scottwb69" data-counturl="http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/" title="Previous Post: Always-On HTTPS With Rails Behind an ELB">&laquo; Always-On HTTPS With Rails Behind an ELB</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/06/21/spicy-summer-drink/" title="next Post: Spicy Summer Drink">Spicy Summer Drink &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section class='aboutMe'>
+  <h1>About Me</h1>
+  <img class="left" src="/favicon.png" width="75" height="75">
+  <p>Husband. Father. Techie. Founder and Principal Engineer at <a href="http://facetdigital.com/">Facet Digital, LLC</a>. Fitness and health enthusiast. Seattle Sounders FC fan. All opinions are mine alone. All trademarks are property of their respective owners.</p>
+</section>
+<section>
+  <h1>Latest Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating The Infamous Mechanize "Too Many Connection Resets" Bug</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Easy Papertrail Deployment Using Rake</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("scottwb69", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/scottwb69" class="twitter-follow-button" data-show-count="true">Follow @scottwb69</a>
+  
+</section>
+
+
+<section>
+  <h1>Latest Code</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/scottwb">@scottwb</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        var blacklist = [];
+        
+          
+            blacklist.push('scottwb.github.com');
+          
+            blacklist.push('haml-block-bug');
+          
+        
+
+        github.showRepos({
+            user: 'scottwb',
+            count: 5,
+            skip_forks: true,
+            blacklist: blacklist,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106700002337561490782?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class='shelfari'>
+  <h1>Latest Books</h1>
+  <div id="ShelfariWidget203753"><a href='http://www.shelfari.com/'>Shelfari: Book reviews on your book blog</a><script src="http://www.shelfari.com/ws/203753/widget.js?r=41860" type="text/javascript" language="javascript"></script></div>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Scott W. Bradley -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'scottwb';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/';
+        var disqus_url = 'http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

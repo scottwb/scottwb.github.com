@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: distributed systems | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/distributed-systems/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Optimistic Locking With Couchbase and Ruby]]></title>
+    <link href="http://scottwb.github.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/"/>
+    <updated>2013-11-11T10:35:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby</id>
+    <content type="html"><![CDATA[<p>Concurrent modification of shared data can be a problem in any distributed system regardless of what data store you are using. With ACID-compliant relational databases, a common tactic is to use pessimistic locking at the table or row level. Most NoSQL data stores do not have a pessimistic lock operation, and even when they do, it is often considered a performance hazard. So, most applications do not lock objects before writing them to a NoSQL datastore (or they use an external lock of some sort). This can quickly become a problem when you have a distributed system with write contention, as shown in the figure below:</p>
+
+<p><img class="center" src="/images/posts/2013-11-11-optimistic-locking-with-couchbase-and-ruby/wrong.png"></p>
+
+<p>One of the nice features of Couchbase is its "CAS" operation. This provides the ability to do an atomic check-and-set operation. You can set the value of a key, providing the last known version identifier (called a "CAS value"). The write will succeed if the document has not been modified since you read it, or it will fail if it has been modified and now has a different CAS value.</p>
+
+<p>Using this operation, we can easily build a higher-level operation to provide <a href="http://en.wikipedia.org/wiki/Optimistic_concurrency_control">optimistic locking</a> on our documents, using a CAS retry loop. The idea is simple: get the latest version of the document, apply your update(s), and write it back to Couchbase. If there are no conflicts, then all is well, and you can move on. If there is a conflict, you <em>re-get</em> the latest version of the document, <em>fully reapply</em> your modifications, and try again to write the document back to Couchbase. Repeat until the write succeeds.</p>
+
+<!-- MORE -->
+
+
+<p>With this, the figure above would look like this:</p>
+
+<p><img class="center" src="/images/posts/2013-11-11-optimistic-locking-with-couchbase-and-ruby/right.png"></p>
+
+<p>There are a few things that are important to note about this technique.</p>
+
+<ol>
+<li>You should have no unsaved modifications to the document before doing this. They will be lost.</li>
+<li>Your modification code <em>must</em> be re-runnable and not have undesired side-effects, because it may be run an unpredictable number of times.</li>
+<li>Your modification code <em>should</em> be <a href="http://en.wikipedia.org/wiki/Commutative_property">commutative</a>, since multiple clients may be operating at the same time, and we cannot guarantee order.</li>
+<li>If your modification is not commutative, you should be comfortable that this roughly amounts to a Last Writer Wins (LWW) strategy (although that is not strictly guaranteed without a real vector clock).</li>
+</ol>
+
+
+<h2>Example Code</h2>
+
+<p>I have created a <a href="https://github.com/scottwb/couchbase-optimistic-locking">GitHub repository</a> that implements this technique by extending the Couchbase Ruby client's <code>Couchbase::Bucket</code> class on which you normally call <code>get</code> and <code>set</code> methods. You can, of course, put this elsewhere so that you don't need to monkey-patch someone else's library. Here is a look at the code:</p>
+
+<p>``` ruby
+require 'couchbase'</p>
+
+<p>module Couchbase
+  class Bucket</p>
+
+<pre><code># IMPORTANT:
+#   This method assumes that the doc you pass in is unmodified.
+#   Any unsaved changes to it will be discarded.
+#
+#   It loads a clean copy of the doc and passes it to the given
+#   block, which should apply changes to that document that can
+#   be retried from scratch multiple times until they are successful.
+#
+#   This method will return the final state of the saved doc.
+#   The caller should use this afterward, instead of the object it has
+#   passed in to the method call.
+#
+def update_with_retry(key, doc, &amp;block)
+  begin
+    doc, flags, cas = get(key, :extended =&gt; true)
+    yield doc
+    set(key, doc, :flags =&gt; flags, :cas =&gt; cas)
+  rescue Couchbase::Error::KeyExists
+    retry
+  end
+  doc
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>With this monkey-patch loaded, you can now do the following:</p>
+
+<p>``` ruby
+cb = Couchbase.connect(:bucket => 'my_bucket', :hostname => 'localhost')
+doc = cb.get('some-key')</p>
+
+<p>doc = cb.update_with_retry('some-key', doc) do |d|
+  # Modify <code>d</code> to your heart's content
+end</p>
+
+<h1>Now doc has safely been updated by the block and saved without collision.</h1>
+
+<p>```</p>
+
+<p>It is important to note that, if your changes are not commutative, like our simple increment example, the code in your modification block will probably want to be smart enough to do some kind of merge logic for conflict resolution. It must recognize that the state of the document before calling <code>update_with_retry</code> may not actually be the same state that the successful block operates on.</p>
+
+<p><a href="https://github.com/scottwb/couchbase-optimistic-locking/blob/master/spec/lib/couchbase_bucket_spec.rb">Test code for this method</a> can be seen in the GitHub repository.</p>
+
+<p><strong>Also note:</strong> My colleague <a href="http://www.linkedin.com/in/jgroh9/">Jeremy Groh</a> has a similar post with sample code for doing <a href="http://www.ramsmusings.com/2013/06/11/optimistic-locking-with-couchbase/">optimistic locking on Couchbase using C#</a>.</p>
+
+<p><em><strong>UPDATED Nov. 15, 2013:</strong> As <a href="https://twitter.com/avsej">Sergey Avseyev</a> pointed out, there is a very similar method <code>Couchbase::Bucket#cas</code> that already exists in the couchbase-ruby-client. The only thing it doesn't do that I described above, is the retry upon collision. At his suggestion, I've <a href="https://github.com/couchbase/couchbase-ruby-client/commit/4c9b6761d6afb1320a852a58104678335dcb7909">extended that method</a> to take a <code>retry</code> option. This is probably a better solution anyway, since it handles both synchronous and asynchronous modes. Look for it in an upcoming release of the couchbase-ruby-client gem.</em></p>
+]]></content>
+  </entry>
+  
+</feed>

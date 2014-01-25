@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: hacks | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/hacks/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Defeating The Infamous CHEF-3694 Warning]]></title>
+    <link href="http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/"/>
+    <updated>2014-01-24T19:47:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning</id>
+    <content type="html"><![CDATA[<p><em><strong>TL;DR:</strong> I hate the CHEF-3694 warning, so I made a <a href="https://github.com/facetdigital/chef_resource_merging">cookbook</a> to get rid of it. YMMV.</em></p>
+
+<p>Resource cloning in Chef is a bit of a minefield. They have a ticket known as <a href="https://tickets.opscode.com/browse/CHEF-3694">CHEF-3694</a> saying that the feature should be removed, and indicating that it will be by the time Chef 12.0.0 comes out. However, a lot of their Opscode-developed community cookbooks use (abuse?) resource cloning. The result is that you get tons of warnings about resource cloning that look like this:</p>
+
+<p><code>
+[2014-01-24T16:15:55+00:00] WARN: Cloning resource attributes for package[perl] from prior resource (CHEF-3694)
+[2014-01-24T16:15:55+00:00] WARN: Previous package[perl]: /tmp/vagrant-chef-1/chef-solo-1/cookbooks/perl/recipes/default.rb:26:in `block in from_file'
+[2014-01-24T16:15:55+00:00] WARN: Current  package[perl]: /tmp/vagrant-chef-1/chef-solo-1/cookbooks/iptables/recipes/default.rb:21:in `from_file'
+</code></p>
+
+<p>Where I come from, it's considered an error to have a warning in your output. Ignorable warnings bury important ones. So...for better or worse, I embarked upon a journey to see what I could do to use resources correctly and avoid these warnings...</p>
+
+<!-- MORE -->
+
+
+<h2>What is resource cloning and why are you warning me about it?</h2>
+
+<p>The <a href="https://tickets.opscode.com/browse/CHEF-3694">discussion</a> about this this issue is an interesting read. You should be able to, for example, declare a service resource in one spot of your recipe, and later start it. You should also be able to have multiple recipes be able to install the same package resource and have it be idempotent, without having to worry about coordinating between cookbooks. That's Chef's job. To support this, Chef uses a technique they call <em>resource cloning</em>, which spews out warning messages because they plan to get rid of it. Proponents of the warning messages argue that if your cookbook relies on resource cloning, then you are doing something incorrectly and you have bigger problems. However, there are popular community cookbooks that won't work without it.</p>
+
+<p>Here's an example of stock <code>perl</code> and <code>iptables</code> cookbooks causing this problem:</p>
+
+<p><a href="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"><img class="center" src="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"></a></p>
+
+<p>I really wouldn't want <code>perl</code> and <code>iptables</code> to have to coordinate between each other in order to avoid this warning. Perhaps there is a way to re-order them? Not that I could figure out...at least not without either making dangerous assumptions or editing stock community cookbook code.</p>
+
+<p>Even so...there are cookbooks that have this problem by themselves without the help of other cookbooks. For example, one of the most popular cookbooks, <code>apache2</code>:</p>
+
+<p><a href="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"><img class="center" src="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"></a></p>
+
+<h2>Can we just remove resource cloning?</h2>
+
+<p>Since it was well-argued that cookbooks shouldn't rely on resource cloning, and that it would be removed in a future version of Chef, I decided to replace it myself with resource <em>duplication</em>. Resource cloning and its associated warning messages are handled in a method called <code>Chef::Resource::load_prior_resources</code>, so I just monkey-patched out that method to allow the duplicate resource without copying over any of the existing resources's attributes, using a bit of code like this:</p>
+
+<p>``` ruby
+class Chef
+  class Resource</p>
+
+<pre><code>def load_prior_resource
+  Chef::Log.warn("I AIN'T CLONING #{self.to_s}!!!")
+  true
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>NOPE! That doesn't work. While this works for some of my cookbooks and certain resources, the community <code>apache2</code> recipes clearly rely on the soon-to-be-deprecated resource cloning behavior. These recipes define the <code>service[apache2]</code> resource a number of times to do things like enable/start/restart after config changes. Without resource cloning, the <code>apache2::logrotate</code> recipe, for example, fails to process a restart of the apache2 service because it <em>didn't</em> inherit the necessary attributes that needed to be cloned from the original service definition, giving errors like this:</p>
+
+<h1>```</h1>
+
+<h1>Error executing action <code>restart</code> on resource 'service[apache2]'</h1>
+
+<h2>Chef::Exceptions::Service</h2>
+
+<p>service[apache2]: unable to locate the init.d script!</p>
+
+<h2>Resource Declaration:</h2>
+
+<h1>In /tmp/vagrant-chef-1/chef-solo-1/cookbooks/apache2/recipes/logrotate.rb</h1>
+
+<p> 20: apache_service = service 'apache2' do
+ 21:   action :nothing
+ 22: end
+ 23:</p>
+
+<h2>Compiled Resource:</h2>
+
+<h1>Declared in /tmp/vagrant-chef-1/chef-solo-1/cookbooks/apache2/recipes/logrotate.rb:20:in `from_file'</h1>
+
+<p>service("apache2") do
+  action [:nothing]
+  supports {:restart=>false, :reload=>false, :status=>true}
+  retries 0
+  retry_delay 2
+  service_name "apache2"
+  pattern "apache2"
+  startup_type :automatic
+  cookbook_name :apache2
+  recipe_name "logrotate"
+end
+```</p>
+
+<h2>Then how about reusing the existing resource?</h2>
+
+<p>I think resource reuse is probably the intention in 99% of the use cases. Some commenters on this discussion have suggested making all their recipes look up the resource in the <em>resources collection</em> first, and using the existing one if possible, otherwise handling the not-found exception and creating the new resource. Not a bad suggestion...but there's no way I'm going to modify every community cookbook to do that.</p>
+
+<p>As an experiment, I tried simply overriding the <code>service</code> DSL method (which is actually implemented in <code>method_missing</code>) to test this theory, with some monkey-patching like this:</p>
+
+<p>``` ruby
+class Chef
+  module DSL</p>
+
+<pre><code>module Recipe
+  def service(svc, &amp;block)
+    s = run_context.resource_collection.find("service[#{svc}]")
+    s.instance_eval(&amp;block) if block
+    s
+  rescue Chef::Exceptions::ResourceNotFound =&gt; e
+    method_missing("service", svc, &amp;block)
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>That's close, but it doesn't quite work. The most noticeable failure with this is that only the last <code>action</code> will be run. So for example, say you have something like this:</p>
+
+<p>``` ruby
+service "apache2" do
+  action :enable
+end</p>
+
+<h1>...some other stuff...</h1>
+
+<p>service "apache2" do
+  action :start
+end
+```</p>
+
+<p>Normally, this creates two <code>service[apache2]</code> resources, each copying its configuration from the previous definition, and <em>overriding</em> the action(s). When executed, you'd end up with both actions being executed (but with a bunch of warnings that you're using the dreaded resource cloning).</p>
+
+<p>With the reuse technique above, the problem is that, in this simple example, the <code>action: start</code> <em>overwrites</em> the <code>action: enable</code>. In the end, you have your service started...but <code>chkconfig</code> shows that it was never enabled. This can obviously be much worse in more complex scenarios.</p>
+
+<h2>The Workaround: resource merging</h2>
+
+<p>My workaround for this takes advantage of internal knowledge of how the <code>action</code> DSL method works...and it only applies to that one method. We're in dark magic territory, so I am sure this could potentially break somebody's cookbooks.</p>
+
+<p>Building on the resource reuse attempt above, I made it so that instead of letting the <code>action</code> of a resource stomp over the pre-existing resource's action, it would <em>merge</em> the actions together. In the over-simplified version, this looks like replacing the single <code>instance_eval</code> line from above with code like this:</p>
+
+<p><code>ruby
+combined_actions = s.action
+if block
+  s.instance_eval(&amp;block)
+  combined_actions += s.action
+end
+s.action combined_actions
+</code></p>
+
+<h2>Putting it together</h2>
+
+<p>There are a few details I glossed over, such as managing the <code>:nothing</code> action, different default actions for different types of resources, actions that are Arrays vs Symbols, etc. My final solution was to extend <code>Chef::DSL::Recipe</code> with a <code>reusable_resource</code> method that could be used by specific resource DSL overrides as much or as little as you want. Here's what that looks like:</p>
+
+<p>``` ruby
+class Chef
+  module DSL</p>
+
+<pre><code>module Recipe
+  def reusable_resource(
+    resource_type,
+    resource_name,
+    default_action,
+    &amp;block
+  )
+    resource_str = "#{resource_type}[#{resource_name}]"
+    existing_resource = run_context.resource_collection.find(resource_str)
+    actions_before = existing_resource.action
+    actions_before = [actions_before] unless actions_before.is_a? Array
+    if block
+      existing_resource.instance_eval(&amp;block)
+      actions_after = existing_resource.action
+    else
+      actions_after = []
+    end
+    if actions_after.nil? || actions_after.empty?
+      actions_after = [default_action]
+    end
+    combined_actions = actions_before + actions_after
+    combined_actions.delete(:nothing) if combined_actions.count &gt; 1
+    existing_resource.action combined_actions
+    existing_resource
+  rescue Chef::Exceptions::ResourceNotFound =&gt; e
+    method_missing(resource_type, resource_name, &amp;block)
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>With that, if you only wanted to override the default behavior for <code>package</code> and <code>service</code> resources, you could monkey-patch those in like this:</p>
+
+<p>``` ruby
+class Chef
+  module DSL</p>
+
+<pre><code>module Recipe
+  def reusable_resource
+    # Omitted for brevity
+  end
+
+  def package(pkg, &amp;block)
+    reusable_resource("package", pkg, :install, &amp;block)
+  end
+
+  def service(svc, &amp;block)
+    reusable_resource("service", svc, :nothing, &amp;block)
+  end
+
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Now all those warnings are gone. My complete initial install works great without complaint. So do my subsequent re-runs.</p>
+
+<p>I've packaged this all up as a cookbook that has nothing but a library applying these monkey-patches. You can <a href="https://github.com/facetdigital/chef_resource_merging">grab it from GitHub</a> and put it at the front of your run_list with <code>recipe[chef_resource_merging]</code>.</p>
+
+<h2>Limitations</h2>
+
+<p>This technique will probably fail in scenarios where you want to have multiple resources with the same name that have differing attributes other than <code>action</code>. For example, two different <code>bash</code> resources in two different places, with two different <code>command</code> scripts, with the same name. Either resource cloning or resource duplication would work...but resource merging the way I've implemented it is going to crash and burn. Of course you can simply name these resources differently, but given that resources share a global namespace, there's always a risk unless you make sure to prefix your resource names with something uniquely yours.</p>
+
+<p>This is why I factored this technique into a <code>reusable_resource</code> DSL method. You can use it directly in custom cookbooks if you want. You can override specific types of resources as I have shown in the example, only touching <code>package</code> and <code>service</code>. Or, you can override those with additional logic to only do in in narrower cases (e.g., only if there is no block given). That's up to you. Your Mileage May Vary.</p>
+
+<h2>Discussion</h2>
+
+<p>I welcome any and all discussion on this. Especially from someone who knows the internals of Chef much more deeply than I do, who can tell me if I'm getting myself into too much trouble here.</p>
+
+<p>I'm hoping that some day there is a proper mechanism for resource reuse, when that is what is intended, or perhaps some way to detect if two resources internals are the same and make a smart decision about whether to reuse or duplicate. Maybe a real resource merging solution could happen, where the entire blocks are chained and executed? Or perhaps we'll see some resource namespace solution (though that would not have solved any of the issues I've had).</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Defeating The Infamous Mechanize "Too Many Connection Resets" Bug]]></title>
+    <link href="http://scottwb.github.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/"/>
+    <updated>2013-11-09T07:56:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug</id>
+    <content type="html"><![CDATA[<p>Have you ever seen this nasty, obnoxious error when using the Mechanize gem to write a screen scraper in Ruby?</p>
+
+<p><code>
+Net::HTTP::Persistent::Error: too many connection resets (due to Connection reset by peer - Errno::ECONNRESET) after 2 requests on 14759220
+</code></p>
+
+<p>This has plagued Mechanize users for years, and it's never been properly fixed. There are a lot of voodoo suggestions and incantations rumored to address this, but none of them seem to really work. You can read all about it on <a href="https://github.com/sparklemotion/mechanize/issues/123">Mechanize Issue #123</a>.</p>
+
+<p>I believe the root cause is how the underlying Net::HTTP handles reusing persistent connections after a POST -- and there is some evidence on the aforementioned github issue that supports this theory. Based on that assumption, I crafted a solution that has been working 100% of the time for me in production for a few months now.</p>
+
+<!-- MORE -->
+
+
+<h2>The Workaround</h2>
+
+<p>This is not really a fix for Mechanize or Net::HTTP::Persistent, and there are sure to be some corner cases where you legitimately want this error to be bubbled up, but in practice, I have found that simply handling a persistent connection being reset with the "too many connection resets" error, <em>forcing the connection to be shutdown and recreated</em>, and simply trying again has worked 100% of the time in high-volume production for scrapers that suffered this problem intermittently.</p>
+
+<p>This is done by creating a wrapper for <code>Mechanize::HTTP::Agent#fetch</code>, the low level HTTP request method that is used to do GETs, PUTs, POSTs, HEADs, etc. This wrapper catches this annoying little exception, and uses the <code>shutdown</code> method to effectively create a new HTTP connection, and then tries the <code>fetch</code> again.</p>
+
+<p>Loading the following monkey-patch somewhere in your application ought to shutup this annoying error for you for most use cases:</p>
+
+<p>```ruby
+class Mechanize::HTTP::Agent
+  MAX_RESET_RETRIES = 10</p>
+
+<p>  # We need to replace the core Mechanize HTTP method:
+  #
+  #   Mechanize::HTTP::Agent#fetch
+  #
+  # with a wrapper that handles the infamous "too many connection resets"
+  # Mechanize bug that is described here:
+  #
+  #   https://github.com/sparklemotion/mechanize/issues/123
+  #
+  # The wrapper shuts down the persistent HTTP connection when it fails with
+  # this error, and simply tries again. In practice, this only ever needs to
+  # be retried once, but I am going to let it retry a few times
+  # (MAX_RESET_RETRIES), just in case.
+  #
+  def fetch_with_retry(</p>
+
+<pre><code>uri,
+method    = :get,
+headers   = {},
+params    = [],
+referer   = current_page,
+redirects = 0
+</code></pre>
+
+<p>  )</p>
+
+<pre><code>action      = "#{method.to_s.upcase} #{uri.to_s}"
+retry_count = 0
+
+begin
+  fetch_without_retry(uri, method, headers, params, referer, redirects)
+rescue Net::HTTP::Persistent::Error =&gt; e
+  # Pass on any other type of error.
+  raise unless e.message =~ /too many connection resets/
+
+  # Pass on the error if we've tried too many times.
+  if retry_count &gt;= MAX_RESET_RETRIES
+    puts "**** WARN: Mechanize retried connection reset #{MAX_RESET_RETRIES} times and never succeeded: #{action}"
+    raise
+  end
+
+  # Otherwise, shutdown the persistent HTTP connection and try again.
+  puts "**** WARN: Mechanize retrying connection reset error: #{action}"
+  retry_count += 1
+  self.http.shutdown
+  retry
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  # Alias so #fetch actually uses our new #fetch_with_retry to wrap the
+  # old one aliased as #fetch_without_retry.
+  alias_method :fetch_without_retry, :fetch
+  alias_method :fetch, :fetch_with_retry
+end
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Fix Rails Mishandling of HTTP Accept Header]]></title>
+    <link href="http://scottwb.github.com/blog/2012/02/06/fix-rails-mishandling-of-http-accept-header/"/>
+    <updated>2012-02-06T13:15:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/02/06/fix-rails-mishandling-of-http-accept-header</id>
+    <content type="html"><![CDATA[<p>There are two Rails issues in its handling of the HTTP <code>Accept</code> header
+which cause spurious <code>ActionView::MissingTemplate</code> exceptions.
+This can be annoying when you are receiving emails on these via <a href="http://airbrakeapp.com/">Airbrake</a>,
+especially given that most of these come from web spiders. I am encountering
+this on Rails 3.0.7. One of these is fixed in a later version of Rails, but
+for other reasons I can't upgrade right now. The other bug is still present in
+Rails 3.2 and in master at the time of this writing.</p>
+
+<p>I have worked up a gist with monkey-patches that fix both issues:</p>
+
+<p><a href="https://gist.github.com/1754727">https://gist.github.com/1754727</a></p>
+
+<p>Read on to learn more about these issues and how my patches work...</p>
+
+<!-- MORE -->
+
+
+<h2>Rails Issue #736</h2>
+
+<p><a href="https://github.com/rails/rails/issues/736">Issue #736</a> is that Rails does not correctly parse a q-value in an Accept header when there is only one content-type specified. For example:</p>
+
+<pre><code>Accept: text/html;q=0.9
+</code></pre>
+
+<p>Will likely cause a <code>MissingTemplate</code> exception because the request will not properly set <code>formats=[:html]</code>. <strong><em>This bug has existed since at least Rails 2.3, and still exists in Rails 3.2 and in master as of this writing.</em></strong></p>
+
+<h2>Rails Issue #860</h2>
+
+<p><a href="https://github.com/rails/rails/issues/860">Issue #860</a> is that Rails does not properly parse wildcard content-types such as <code>text/*</code>, <code>application/*</code>, and <code>image/*</code>. For example:</p>
+
+<pre><code>Accept: text/*
+</code></pre>
+
+<p>will likely cause a <code>MissingTemplate</code> exception because the request will not properly set <code>formats[:html,:text,:js,:css,:ics,:csv,:xml,:yaml:json]</code>. <strong><em>This bug was fixed sometime later than Rails 3.0.7.</em></strong> That fix, however, only solved the cases for <code>text/*</code> and <code>application/*</code>. The monkey-patch for this is largely based off of their solution, but also includes a fix for <code>image/*</code>.</p>
+
+<h2>Testing This Patch</h2>
+
+<p><a href="https://gist.github.com/1754727">The gist</a> includes a file named <code>mime_type_spec.rb</code>, which is an RSpec example that you can drop into your rspec directory somewhere and run with the rest of your tests. It tests for both issues. Try it before dropping in the other files and see the failure. Then, add in the other files and see the tests pass.</p>
+
+<p>When you change to a different version of Rails, the patches will be disabled, and the tests may fail. If they do, edit the patches to change the Rails version they are constrained to, and see if the tests pass. If not, you may need to do more investigation as the internals of Rails may have changed. On the other hand, if you upgrade to a new version of Rails and the tests still pass, then this means the bugs have been fixed in your version of Rails and you can delete these patches.</p>
+
+<h2>Applying This Patch</h2>
+
+<p><a href="https://gist.github.com/1754727">The gist</a> contains files named <code>rails_issue_736.rb</code> and <code>rails_issue_860.rb</code>. These are the monkey-patches for these two issues, respectively. Place them somewhere in your Rails project where they will be loaded. I put them in <code>config/initializers</code>, but you should be able to put them anywhere that will get them loaded in your project.</p>
+
+<p>You can take one or both files at your discretion.</p>
+
+<p>You'll notice at the top of each of these is a test against the version of Rails you are running, that looks like:</p>
+
+<p><code>ruby
+if Rails.version == "3.0.7"
+</code></p>
+
+<p>You will want to edit this to be equal to your version of Rails. This makes it so that the monkey-patch gets applied, but only for your current version of Rails. This way, when you upgrade Rails, the patch is disabled. Then, if your tests no longer fail, you know Rails has fixed it and you can delete this monkey-patch. Otherwise, you can go back and edit that version number again and see if it makes the tests pass again.</p>
+
+<h2>The Future</h2>
+
+<p>In my opinion, some simple refactoring of <code>Mime::Types.parse</code> would eliminate the maintenance hazard that causes these issues. Currently there are two blocks of code in this method: one that handles a single content-type, and one that handles a list of multiple content-types. This should really just treat the single case as a list of one content-type. This way, fixes made to one don't have to be applied to the other -- which is likely the main cause of these problems. Both these issues are non-issues in the multiple content-type case, but are not addressed in the single content-type case.</p>
+
+<p>I'll probably work up a pull request to address this, so hopefully these will be fixed in the mainline Rails someday.</p>
+
+<p><em><strong>UPDATED Feb 7, 2012:</strong> I submitted a <a href="https://github.com/rails/rails/pull/4918">pull request</a> yesterday to fix this correctly in Edge Rails, and it has now been merged into <code>master</code>.</em></p>
+]]></content>
+  </entry>
+  
+</feed>

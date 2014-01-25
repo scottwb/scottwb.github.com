@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: chef | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/chef/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Defeating The Infamous CHEF-3694 Warning]]></title>
+    <link href="http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/"/>
+    <updated>2014-01-24T19:47:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning</id>
+    <content type="html"><![CDATA[<p><em><strong>TL;DR:</strong> I hate the CHEF-3694 warning, so I made a <a href="https://github.com/facetdigital/chef_resource_merging">cookbook</a> to get rid of it. YMMV.</em></p>
+
+<p>Resource cloning in Chef is a bit of a minefield. They have a ticket known as <a href="https://tickets.opscode.com/browse/CHEF-3694">CHEF-3694</a> saying that the feature should be removed, and indicating that it will be by the time Chef 12.0.0 comes out. However, a lot of their Opscode-developed community cookbooks use (abuse?) resource cloning. The result is that you get tons of warnings about resource cloning that look like this:</p>
+
+<p><code>
+[2014-01-24T16:15:55+00:00] WARN: Cloning resource attributes for package[perl] from prior resource (CHEF-3694)
+[2014-01-24T16:15:55+00:00] WARN: Previous package[perl]: /tmp/vagrant-chef-1/chef-solo-1/cookbooks/perl/recipes/default.rb:26:in `block in from_file'
+[2014-01-24T16:15:55+00:00] WARN: Current  package[perl]: /tmp/vagrant-chef-1/chef-solo-1/cookbooks/iptables/recipes/default.rb:21:in `from_file'
+</code></p>
+
+<p>Where I come from, it's considered an error to have a warning in your output. Ignorable warnings bury important ones. So...for better or worse, I embarked upon a journey to see what I could do to use resources correctly and avoid these warnings...</p>
+
+<!-- MORE -->
+
+
+<h2>What is resource cloning and why are you warning me about it?</h2>
+
+<p>The <a href="https://tickets.opscode.com/browse/CHEF-3694">discussion</a> about this this issue is an interesting read. You should be able to, for example, declare a service resource in one spot of your recipe, and later start it. You should also be able to have multiple recipes be able to install the same package resource and have it be idempotent, without having to worry about coordinating between cookbooks. That's Chef's job. To support this, Chef uses a technique they call <em>resource cloning</em>, which spews out warning messages because they plan to get rid of it. Proponents of the warning messages argue that if your cookbook relies on resource cloning, then you are doing something incorrectly and you have bigger problems. However, there are popular community cookbooks that won't work without it.</p>
+
+<p>Here's an example of stock <code>perl</code> and <code>iptables</code> cookbooks causing this problem:</p>
+
+<p><a href="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"><img class="center" src="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"></a></p>
+
+<p>I really wouldn't want <code>perl</code> and <code>iptables</code> to have to coordinate between each other in order to avoid this warning. Perhaps there is a way to re-order them? Not that I could figure out...at least not without either making dangerous assumptions or editing stock community cookbook code.</p>
+
+<p>Even so...there are cookbooks that have this problem by themselves without the help of other cookbooks. For example, one of the most popular cookbooks, <code>apache2</code>:</p>
+
+<p><a href="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"><img class="center" src="/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"></a></p>
+
+<h2>Can we just remove resource cloning?</h2>
+
+<p>Since it was well-argued that cookbooks shouldn't rely on resource cloning, and that it would be removed in a future version of Chef, I decided to replace it myself with resource <em>duplication</em>. Resource cloning and its associated warning messages are handled in a method called <code>Chef::Resource::load_prior_resources</code>, so I just monkey-patched out that method to allow the duplicate resource without copying over any of the existing resources's attributes, using a bit of code like this:</p>
+
+<p>``` ruby
+class Chef
+  class Resource</p>
+
+<pre><code>def load_prior_resource
+  Chef::Log.warn("I AIN'T CLONING #{self.to_s}!!!")
+  true
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>NOPE! That doesn't work. While this works for some of my cookbooks and certain resources, the community <code>apache2</code> recipes clearly rely on the soon-to-be-deprecated resource cloning behavior. These recipes define the <code>service[apache2]</code> resource a number of times to do things like enable/start/restart after config changes. Without resource cloning, the <code>apache2::logrotate</code> recipe, for example, fails to process a restart of the apache2 service because it <em>didn't</em> inherit the necessary attributes that needed to be cloned from the original service definition, giving errors like this:</p>
+
+<h1>```</h1>
+
+<h1>Error executing action <code>restart</code> on resource 'service[apache2]'</h1>
+
+<h2>Chef::Exceptions::Service</h2>
+
+<p>service[apache2]: unable to locate the init.d script!</p>
+
+<h2>Resource Declaration:</h2>
+
+<h1>In /tmp/vagrant-chef-1/chef-solo-1/cookbooks/apache2/recipes/logrotate.rb</h1>
+
+<p> 20: apache_service = service 'apache2' do
+ 21:   action :nothing
+ 22: end
+ 23:</p>
+
+<h2>Compiled Resource:</h2>
+
+<h1>Declared in /tmp/vagrant-chef-1/chef-solo-1/cookbooks/apache2/recipes/logrotate.rb:20:in `from_file'</h1>
+
+<p>service("apache2") do
+  action [:nothing]
+  supports {:restart=>false, :reload=>false, :status=>true}
+  retries 0
+  retry_delay 2
+  service_name "apache2"
+  pattern "apache2"
+  startup_type :automatic
+  cookbook_name :apache2
+  recipe_name "logrotate"
+end
+```</p>
+
+<h2>Then how about reusing the existing resource?</h2>
+
+<p>I think resource reuse is probably the intention in 99% of the use cases. Some commenters on this discussion have suggested making all their recipes look up the resource in the <em>resources collection</em> first, and using the existing one if possible, otherwise handling the not-found exception and creating the new resource. Not a bad suggestion...but there's no way I'm going to modify every community cookbook to do that.</p>
+
+<p>As an experiment, I tried simply overriding the <code>service</code> DSL method (which is actually implemented in <code>method_missing</code>) to test this theory, with some monkey-patching like this:</p>
+
+<p>``` ruby
+class Chef
+  module DSL</p>
+
+<pre><code>module Recipe
+  def service(svc, &amp;block)
+    s = run_context.resource_collection.find("service[#{svc}]")
+    s.instance_eval(&amp;block) if block
+    s
+  rescue Chef::Exceptions::ResourceNotFound =&gt; e
+    method_missing("service", svc, &amp;block)
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>That's close, but it doesn't quite work. The most noticeable failure with this is that only the last <code>action</code> will be run. So for example, say you have something like this:</p>
+
+<p>``` ruby
+service "apache2" do
+  action :enable
+end</p>
+
+<h1>...some other stuff...</h1>
+
+<p>service "apache2" do
+  action :start
+end
+```</p>
+
+<p>Normally, this creates two <code>service[apache2]</code> resources, each copying its configuration from the previous definition, and <em>overriding</em> the action(s). When executed, you'd end up with both actions being executed (but with a bunch of warnings that you're using the dreaded resource cloning).</p>
+
+<p>With the reuse technique above, the problem is that, in this simple example, the <code>action: start</code> <em>overwrites</em> the <code>action: enable</code>. In the end, you have your service started...but <code>chkconfig</code> shows that it was never enabled. This can obviously be much worse in more complex scenarios.</p>
+
+<h2>The Workaround: resource merging</h2>
+
+<p>My workaround for this takes advantage of internal knowledge of how the <code>action</code> DSL method works...and it only applies to that one method. We're in dark magic territory, so I am sure this could potentially break somebody's cookbooks.</p>
+
+<p>Building on the resource reuse attempt above, I made it so that instead of letting the <code>action</code> of a resource stomp over the pre-existing resource's action, it would <em>merge</em> the actions together. In the over-simplified version, this looks like replacing the single <code>instance_eval</code> line from above with code like this:</p>
+
+<p><code>ruby
+combined_actions = s.action
+if block
+  s.instance_eval(&amp;block)
+  combined_actions += s.action
+end
+s.action combined_actions
+</code></p>
+
+<h2>Putting it together</h2>
+
+<p>There are a few details I glossed over, such as managing the <code>:nothing</code> action, different default actions for different types of resources, actions that are Arrays vs Symbols, etc. My final solution was to extend <code>Chef::DSL::Recipe</code> with a <code>reusable_resource</code> method that could be used by specific resource DSL overrides as much or as little as you want. Here's what that looks like:</p>
+
+<p>``` ruby
+class Chef
+  module DSL</p>
+
+<pre><code>module Recipe
+  def reusable_resource(
+    resource_type,
+    resource_name,
+    default_action,
+    &amp;block
+  )
+    resource_str = "#{resource_type}[#{resource_name}]"
+    existing_resource = run_context.resource_collection.find(resource_str)
+    actions_before = existing_resource.action
+    actions_before = [actions_before] unless actions_before.is_a? Array
+    if block
+      existing_resource.instance_eval(&amp;block)
+      actions_after = existing_resource.action
+    else
+      actions_after = []
+    end
+    if actions_after.nil? || actions_after.empty?
+      actions_after = [default_action]
+    end
+    combined_actions = actions_before + actions_after
+    combined_actions.delete(:nothing) if combined_actions.count &gt; 1
+    existing_resource.action combined_actions
+    existing_resource
+  rescue Chef::Exceptions::ResourceNotFound =&gt; e
+    method_missing(resource_type, resource_name, &amp;block)
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>With that, if you only wanted to override the default behavior for <code>package</code> and <code>service</code> resources, you could monkey-patch those in like this:</p>
+
+<p>``` ruby
+class Chef
+  module DSL</p>
+
+<pre><code>module Recipe
+  def reusable_resource
+    # Omitted for brevity
+  end
+
+  def package(pkg, &amp;block)
+    reusable_resource("package", pkg, :install, &amp;block)
+  end
+
+  def service(svc, &amp;block)
+    reusable_resource("service", svc, :nothing, &amp;block)
+  end
+
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Now all those warnings are gone. My complete initial install works great without complaint. So do my subsequent re-runs.</p>
+
+<p>I've packaged this all up as a cookbook that has nothing but a library applying these monkey-patches. You can <a href="https://github.com/facetdigital/chef_resource_merging">grab it from GitHub</a> and put it at the front of your run_list with <code>recipe[chef_resource_merging]</code>.</p>
+
+<h2>Limitations</h2>
+
+<p>This technique will probably fail in scenarios where you want to have multiple resources with the same name that have differing attributes other than <code>action</code>. For example, two different <code>bash</code> resources in two different places, with two different <code>command</code> scripts, with the same name. Either resource cloning or resource duplication would work...but resource merging the way I've implemented it is going to crash and burn. Of course you can simply name these resources differently, but given that resources share a global namespace, there's always a risk unless you make sure to prefix your resource names with something uniquely yours.</p>
+
+<p>This is why I factored this technique into a <code>reusable_resource</code> DSL method. You can use it directly in custom cookbooks if you want. You can override specific types of resources as I have shown in the example, only touching <code>package</code> and <code>service</code>. Or, you can override those with additional logic to only do in in narrower cases (e.g., only if there is no block given). That's up to you. Your Mileage May Vary.</p>
+
+<h2>Discussion</h2>
+
+<p>I welcome any and all discussion on this. Especially from someone who knows the internals of Chef much more deeply than I do, who can tell me if I'm getting myself into too much trouble here.</p>
+
+<p>I'm hoping that some day there is a proper mechanism for resource reuse, when that is what is intended, or perhaps some way to detect if two resources internals are the same and make a smart decision about whether to reuse or duplicate. Maybe a real resource merging solution could happen, where the entire blocks are chained and executed? Or perhaps we'll see some resource namespace solution (though that would not have solved any of the issues I've had).</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Provision and Bootstrap Windows EC2 Instances With Chef]]></title>
+    <link href="http://scottwb.github.com/blog/2012/12/13/provision-and-bootstrap-windows-ec2-instances-with-chef/"/>
+    <updated>2012-12-13T05:17:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/12/13/provision-and-bootstrap-windows-ec2-instances-with-chef</id>
+    <content type="html"><![CDATA[<p>This post illustrates how you can have a single script on your workstation (yes, of course, it's a Mac) that provisions a new Windows EC2 instance and bootstraps it using Opscode Chef -- written from the point of view of someone who is used to doing this all the time with ease for Linux instances using the <code>knife-ec2</code> gem. I'll assume the reader:</p>
+
+<ul>
+<li>has a basic working knowledge of Opscode Chef</li>
+<li>is using Hosted Chef</li>
+<li>already has a working chef-repo workstation with <code>knife</code> configured</li>
+<li>already has (or can figure out) <code>knife-ec2</code> installed and configured with AWS API credentials</li>
+<li>is on their own for creating actual cookbooks and roles to configure their Windows instances</li>
+</ul>
+
+
+<p>This is fairly easy to do with Linux instances. Using <code>knife ec2 server create</code> and a bunch of parameters, a single command provisions a new Linux instance in EC2, waits for it to come up, connects to it over SSH using the specified key pair, installs <code>chef-client</code>, and bootstraps the node using the specified run_list. Done.</p>
+
+<p>However, things are not so simple for Windows Server instances.</p>
+
+<!-- MORE -->
+
+
+<p>Working with Windows instances in EC2 using Chef presents a few hurdles:</p>
+
+<ul>
+<li>Windows doesn't natively support SSH.</li>
+<li>The <code>knife ec2 server create</code> command waits for the instance to accept SSH connections. There is no option to circumvent this.</li>
+<li>Windows takes forever to provision.</li>
+<li>Windows instances typically get a random Administrator password generated for them that takes over 15 minutes to retrieve.</li>
+<li>The <code>knife-windows</code> gem provides a <code>knife bootstrap windows winrm</code> command that can bootstrap an <em>existing</em> Windows instance with Chef, but cannot provision a <em>new</em> instance.</li>
+<li>The <code>knife bootstrap windows winrm</code> command requires WinRM to be configured on the instance (which it isn't be default), requires the Administrator password of the instnace (which defaults to a random value), and requires the public IP address of the instance (which we don't know until the instance is up).</li>
+</ul>
+
+
+<p>Below I'll provide a simplified example script that demonstrates how we can hack together a few techniques to create an all-in-one solution for bringing up new Windows Server nodes in the Amazon cloud. Other than <code>knife</code> and all the other pre-requisites mentioned above, you'll need to make sure you have the following Ruby gems installed:</p>
+
+<p><code>bash
+% gem install knife-ec2
+% gem install knife-windows
+</code></p>
+
+<h2>The Tricks</h2>
+
+<p>The Ruby script below uses a few nasty tricks to make this all work:</p>
+
+<p>First, we write a temporary "user data" file to pass to the EC2 API. This gets executed by the new instance when it is first provisioned. There are two tricks we need to stick into the user data file:</p>
+
+<ul>
+<li>A BAT <code>&lt;script&gt;</code> that configures WinRM (Windows Remote Management), which is what we'll use to connect to and bootstrap the instance.</li>
+<li>A <code>&lt;powershell&gt;</code> script that sets the Administrator password to a value we define. This makes it so we don't have to wait 15+ minutes for EC2 to generate a password for us, and retrieve it manually through the GUI.</li>
+</ul>
+
+
+<p>Then, we use <code>knife ec2 server create</code> to provision the Windows instance to specification, passing in that user data file. This works great for provisioning the instance, but since it was not really designed for Windows and WinRM, there are two tricks we have to employ here:</p>
+
+<ul>
+<li>Execute the <code>knife</code> command in a sub-process and read its <code>STDOUT</code> until we see it output the new instances public IP address. We'll grab that and save that for the next step.</li>
+<li>This is also our cue to bail out of <code>knife ec2 server create</code>. If you were doing this manually, you'd hit <code>CTRL-C</code> here, which <code>knife</code> is saying "Waiting for sshd" (which is never going to come up). We do that by sending the sub-process a <code>SIGTERM</code> signal.</li>
+</ul>
+
+
+<p>Now, we can't just move on to bootstrapping the node, because it is still booting up, and WinRM may not be configured yet. The trick here is to create a TCP socket to the WinRM port, using the IP address we aquired in the previous step, and wait for it to connect. If it fails to connect, try again until it does. By the time this succeeds, we know WinRM is up and accepting connections. However, we don't know if the rest of the system is ready. Moving on to the next bootstrapping step immediately will run into intermittent errors. I've seen this manifest as an authentication erorr, presumably because we tried to bootstrap over WinRM before the PowerShell script set the password. There may be other mysteries of the Windows universe lurking here as well. My solution: sleep for two minutes. Lame, I know...but so far it is the only thing that has reliably worked.</p>
+
+<p>Finally, we can bootstrap the new running Windows instance with the <code>knife bootstrap windows winrm</code> command, using the IP address we acquired, the password we specified in the user data, and the other <code>knife</code> params we want to use such as the run_list and environment.</p>
+
+<h2>The Script</h2>
+
+<p>Here is a stripped down version of this script demonstrating all these tricks. As you can see, all the custom configuration is hard-coded in constants at the top of the script. You would obviously fill in your own information however you like -- via command-line params, interactive prompts, config files, etc.</p>
+
+<p>Big thanks to my colleauge <a href="https://twitter.com/jgroh9">Jeremy Groh</a> who paired through this with me and did the bulk of the heavy lifting on the Windows side, especially with the WinRM and password-reset parts.</p>
+
+<p>``` ruby bootstrap-windows.rb https://gist.github.com/4276748 View Gist</p>
+
+<h1>!/usr/bin/env/ruby</h1>
+
+<p>require 'socket'</p>
+
+<h1>AWS API Credentials</h1>
+
+<p>AWS_ACCESS_KEY_ID     = "your-aws-access-key-id"
+AWS_SECRET_ACCESS_KEY = "your-aws-secret-access-key"</p>
+
+<h1>Node details</h1>
+
+<p>NODE_NAME         = "webserver-01.example.com"
+CHEF_ENVIRONMENT  = "production"
+INSTANCE_SIZE     = "m1.large"
+EBS_ROOT_VOL_SIZE = 70   # in GB
+REGION            = "us-west-2"
+AVAILABILITY_ZONE = "us-west-2b"
+AMI_NAME          = "ami-46c54c76"
+SECURITY_GROUP    = "Web Servers"
+RUN_LIST          = "role[base],role[iis]"
+USER_DATA_FILE    = "/tmp/userdata.txt"
+USERNAME          = "Administrator"
+PASSWORD          = "YourAdminPassword"</p>
+
+<h1>Write user data file that sets up WinRM and sets the Administrator password.</h1>
+
+<p>File.open(USER_DATA_FILE, "w") do |f|
+  f.write &lt;&lt;EOT</p>
+
+<script>
+winrm quickconfig -q & winrm set winrm/config/winrs @{MaxMemoryPerShellMB="300"} & winrm set winrm/config @{MaxTimeoutms="1800000"} & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"}
+</script>
+
+
+<p><powershell>
+$admin = <a href="" title="WinNT://./administrator, user">adsi</a>
+$admin.psbase.invoke("SetPassword", "#{PASSWORD}")
+</powershell>
+EOT
+end</p>
+
+<h1>Define the command to provision the instance</h1>
+
+<p>provision_cmd = [
+  "knife ec2 server create",
+  "--aws-access-key-id #{AWS_ACCESS_KEY_ID}",
+  "--aws-secret-access-key #{AWS_SECRET_ACCESS_KEY}",
+  "--tags 'Name=#{NODE_NAME}'",
+  "--environment '#{CHEF_ENVIRONMENT}'",
+  "--flavor #{INSTANCE_SIZE}",
+  "--ebs-size #{EBS_ROOT_VOL_SIZE}",
+  "--region #{REGION}",
+  "--availability_zone #{AVAILABILITY_ZONE}",
+  "--image #{AMI_NAME}",
+  "--groups '#{SECURITY_GROUP}'",
+  "--user-data #{USER_DATA_FILE}",
+  "--verbose"
+].join(" ")</p>
+
+<h1>Run <code>knife ec2 server create</code> to provision the new instance and</h1>
+
+<h1>read the output until we know it's public IP address. At that point,</h1>
+
+<h1>knife is going to wait until the instance responds on the SSH port. Of</h1>
+
+<h1>course, being Windows, this will never happen, so we need to go ahead and</h1>
+
+<h1>kill knife and then proceed with the rest of this script to wait until</h1>
+
+<h1>WinRM is up and we can bootstrap the node with Chef over WinRM.</h1>
+
+<p>ip_addr = nil
+IO.popen(provision_cmd) do |pipe|
+  begin</p>
+
+<pre><code>while line = pipe.readline
+  puts line
+  if line =~ /^Public IP Address: (.*)$/
+    ip_addr = $1.strip
+    Process.kill("TERM", pipe.pid)
+    break
+  end
+end
+</code></pre>
+
+<p>  rescue EOFError</p>
+
+<pre><code># done
+</code></pre>
+
+<p>  end
+end
+if id_addr.nil?
+  puts "ERROR: Unable to get new instance's IP address"
+  exit -1
+end</p>
+
+<h1>Now the new instance is provisioned, but we have no idea when it will</h1>
+
+<h1>be ready to go. The first thing we'll do is wait until the WinRM port</h1>
+
+<h1>responds to connections.</h1>
+
+<p>puts "Waiting for WinRM..."
+start_time = Time.now
+begin
+  s = TCPSocket.new ip_addr, 5985
+rescue Errno:ETIMEOUT => e
+  puts "Still waiting..."
+  retry
+end
+s.close</p>
+
+<h1>You'd think we'd be good to go now...but NOPE! There is still more Windows</h1>
+
+<h1>bootstrap crap going on, and we have no idea what we need to wait on. So,</h1>
+
+<h1>in a last-ditch effort to make this all work, we've seen that 120 seconds</h1>
+
+<h1>ought to be enough...</h1>
+
+<p>wait_time = 120
+while wait_time > 0
+  puts "Better wait #{wait_time} more seconds..."
+  sleep 1
+  wait_time -= 1
+end
+puts "Finally ready to try bootstrapping instance..."</p>
+
+<h1>Define the command to bootstrap the already-provisioned instance with Chef</h1>
+
+<p>bootstrap_cmd = [
+  "knife bootstrap windows winrm #{ip_addr}",
+  "-x #{USERNAME}",
+  "-P '#{PASSWORD}'",
+  "--environment #{CHEF_ENVIRONMENT}",
+  "--node-name #{NODE_NAME}",
+  "--run-list #{RUN_LIST}",
+  "--verbose"
+].join(' ')</p>
+
+<h1>Now we can bootstrap the instance with Chef and the configured run list.</h1>
+
+<p>status = system(bootstrap_cmd) ? 0 : -1
+exit status
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: lean startup | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/lean-startup/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Cohort Analysis]]></title>
+    <link href="http://scottwb.github.com/blog/2013/01/21/cohort-analysis/"/>
+    <updated>2013-01-21T13:58:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/01/21/cohort-analysis</id>
+    <content type="html"><![CDATA[<p>After a few conversations with a former colleauge about statistics, metrics, and analytics, I thought I'd dig up some good articles to summarize some of the key Lean Startup principles surrounding metrics and data-driven decision-making for those who haven't had the pleasure of reading Eric Reis's book <em>Lean Startup</em>. That turned into a blog post about what metrics we report as developers and ops guys, and why we need to focus on <em>Actionable Metrics</em> over <em>Vanity Metrics</em>.</p>
+
+<p> My goal is to provide a little background on <em>Actionable Metrics</em> and how they differ from <em>Vanity Metrics</em>. Understanding this is a central theme of the book <em>Lean Startup</em>, by Eric Reis, and the writings and teachings of a number of other prominent startup/entrepreneur/lean proponents such as Steve Blank, Dave McClure, and Ash Maurya. Fred Wilson of Union Square Ventures, has been quoted saying, "one of our firm's favorite measurements is the cohort analysis".</p>
+
+<!-- MORE -->
+
+
+<h2>Three Links You Should Read</h2>
+
+<h3>1. <a href="http://www.ashmaurya.com/2010/07/3-rules-to-actionable-metrics/">3 Rulesource/_includes/custom/asides/s To Actionable Metrics - Ash Maurya</a></h3>
+
+<p>In this post, Ash Maurya, author of <em>Running Lean</em> and creator of <em>Lean Canvas</em> starts right out with the definitions of Actionable Metrics and Vanity Metrics. The key summary being:</p>
+
+<blockquote><p><strong>Actionable Metric:</strong> ties specific and repeatable actions to observed results</p>
+
+<p><strong>Vanity Metric:</strong> only serves to document the current state of the product but offers no insight into how we got here or what to do next.</p></blockquote>
+
+<p>In the <em>Tracking Long LifeCycle Events</em> section of this post, where Maurya talks about cohort analysis, his recommendation is that the first report you implement -- the canary in the coal mine -- is exactly the kind of reporting we put first on our internal statistics console:</p>
+
+<blockquote><p>The first report I recommend implementing is a “Weekly Cohort Report by Join Date”. This report functions like a canary in the coal mine and is a great alerting tool for picking up on actions that had overall positive or negative impact.</p></blockquote>
+
+<h3>2. <a href="http://www.purlem.com/blog/2012/03/track-what-matters-with-cohort-analysis/">Track What Matters With Cohort Analysis - Martin Thomas</a></h3>
+
+<p>This is a nice short blog post, by Martin Thomas, founder of Purlem, about using cohort analysis with a simple real-world example. Importantly, he calls out the definition of a cohort:</p>
+
+<blockquote><p>A cohort is a group of people who share a common characteristic or experience within a defined period</p></blockquote>
+
+<p>Note the focus on measuring "within a defined period". As with Maurya's post, his example is to group cohorts by signup date, and then track what those cohorts have as their initial experience (his is over a month, ours is currently over a 24-hour period -- we really want to measure that "Day One Aha!" experience). He quotes Eric Reis on the issue of using vanity metrics:</p>
+
+<blockquote><p>Before using cohort analysis, I was tracking the cumulative number of paying users. Eric Reis calls this vanity metrics as they give the “rosiest possible picture” of a startup’s progress, but does not track how people are actually interacting with the application.</p>
+
+<p>At the end of the day, using cohort analysis helps you to track the numbers that matter to the progress of your company.</p></blockquote>
+
+<h3>3. <a href="http://www.slideshare.net/njvitto/lean-startup-metrics-analytics">Lean Startup Metrics &amp; Analytics - Nocola Junior Vitto</a></h3>
+
+<p>This is a great slide deck about metrics and analytics in a startup. It's a bit long but I think it is worth looking at the slides and understanding them. If you don't go through them all, at least check out what I consider to be the highlights:</p>
+
+<ul>
+<li><p><strong>Slides 4-8:</strong> The perfect picture of vanity metrics. I love that Slide 7 calls Google Analytics Realtime Overview a "drug that can kill you". So true.</p></li>
+<li><p><strong>Slides 14-15:</strong> Good definitions of actionable metrics</p></li>
+<li><p><strong>Slide 28:</strong> Nice visualization of the conversion funnel</p></li>
+<li><p><strong>Slide 33:</strong> Good progression of online marketing. We need to work toward getting solidly into the 3rd Generation territory.</p></li>
+<li><p><strong>Slides 49-56:</strong> Good summary of metrics surrounding user acquisition. This is exactly why I've been so adamant about getting the people sharing links to use tracking codes properly: "Use <strong>unique urls</strong> (tracking parameters) on <strong>every url</strong> you create/give-out/pay for"</p></li>
+<li><p><strong>Slides 71-77:</strong> Good overview of the "Viral Coefficient". In our app we track this using AddThis analytics (which is one of the reasons we chose to use AddThis instead of custom Facebook integration)</p></li>
+<li><p><strong>Slides 78-81:</strong> Good overview of the "Net Promoter Score" (NPS). We intend to measure this using Qualaroo (formerly KISSinsights), but we are not doing that yet.</p></li>
+<li><p><strong>Slide 98:</strong> I love this slide -- it applies the "OODA Loop" to the Lean Startup. <a href="http://en.wikipedia.org/wiki/OODA_loop">The OODA Loop</a> is a term uses in martial arts, combatics, military, and law-enforcement. It stands for <em>Observe, Orient, Decide, Act</em>. Then repeat. Eric Reis talks about the "Build-Measure-Learn" cycle. They really are the same thing. I love the idea of applying the OODA Loop to startups because it imbues a sense of urgency. This slide has a nice picture merging the two.</p></li>
+<li><p><strong>Slides 99-100:</strong> Innovation Accounting. I'd call it a wake-up-call. "Everything you do should attempt to change a metric". I.e.: anything we are not doing that is not specifically aimed at changing an actionable metric is something we need to stop doing.</p></li>
+<li><p><strong>Slide 106:</strong> Kanban board. Looks like my Trello boards!</p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

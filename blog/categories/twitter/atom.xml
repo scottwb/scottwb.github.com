@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: twitter | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/twitter/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Embedded Tweet Tag For Jekyll]]></title>
+    <link href="http://scottwb.github.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll/"/>
+    <updated>2012-01-29T15:54:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll</id>
+    <content type="html"><![CDATA[<p>A nice way to quote a tweet in your blog post is to use Twitter's <a href="https://dev.twitter.com/docs/embedded-tweets">Embedded Tweet</a> feature. Not only does it provide a familiar Twitter style, it also provides features like being able to directly retweet, follow, etc., without leaving your page. For example:</p>
+
+<p><div class='embed tweet'><blockquote class="twitter-tweet" align="center" width="350"><p>Best analogy I find so far for explain concept of ScrumMaster to new devops is Tooth Fairy.</p>&mdash; DevOps Borat (@DEVOPS_BORAT) <a href="https://twitter.com/DEVOPS_BORAT/statuses/159849628819402752">January 19, 2012</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></div></p>
+
+<p>If you use Octopress or Jekyll, you can easily embed tweets using the <a href="https://github.com/scottwb/jekyll-tweet-tag">Jekyll Tweet Tag</a>. All you need to do is download <a href="https://raw.github.com/scottwb/jekyll-tweet-tag/master/tweet_tag.rb">tweet_tag.rb</a> and store it in your Jekyll <code>plugins</code> directory.</p>
+
+<!-- MORE -->
+
+
+<p>Then, when you see a tweet you want to quote, click the "Embed this Tweet" link.</p>
+
+<p><img src="https://img.skitch.com/20120129-r8p92x27s6ipncji5bstxeiuqf.png"></p>
+
+<p>When that pops up the dialog, choose the "Shortcode" tab, select your desired alignment, and copy the resulting code into your blog post.</p>
+
+<p><img src="https://img.skitch.com/20120130-8mw9jdrwcph98eu9igeanhm13c.png"></p>
+
+<p><strong><em>IMPORANT NOTE:</em></strong> Since Twitter generates shortcodes for Wordpress, you still have one more step: convert that code to a Liquid-style tag. All that means is replacing the <code>[...]</code> with <code>{% ... %}</code>. For example:</p>
+
+<p><code>
+{% tweet https://twitter.com/DEVOPS_BORAT/status/159849628819402752 align='center' %}
+</code></p>
+
+<p>For full documentation, see the project <a href="https://github.com/scottwb/jekyll-tweet-tag/blob/master/README.md">README</a>.</p>
+
+<p>That's all there is to it. If you're using Octopress with your own fork of the repository, you might be interested in my <a href="https://github.com/imathis/octopress/pull/399">pull request</a> that imports the <code>jekyll-tweet-tag</code> plugin.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Twitter Image Search and Download]]></title>
+    <link href="http://scottwb.github.com/blog/2012/01/14/twitter-image-search-and-download/"/>
+    <updated>2012-01-14T14:03:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/01/14/twitter-image-search-and-download</id>
+    <content type="html"><![CDATA[<p>Last night the sunset in the Seattle area was in rare form. You might have thought there was a <a href="http://www.funnyordie.com/videos/dcf83410c7/insane-double-rainbow-guy">double rainbow</a> by the way everyone was going on about it. My wife even noted that her Facebook feed was filled with pictures of it.</p>
+
+<p>So I thought it would be funny to scour Twitter for all the pictures of it that I could find and post them to Facebook just to be a smart-ass.</p>
+
+<p>I sat down to whip out a quick-and-dirty script to do this for me. By the time it was ready, I had lost the smart-ass urge to post them to Facebook, but what I ended up with turns out to be a handy little tool.</p>
+
+<!-- MORE -->
+
+
+<p>You can grab it from my github page at <a href="https://github.com/scottwb/twitter-image-search">https://github.com/scottwb/twitter-image-search</a></p>
+
+<p>It's pretty easy to use. You give it a search term and it creates a directory and downloads a bunch of matching images.</p>
+
+<p>The sunset may have passed, but this morning we have over a millimeter of snow in the Seattle area and all hell is breaking loose. It's SNOWPOCALPSE 2012!!! So, of course I ran this script:</p>
+
+<p><code>bash
+$ ./twitter-image-search.rb "seattle #snowpocalypse2012"
+</code></p>
+
+<p>And you can see from the results, people are clearly a bit worked up about the snow:</p>
+
+<p><img src="https://img.skitch.com/20120114-kbehj5uxyghxr4p9nic6rh7wp3.png"></p>
+]]></content>
+  </entry>
+  
+</feed>

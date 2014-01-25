@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: google | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/google/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Tracking Facebook Ads With Google Analytics]]></title>
+    <link href="http://scottwb.github.com/blog/2012/01/16/tracking-facebook-ads-with-google-analytics/"/>
+    <updated>2012-01-16T13:37:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/01/16/tracking-facebook-ads-with-google-analytics</id>
+    <content type="html"><![CDATA[<p>By default, Google Analytics does not do a very good job at categorizing traffic you receive from placing an ad on an external ad network such as Facebook Ads. In the case of Facebook in particular, traffic referred from your ad will show up as "direct" or generically as "facebook" because of they way the redirect the user to your ad through their own analytics back-end.</p>
+
+<p>The intended way to track through this redirection is using "UTM codes": parameters appended to the URL you use in your ad, that lets Google track that user's behavior on your site for the lifecycle of their visit. This is great, because you want to know more than just how many people have clicked on your ad. You want to know what they do once they get to your site (e.g.: if they buy something).</p>
+
+<p>Below is a quick primer on getting setup so that your Facebook Ads can be properly tracked with Google Analytics.</p>
+
+<!-- MORE -->
+
+
+<h3>1) Add these lines to your existing Google Analytics javascript code:</h3>
+
+<p>``` diff google_analytics.diff https://gist.github.com/1623245 View Gist
+ <script type="text/javascript">
+   var <em>gaq = </em>gaq || [];
+   <em>gaq.push(['</em>setAccount', 'UA-XXXXXXXX-X']);
++  <em>gaq.push(['</em>setCampSourceKey', 'utm_source']);
++  <em>gaq.push(['</em>setCampMediumKey', 'utm_medium']);
++  <em>gaq.push(['</em>setCampContentKey', 'utm_content']);
++  <em>gaq.push(['</em>setCampTermKey', 'utm_keyword']);
++  <em>gaq.push(['</em>setCampNameKey', 'utm_campaign']);
+   <em>gaq.push(['</em>trackPageview']);</p>
+
+<p>   (function() {</p>
+
+<pre><code> var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+ ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+ var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+</code></pre>
+
+<p>   })();
+ </script>
+```</p>
+
+<h3>2) Build a URL with <a href="http://support.google.com/googleanalytics/bin/answer.py?hl=en&amp;answer=55578">Google Analytics URL Builder</a></h3>
+
+<p>These will be the values you can filter by in Google Analytics. For example, you might do this for an ad placed on Facebook:</p>
+
+<ul>
+<li><strong>Website URL</strong>: http://www.postonthewall.com/walls/south-beach</li>
+<li><strong>Campaign Source</strong>: facebook</li>
+<li><strong>Campaign Medium</strong>: cpc</li>
+<li><strong>Campaign Term</strong>: spring break <em>(i.e.: your search terms)</em></li>
+<li><strong>Campaign Content</strong>: <em>blank - or use for A/B testing two ads at same time</em></li>
+<li><strong>Campaign Name</strong>: spring_break_south_beach</li>
+</ul>
+
+
+<h3>3) Place your ad with Facebook</h3>
+
+<p>Choosing how to position your ad is outside the scope of this post. Take the URL you generated with the Google Analytics URL Builder, and make an ad on Facebook that points to it. You can start with the <a href="https://www.facebook.com/advertising/">Facebook Ads</a> page.</p>
+
+<h3>4) Bonus Points: Setup conversion goals in Google Analytics.</h3>
+
+<p>This is also largely outside the scope of what I intended to post here, but it's an important step. In short, setting up conversion goals and funnels will help you calculate the ROI for your ads, and will let you figure out where you are losing users that come to your site through these ads.</p>
+
+<p>You can read more about it <a href="http://support.google.com/googleanalytics/bin/answer.py?hl=en&amp;answer=55515">here</a>.</p>
+]]></content>
+  </entry>
+  
+</feed>

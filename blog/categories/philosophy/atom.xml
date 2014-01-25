@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: philosophy | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/philosophy/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Inspiration is Perishable]]></title>
+    <link href="http://scottwb.github.com/blog/2012/02/09/inspiration-is-perishable/"/>
+    <updated>2012-02-09T07:49:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/02/09/inspiration-is-perishable</id>
+    <content type="html"><![CDATA[<p><a href="http://www.amazon.com/gp/product/B002MUAJ2A/ref=as_li_ss_il?ie=UTF8&amp;tag=sleepcodin-20&amp;linkCode=as2&amp;camp=1789&amp;creative=390957&amp;creativeASIN=B002MUAJ2A"><img class="left" src="http://ws.assoc-amazon.com/widgets/q?<em>encoding=UTF8&amp;Format=</em>SL200_&amp;ASIN=B002MUAJ2A&amp;MarketPlace=US&amp;ID=AsinImage&amp;WS=1&amp;tag=sleepcodin-20&amp;ServiceVersion=20070822" title="Rework" alt="rework"></a></p>
+
+<p>I woke up inspired to build something new this morning. I also woke up with this phrase echoing through my head: "Inspiration has a shelf life". I laid in bed staring at the ceiling reciting to myself, "If you're inspired now, do it now. Otherwise, it won't ever happen."</p>
+
+<p>One of the most memorable chapters of the book <em><a href="http://www.amazon.com/gp/product/B002MUAJ2A/ref=as_li_ss_il?ie=UTF8&amp;tag=sleepcodin-20&amp;linkCode=as2&amp;camp=1789&amp;creative=390957&amp;creativeASIN=B002MUAJ2A">Rework</a></em>, by Jason Fried and David Heinemeier-Hansson, was its final one: <em>Inspiration is Perishable</em>. It's main point was that it is not enough to have a good idea; you have to act when inspiration strikes.</p>
+
+<!-- MORE -->
+
+
+<p>Ideas can last forever. Everyone has had ideas they've done nothing about. The real power comes from inspiration. When you are feeling inspired, you work harder and smarter. But more importantly, you have to take advantage of inspiration when you have it. If you don't take action, inspiration fades and becomes just another could-have-done.</p>
+
+<blockquote><p>Inspiration is like fresh fruit or milk: It has an expiration date.</p>
+
+<p>If you want to do something, you've got to do it now. You can't put it on a shelf and wait two months to get around to it. You can't just say you'll do it later. Later, you won't be pumped up about it anymore.</p>
+
+<p>--Jason Fried and David Heinemeier-Hansson, Rework</p></blockquote>
+
+<p>Another important point is that you need to <strong><em>jump right into the middle of it</em></strong>.</p>
+
+<p>As a professional software developer, when I have the inspiration for a side project, my knee-jerk reaction is often to start thinking of the entire picture. Say it's a great idea for a website, for example. Soon I am thinking of how I am going to host it, what data store I need to be using, what I am going to name it, what web framework I should use, etc.</p>
+
+<p>What a great way to kill inspiration.</p>
+
+<p>To make the most of inspiration, you have to jump right in to the part that inspires you. Start right away, tackling the part that excites you, and worry about the other details later. Inspiration fuels itself and will provide you more than enough energy to wrap up the mundane details when it becomes worth it.</p>
+
+<p>You don't get to choose when inspiration strikes. Some of us are lucky enough to work in an environment where we can drop everything at a moment's notice when inspiration happens. Count me among those lucky few in my job with <a href="http://www.balassanianenterprises.com/">Balassanian Enterprises</a>, where we recognize the power of inspiration and how it leads to innovation. (Not to mention Thomas Edison's famous "99% perspiration", a topic for another day.)</p>
+
+<p>So...today I am diving right in. I'll tell you more about it later.</p>
+]]></content>
+  </entry>
+  
+</feed>

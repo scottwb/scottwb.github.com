@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: git | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/git/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Merge Git Repositories and Preseve Commit History]]></title>
+    <link href="http://scottwb.github.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history/"/>
+    <updated>2012-07-14T11:42:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history</id>
+    <content type="html"><![CDATA[<p>Every time I want to combine two git repositories into a new high-level repository, I have to re-figure it out. I decided this time to write it down. Maybe someone else will find this useful too.</p>
+
+<p>Here is my scenario: I have two repositories. I want to make a new empty repository and move the other two into it as subdirectories. I also want to preserve all the commit history of the original repositories.</p>
+
+<p>Here are the steps involved for the first repository:</p>
+
+<ol>
+<li>Clone the first source repository</li>
+<li>Remove its origin ref so you dont' accidentally push any screwups</li>
+<li>Make a subdir in that source repo named the same as the repo</li>
+<li>Move all the top-level files into that directory</li>
+<li>Commit that move.</li>
+<li>Create (or clone) your desination repository.</li>
+<li>Add a remote ref to it that points to the file location of your source repo clone.</li>
+<li>Pull from that ref</li>
+<li>Remove that remote ref.</li>
+</ol>
+
+
+<p>You can now delete the clone of the source repository you, so you don't really keep those file moves around in the original source if you don't want to.</p>
+
+<p>Here's what those steps might look like:</p>
+
+<p>``` bash</p>
+
+<h1>Step 1</h1>
+
+<p>$ git clone SOURCE_REPO_URL
+$ cd source_repo_name</p>
+
+<h1>Step 2</h1>
+
+<p>$ git remote rm origin</p>
+
+<h1>Step 3</h1>
+
+<p>$ mkdir source_repo_name</p>
+
+<h1>Step 4</h1>
+
+<p>#</p>
+
+<h1>NOTE: You can't actually do this command verbatim. You need to</h1>
+
+<h1>git mv each top-level file/dir individually and don't forget</h1>
+
+<h1>.* files like .gitignore, but DO NOT copy the .git directory.</h1>
+
+<p>$ git mv * source_repo_name/.</p>
+
+<h1>Step 5</h1>
+
+<p>$ git commit -m "Prepare source_repo_name to merge into dest_repo_name"
+$ cd ..</p>
+
+<h1>Step 6</h1>
+
+<p>$ git clone DST_REPO_URL
+$ cd dest_repo_name</p>
+
+<h1>Step 7</h1>
+
+<p>$ git remote add source_repo_name SRC_REPO_FILEPATH</p>
+
+<h1>Step 8</h1>
+
+<p>$ git pull source_repo_name master</p>
+
+<h1>Step 9</h1>
+
+<p>$ git remote rm source_repo_name
+```</p>
+
+<p>Now you're done and can delete the source repository clone, and push the destination repository clone upstream. Check the <code>git log</code> to be sure.</p>
+
+<h3>A Concrete Example</h3>
+
+<p>Say I have two repositories on github named <code>homer</code> and <code>bart</code> and I want to combine them into a new repository called <code>simpsons</code>. Here is how that looks:</p>
+
+<p>``` bash</p>
+
+<h1>...First create a new empty repository on github named 'simpsons'...</h1>
+
+<h1>Clone all the repos to work with</h1>
+
+<p>$ cd ~/src
+$ git clone git@github.com:scottwb/homer.git
+$ git clone git@github.com:scottwb/bart.git
+$ git clone git@github.com:scottwb/simpsons.git</p>
+
+<h1>Copy over homer to simpsons</h1>
+
+<p>$ cd homer
+$ git remote rm origin
+$ mkdir homer
+$ git mv <em>.</em> homer/.
+$ git commit -m "Prepare homer to merge into simpsons"
+$ cd ../simpsons
+$ git remote add homer ~/src/homer
+$ git pull homer master
+$ git remote rm homer
+$ cd ..
+$ rm -rf homer</p>
+
+<h1>Copy over bart to simpsons</h1>
+
+<p>$ cd bart
+$ git remote rm origin
+$ mkdir bart
+$ git mv <em>.</em> bart/.
+$ git commit -m "Prepare bart to merge into simpsons"
+$ cd ../simpsons
+$ git remote add bart ~/src/bart
+$ git pull bart master
+$ git remote rm bart
+$ cd ..
+$ rm -rf bart</p>
+
+<h1>Push simpsons back upstream to github</h1>
+
+<p>$ cd simpsons
+$ git push
+```</p>
+
+<h3>Bonus Points: Only Moving a Sub-Directory</h3>
+
+<p>What if you only want to move a subdirectory of the original source repository into the destination repository? All you need to do is filter out what you copy into that new sub-directory you create in step 4, and make sure everything else gets removed from that source repository. (Don't worry - remember, you're just working with a local working copy of that source repo, that you're going top discard after this operation. You won't harm anything irreversibly here.)</p>
+
+<p>One way to peform that filtering is by using the <code>git filter-branch</code> command. For example, to only copy the <code>pranks</code> subdir from the <code>bart</code> repo, just before step 4, you would do something like this:</p>
+
+<p><code>bash
+$ git filter-branch --subdirectory-filter pranks -- --all
+</code></p>
+
+<p>That dumps all the contents of the <code>pranks</code> dir into top-level dir where you can proceed to move them into your new subdir that you created in step 3.</p>
+]]></content>
+  </entry>
+  
+</feed>

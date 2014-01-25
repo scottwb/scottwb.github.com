@@ -1,0 +1,540 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Merge Git Repositories and Preseve Commit History - Scott W. Bradley</title>
+  <meta name="author" content="Scott W. Bradley">
+
+  
+  <meta name="description" content="Every time I want to combine two git repositories into a new high-level repository, I have to re-figure it out. I decided this time to write it down &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://scottwb.github.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history">
+
+  
+  <link href="/favicon.png" rel="icon">
+
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Scott W. Bradley" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-28351625-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Scott W. Bradley</a></h1>
+  
+    <h2>in which scottwb thinks out loud</h2>
+  
+  <a href="http://github.com/scottwb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/camo.github.com/abad93f42020b733148435e2cd92ce15c542d320/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub"></a>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:scottwb.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/profile">Profile</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Merge Git Repositories and Preseve Commit History</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-14T11:42:00-07:00" pubdate data-updated="true">Jul 14<span>th</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Every time I want to combine two git repositories into a new high-level repository, I have to re-figure it out. I decided this time to write it down. Maybe someone else will find this useful too.</p>
+
+<p>Here is my scenario: I have two repositories. I want to make a new empty repository and move the other two into it as subdirectories. I also want to preserve all the commit history of the original repositories.</p>
+
+<p>Here are the steps involved for the first repository:</p>
+
+<ol>
+<li>Clone the first source repository</li>
+<li>Remove its origin ref so you dont&#8217; accidentally push any screwups</li>
+<li>Make a subdir in that source repo named the same as the repo</li>
+<li>Move all the top-level files into that directory</li>
+<li>Commit that move.</li>
+<li>Create (or clone) your desination repository.</li>
+<li>Add a remote ref to it that points to the file location of your source repo clone.</li>
+<li>Pull from that ref</li>
+<li>Remove that remote ref.</li>
+</ol>
+
+
+<p>You can now delete the clone of the source repository you, so you don&#8217;t really keep those file moves around in the original source if you don&#8217;t want to.</p>
+
+<p>Here&#8217;s what those steps might look like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># Step 1</span>
+</span><span class='line'><span class="nv">$ </span>git clone SOURCE_REPO_URL
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>source_repo_name
+</span><span class='line'>
+</span><span class='line'><span class="c"># Step 2</span>
+</span><span class='line'><span class="nv">$ </span>git remote rm origin
+</span><span class='line'>
+</span><span class='line'><span class="c"># Step 3</span>
+</span><span class='line'><span class="nv">$ </span>mkdir source_repo_name
+</span><span class='line'>
+</span><span class='line'><span class="c"># Step 4</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># NOTE: You can&#39;t actually do this command verbatim. You need to</span>
+</span><span class='line'><span class="c">#       git mv each top-level file/dir individually and don&#39;t forget</span>
+</span><span class='line'><span class="c">#       .* files like .gitignore, but DO NOT copy the .git directory.</span>
+</span><span class='line'><span class="nv">$ </span>git mv * source_repo_name/.
+</span><span class='line'>
+</span><span class='line'><span class="c"># Step 5</span>
+</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s2">&quot;Prepare source_repo_name to merge into dest_repo_name&quot;</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ..
+</span><span class='line'>
+</span><span class='line'><span class="c"># Step 6</span>
+</span><span class='line'><span class="nv">$ </span>git clone DST_REPO_URL
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>dest_repo_name
+</span><span class='line'>
+</span><span class='line'><span class="c"># Step 7</span>
+</span><span class='line'><span class="nv">$ </span>git remote add source_repo_name SRC_REPO_FILEPATH
+</span><span class='line'>
+</span><span class='line'><span class="c"># Step 8</span>
+</span><span class='line'><span class="nv">$ </span>git pull source_repo_name master
+</span><span class='line'>
+</span><span class='line'><span class="c"># Step 9</span>
+</span><span class='line'><span class="nv">$ </span>git remote rm source_repo_name
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now you&#8217;re done and can delete the source repository clone, and push the destination repository clone upstream. Check the <code>git log</code> to be sure.</p>
+
+<h3>A Concrete Example</h3>
+
+<p>Say I have two repositories on github named <code>homer</code> and <code>bart</code> and I want to combine them into a new repository called <code>simpsons</code>. Here is how that looks:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c"># ...First create a new empty repository on github named &#39;simpsons&#39;...</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Clone all the repos to work with</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ~/src
+</span><span class='line'><span class="nv">$ </span>git clone git@github.com:scottwb/homer.git
+</span><span class='line'><span class="nv">$ </span>git clone git@github.com:scottwb/bart.git
+</span><span class='line'><span class="nv">$ </span>git clone git@github.com:scottwb/simpsons.git
+</span><span class='line'>
+</span><span class='line'><span class="c"># Copy over homer to simpsons</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>homer
+</span><span class='line'><span class="nv">$ </span>git remote rm origin
+</span><span class='line'><span class="nv">$ </span>mkdir homer
+</span><span class='line'><span class="nv">$ </span>git mv *.* homer/.
+</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s2">&quot;Prepare homer to merge into simpsons&quot;</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ../simpsons
+</span><span class='line'><span class="nv">$ </span>git remote add homer ~/src/homer
+</span><span class='line'><span class="nv">$ </span>git pull homer master
+</span><span class='line'><span class="nv">$ </span>git remote rm homer
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ..
+</span><span class='line'><span class="nv">$ </span>rm -rf homer
+</span><span class='line'>
+</span><span class='line'><span class="c"># Copy over bart to simpsons</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>bart
+</span><span class='line'><span class="nv">$ </span>git remote rm origin
+</span><span class='line'><span class="nv">$ </span>mkdir bart
+</span><span class='line'><span class="nv">$ </span>git mv *.* bart/.
+</span><span class='line'><span class="nv">$ </span>git commit -m <span class="s2">&quot;Prepare bart to merge into simpsons&quot;</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ../simpsons
+</span><span class='line'><span class="nv">$ </span>git remote add bart ~/src/bart
+</span><span class='line'><span class="nv">$ </span>git pull bart master
+</span><span class='line'><span class="nv">$ </span>git remote rm bart
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ..
+</span><span class='line'><span class="nv">$ </span>rm -rf bart
+</span><span class='line'>
+</span><span class='line'><span class="c"># Push simpsons back upstream to github</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>simpsons
+</span><span class='line'><span class="nv">$ </span>git push
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Bonus Points: Only Moving a Sub-Directory</h3>
+
+<p>What if you only want to move a subdirectory of the original source repository into the destination repository? All you need to do is filter out what you copy into that new sub-directory you create in step 4, and make sure everything else gets removed from that source repository. (Don&#8217;t worry - remember, you&#8217;re just working with a local working copy of that source repo, that you&#8217;re going top discard after this operation. You won&#8217;t harm anything irreversibly here.)</p>
+
+<p>One way to peform that filtering is by using the <code>git filter-branch</code> command. For example, to only copy the <code>pranks</code> subdir from the <code>bart</code> repo, just before step 4, you would do something like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>git filter-branch --subdirectory-filter pranks -- --all
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That dumps all the contents of the <code>pranks</code> dir into top-level dir where you can proceed to move them into your new subdir that you created in step 3.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Scott W. Bradley</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-07-14T11:42:00-07:00" pubdate data-updated="true">Jul 14<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/git/'>git</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://scottwb.github.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history/" data-via="scottwb69" data-counturl="http://scottwb.github.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/07/12/customize-attribute-accessors-on-ripple-models/" title="Previous Post: Customize Attribute Accessors on Ripple Models">&laquo; Customize Attribute Accessors on Ripple Models</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/08/15/the-joys-of-working-from-home/" title="next Post: The Joys of Working From Home">The Joys of Working From Home &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section class='aboutMe'>
+  <h1>About Me</h1>
+  <img class="left" src="/favicon.png" width="75" height="75">
+  <p>Husband. Father. Techie. Founder and Principal Engineer at <a href="http://facetdigital.com/">Facet Digital, LLC</a>. Fitness and health enthusiast. Seattle Sounders FC fan. All opinions are mine alone. All trademarks are property of their respective owners.</p>
+</section>
+<section>
+  <h1>Latest Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating The Infamous Mechanize "Too Many Connection Resets" Bug</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Easy Papertrail Deployment Using Rake</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("scottwb69", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/scottwb69" class="twitter-follow-button" data-show-count="true">Follow @scottwb69</a>
+  
+</section>
+
+
+<section>
+  <h1>Latest Code</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/scottwb">@scottwb</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        var blacklist = [];
+        
+          
+            blacklist.push('scottwb.github.com');
+          
+            blacklist.push('haml-block-bug');
+          
+        
+
+        github.showRepos({
+            user: 'scottwb',
+            count: 5,
+            skip_forks: true,
+            blacklist: blacklist,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106700002337561490782?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class='shelfari'>
+  <h1>Latest Books</h1>
+  <div id="ShelfariWidget203753"><a href='http://www.shelfari.com/'>Shelfari: Book reviews on your book blog</a><script src="http://www.shelfari.com/ws/203753/widget.js?r=41860" type="text/javascript" language="javascript"></script></div>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Scott W. Bradley -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'scottwb';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://scottwb.github.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history/';
+        var disqus_url = 'http://scottwb.github.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

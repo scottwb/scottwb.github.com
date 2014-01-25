@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rsync | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/rsync/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Middleman Deployment Rakefile]]></title>
+    <link href="http://scottwb.github.com/blog/2012/02/24/middleman-deployment-rakefile/"/>
+    <updated>2012-02-24T09:30:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/02/24/middleman-deployment-rakefile</id>
+    <content type="html"><![CDATA[<p>I started tinkering with <a href="http://middlemanapp.com/">Middleman</a> the other day to build a small static website.</p>
+
+<p>In the past, I've used <a href="http://staticmatic.rubyforge.org/">StaticMatic</a>, <a href="http://jekyllrb.com/">Jekyll</a>, or <a href="http://octopress.org/">Octopress</a> for this sort of thing. Jekyll and Octopress are great for blogs. StaticMatic is great for prototyping a static site with Haml and Sass that you can easily migrate to your Rails app.</p>
+
+<p><span class='pullquote-right' data-pullquote='any custom middleware you add to the stack gets invoked for all the pages it generates.'>
+I've been using Middleman for less than 24 hours at this point, but so far it seems great. One of the things I like about it is that it's actually serving your site dynamically with Sinatra, and comes out of the box with Haml, Sass, Compass, view helpers, lorem ipsum generators, CSS and Javascript minification, and more. Plus, you can throw in any other Rack middleware you like, for example, the Google Analytics middleware. While you're developing the site, you run the preview server and your changes are immediately visible without restarting it. The cool part is that when you deploy, it actually generates all the static pages by executing the Rack server and running requests through it. This means any custom middleware you add to the stack gets invoked for all the pages it generates.
+</span></p>
+
+<p>Middleman imposes very little structure. This is refreshing if you're just making a one- or two-page site. It lets you get started right away and build whatever organization you want for yourself. It doesn't tell you how to deploy your site. That's I'm here to do. :)</p>
+
+<p>I took a little inspiration from Octopress's Rakefile and put together a simple Rakefile for use with Middleman that helps you deploy your static site via rsync. It also adds a few little wrapper tasks for things like remembering to add the <code>--clean</code> flag, and an Octopress-like <code>rake gen_deploy</code> task that regenerates and deploys in one step.</p>
+
+<p><code>bash
+$ rake -T
+rake build       # Build the website from source
+rake deploy      # Deploy website via rsync
+rake gen_deploy  # Build and deploy website
+rake preview     # Run the preview server at http://localhost:4567
+</code></p>
+
+<p>Simply drop this Rakefile into the root of your Middleman project and edit the SSH variables at the top.</p>
+
+<p>``` ruby Rakefile https://gist.github.com/1902178 View Gist
+SSH_USER = 'root'
+SSH_HOST = 'www.example.com'
+SSH_DIR  = '/var/www/html/www.example.com'</p>
+
+<p>desc "Build the website from source"
+task :build do
+  puts "## Building website"
+  status = system("middleman build --clean")
+  puts status ? "OK" : "FAILED"
+end</p>
+
+<p>desc "Run the preview server at http://localhost:4567"
+task :preview do
+  system("middleman server")
+end</p>
+
+<p>desc "Deploy website via rsync"
+task :deploy do
+  puts "## Deploying website via rsync to #{SSH_HOST}"
+  status = system("rsync -avze 'ssh' --delete build/ #{SSH_USER}@#{SSH_HOST}:#{SSH_DIR}")
+  puts status ? "OK" : "FAILED"
+end</p>
+
+<p>desc "Build and deploy website"
+task :gen_deploy => [:build, :deploy] do
+end
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

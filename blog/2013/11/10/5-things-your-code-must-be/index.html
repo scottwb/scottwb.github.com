@@ -1,0 +1,383 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>5 Things Your Code Must Be - Scott W. Bradley</title>
+  <meta name="author" content="Scott W. Bradley">
+
+  
+  <meta name="description" content="If you work for me, with me, or near me, there are certain qualities of your code that must be met before I will let you get away with calling it &# &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://scottwb.github.com/blog/2013/11/10/5-things-your-code-must-be">
+
+  
+  <link href="/favicon.png" rel="icon">
+
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Scott W. Bradley" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-28351625-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Scott W. Bradley</a></h1>
+  
+    <h2>in which scottwb thinks out loud</h2>
+  
+  <a href="http://github.com/scottwb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/camo.github.com/abad93f42020b733148435e2cd92ce15c542d320/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub"></a>
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:scottwb.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/profile">Profile</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">5 Things Your Code Must Be</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-10T06:47:00-08:00" pubdate data-updated="true">Nov 10<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>If you work for me, with me, or near me, there are certain qualities of your code that must be met before I will let you get away with calling it &#8220;done&#8221;. Developers love to brag about a piece of code being done the second it sort of works for the main &#8220;happy path&#8221; use case it was intended for&#8230;on their development system. Developers are also optimists when it comes to estimation. Some of that has to do with their enthusiasm for achieving the &#8220;done&#8221; state based on their own notion of just having solved the base problem they set out to solve.</p>
+
+<p>This creates all kinds of schedule problems, expectation/reality mismatch problems with management, marketing, sales, etc.</p>
+
+<p>There are tons of details that go into the definition of &#8220;done&#8221;, and they vary depending on the project and the organization&#8217;s software development lifecycle. Rather than try to rigorously enumerate these &#8211; which would be the topic of an entire book &#8211; I tend to lean on 5 keystone requirements that we can assess about the code before we can call it &#8220;done&#8221;. There are many tactical rules for developing good software, but at a strategic level, following these keystone requirements generally leads us to cover most of those details.</p>
+
+<p>So&#8230;before you can call it &#8220;done&#8221;, your code module must be:</p>
+
+<!-- MORE -->
+
+
+<h3>#1 - Testable</h3>
+
+<p>This is fairly obvious if you follow TDD/BDD methodologies. But this is also important when it comes to things like daemon services that produce/consume messages via queues. We need to keep an eye on making those services fully self-contained such that we can mock the queue system, as well as the collaborator queue producers/consumers, and still fully integration test the service under test. Enforcing this often eliminates other classes of problems such as code coupling. <em>If your code is not testable (and covered with tests!), it is not done.</em></p>
+
+<h3>#2 - Configurable</h3>
+
+<p>Maybe small features don&#8217;t need this day one, but we often find ourselves with things like constants defined very early on. If the overall system has a configuration framework of some sort, we should be using that from day one, and we should be especially aware of config params that vary between test/dev/stag/prod environments, and have these extracted to a config file. This makes it so that your automated deployment tools can manage environment configuration as well. <em>If your code module cannot be externally configured for different environments as necessary, it is not done.</em></p>
+
+<h3>#3 - Deployable</h3>
+
+<p>Deployability often piggybacks on existing deployment mechanisms for small features, but in a larger sense, I mean &#8220;your new image upload processing service isn&#8217;t done until it has the worker process wrapper, config file, rake/capistrano tasks as necessary, chef cookbook/recipe/role as necessary, etc. that are necessary to deploy and run it in development, staging, and production&#8221;. You don&#8217;t get away with throwing code over the fence to the operations team these days. One of the core tenets of the &#8220;DevOps&#8221; culture is that developers are responsible for the operations aspects of their code. <em>If you code module cannot be deployed by the automated continuous deployment system, it is not done.</em></p>
+
+<h3>#4 - Measurable</h3>
+
+<p>For some features this just may be logging. Even just at that, it&#8217;s important this integrates day one with your centralized logging infrastructure (rsyslog, <a href="http://papertrailapp.com/">Papertrail</a>, <a href="http://www.loggly.com/">Loggly</a>, etc). I believe that every unit should emit timing and workload information to a stats collector like <code>statsd</code> or <a href="http://square.github.io/cube/">Cube</a>. In a service-oriented architecture, for example, at the very least, each queue and service should be recording message queue wait times, throughput, busy/idle percentage, processing times, etc. Throw that over to something like <a href="http://www.nagios.org/">nagios</a>, <a href="http://www.zabbix.com/">zabbix</a>, <a href="https://www.scoutapp.com/">Scout</a>, or the new custom monitoring charts at <a href="http://newrelic.com/">NewRelic</a>, and you should be able to answer those hard ops questions about where something went wrong in your distributed system much more quickly. <em>If we cannot measure the operating parameters of your code, it is not done.</em></p>
+
+<h3>#5 - Monitorable</h3>
+
+<p>Maybe this isn&#8217;t that much different than #4, or maybe this should really be called &#8220;alertable&#8221;. For the most part, when we release a piece of code, we want to know if it is working, and when it stops working. At the simplest level, this is aimed at letting us sleep at night - ideally this includes &#8220;restartable&#8221;. We don&#8217;t need to manually check if the async mailer workers are down if something like <a href="http://godrb.com/">god</a> or <a href="http://mmonit.com/monit/">monit</a> is watching our processes, and when they die, alerting us and restarting them. (This applies at the cloud instance level too.) Being monitorable doesn&#8217;t just have to apply at the process level though. Going hand-in-hand with measurability, this comes down to defining early the operating bands for our measurements from #4, and when to alert that we&#8217;ve gone outside of them. For example, your &#8220;sign up form&#8221; feature could be measured and monitored for signups-per-hour. If you have a steady enough visitor rate, there is some low (perhaps zero) that you don&#8217;t think you should ever reach if your sign up form is functioning properly. Alerting on this proxy variable can serve as a canary in the coal mine, letting you know that an underlying problem is developing. <em>If we cannot tell when your code is in trouble, and ideally be able to kill and restart it, then it is not done.</em></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Scott W. Bradley</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-10T06:47:00-08:00" pubdate data-updated="true">Nov 10<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/architecture/'>architecture</a>, <a class='category' href='/blog/categories/development/'>development</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://scottwb.github.com/blog/2013/11/10/5-things-your-code-must-be/" data-via="scottwb69" data-counturl="http://scottwb.github.com/blog/2013/11/10/5-things-your-code-must-be/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/" title="Previous Post: Defeating The Infamous Mechanize "Too Many Connection Resets" Bug">&laquo; Defeating The Infamous Mechanize "Too Many Connection Resets" Bug</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/" title="next Post: Optimistic Locking With Couchbase and Ruby">Optimistic Locking With Couchbase and Ruby &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section class='aboutMe'>
+  <h1>About Me</h1>
+  <img class="left" src="/favicon.png" width="75" height="75">
+  <p>Husband. Father. Techie. Founder and Principal Engineer at <a href="http://facetdigital.com/">Facet Digital, LLC</a>. Fitness and health enthusiast. Seattle Sounders FC fan. All opinions are mine alone. All trademarks are property of their respective owners.</p>
+</section>
+<section>
+  <h1>Latest Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating The Infamous Mechanize "Too Many Connection Resets" Bug</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Easy Papertrail Deployment Using Rake</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("scottwb69", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/scottwb69" class="twitter-follow-button" data-show-count="true">Follow @scottwb69</a>
+  
+</section>
+
+
+<section>
+  <h1>Latest Code</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/scottwb">@scottwb</a> on Github
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        var blacklist = [];
+        
+          
+            blacklist.push('scottwb.github.com');
+          
+            blacklist.push('haml-block-bug');
+          
+        
+
+        github.showRepos({
+            user: 'scottwb',
+            count: 5,
+            skip_forks: true,
+            blacklist: blacklist,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/106700002337561490782?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class='shelfari'>
+  <h1>Latest Books</h1>
+  <div id="ShelfariWidget203753"><a href='http://www.shelfari.com/'>Shelfari: Book reviews on your book blog</a><script src="http://www.shelfari.com/ws/203753/widget.js?r=41860" type="text/javascript" language="javascript"></script></div>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Scott W. Bradley -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'scottwb';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://scottwb.github.com/blog/2013/11/10/5-things-your-code-must-be/';
+        var disqus_url = 'http://scottwb.github.com/blog/2013/11/10/5-things-your-code-must-be/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

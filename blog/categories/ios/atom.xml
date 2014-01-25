@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ios | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/ios/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Reload The Same Page Without Blinking On jQuery Mobile]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile/"/>
+    <updated>2012-06-29T09:53:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile</id>
+    <content type="html"><![CDATA[<p>When using jQuery Mobile, if you try to reload the current page from javascript using the usual tactics of assigning <code>window.location.href</code>, you might notice some unsightly artifacts and page blinking. This is particularly noticeable on iOS Mobile Safari (mainly on iPhone), because the reload also causes the address bar to slide down and back up.</p>
+
+<p>Below is function I made to refresh the current page successfully with no visible artifacts: no blinking, no address bar showing, transitions:</p>
+
+<p>```javascript
+function refreshPage() {
+  $.mobile.changePage(</p>
+
+<pre><code>window.location.href,
+{
+  allowSamePageTransition : true,
+  transition              : 'none',
+  showLoadMsg             : false,
+  reloadPage              : true
+}
+</code></pre>
+
+<p>  );
+}
+```</p>
+
+<p><em>This was done on jQuery Mobile 1.1.0.</em></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[jQuery Mobile Breaks Your HREFs on iOS Mobile Safari]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
+    <updated>2012-06-29T00:00:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
+    <content type="html"><![CDATA[<p>Starting with verison 1.1.0RC1, jQuery Mobile changes the <code>href</code> of any link to be <code>#</code> when it is clicked, but <em>only on iOS Mobile Safari</em>. If you try to make a click handler that reads the <code>href</code> attribute, you will be surprised to find that it does not get the href you intended. For example:</p>
+
+<p><code>javascript
+$('a').click(function() {
+  console.log($(this).attr('href'));
+});
+</code></p>
+
+<p>When using jQuery Mobile, this code will print out the href you expect on every browser except Mobile Safari on iOS (both real devices and simulators, but <em>not with other browsers faking their User-Agent</em>). On Mobile Safari, this will print out that the href is "#".</p>
+
+<h2>The Problem</h2>
+
+<p>Obviously this is a problem if you have code that operates in a click handler that reads the clicked element's <code>href</code> attribute. jQuery Mobile changes that href before you get a chance to read it.</p>
+
+<p>One common place this is used is with the <code>link_to</code> helper in Ruby on Rails, for links that need to use other HTTP methods. For example, the standard RESTful way to delete a resource will be with a link that sets <code>:method</code> to <code>:delete</code>. Rails handles this with a library called jQuery UJS that needs to read the href from the link when it is clicked.</p>
+
+<p>Unfortunately for Rails users, this means that Rails method links don't work with jQuery Mobile on iOS Mobile Safari.</p>
+
+<!-- MORE -->
+
+
+<h2>The Reason</h2>
+
+<p>The jQuery Mobile team is doing this on purpose, to make it so the address bar on iPhone does not drop down when changing pages (and we all love that feature!). In <a href="https://github.com/jquery/jquery-mobile/issues/3777">this discussion</a> and <a href="https://github.com/jquery/jquery-mobile/issues/3686">this discussion</a>, they seem to understand that this makes custom click handlers get the wrong href, but decide to go ahead with it anyway.</p>
+
+<p>You can see it happen in this excerpt from the jQuery Mobile 1.1.0 source (reformatted for blog-friendlyness):</p>
+
+<p><code>javascript
+// By caching the href value to data and switching the href to a #,
+// we can avoid address bar showing in iOS. The click handler resets
+// the href during its initial steps if this data is present
+$( link )
+  .jqmData( "href", $( link  ).attr( "href" )  )
+  .attr( "href", "#" );
+</code></p>
+
+<h2>The Solution</h2>
+
+<p>Here's the part that seems to be undocumented other than in that comment: <em>they store the href in a data attribute!</em> This makes this problem easy to workaround. Simply change your click handler to check for the data attribute first and fall back to the href:</p>
+
+<p><code>javascript
+$('a').click(function() {
+  console.log($(this).data('href') || $(this).attr('href'));
+});
+</code></p>
+
+<p>That would be easy enough to encapsulate in a nice helper function...</p>
+
+<h2>Applying This To Rails jQuery UJS</h2>
+
+<p>If you use the Rails <code>link_to</code> helper with the <code>:method</code> option set to anything other than <code>:get</code>, links are handled by the <code>jquery_ujs</code> library that comes with Rails (often referred to as Rails UJS, jQuery UJS, rails.js). You'll notice, for example that none of your <code>:delete</code> links work with jQuery Mobile when you are on iOS Mobile Safari. You might see this as a missing route for your <code>show</code> or <code>edit</code> method depending on where you are linking from.</p>
+
+<p>It turns out the fix is easy. The jquery_ujs code already has a method to encapsulate getting the href from an element, complete with a comment telling you how you can override it. All it does out of the box is read <code>element.attr('href')</code>. All we have to do is override it and make it try the data attribute first.</p>
+
+<p>Somewhere after <code>jquery_ujs.js</code> is loaded, define this:</p>
+
+<p><code>javascript
+$.rails.href = function(element) {
+  return element.data('href') || element.attr('href');
+}
+</code></p>
+
+<p>Now your Rails <code>link_to</code> calls with custom <code>:method</code> options such as <code>:delete</code> will work just fine with jQuery Mobile 1.1.0 on iOS Mobile Safari, and you don't have to lose that clever bit that keeps the address bar hidden.</p>
+
+<hr />
+
+<p><em><strong>UPDATED Jan. 3, 2013:</strong> I have confirmed that this problem has been solved in jQuery Mobile 1.2.0, and this work-around is no longer required. I did try to upgrade one of my jQuery Mobile 1.1.0 apps to 1.1.1 (but rolled back for other reasons), and in that process I believe that the above solution was still required.</em></p>
+]]></content>
+  </entry>
+  
+</feed>

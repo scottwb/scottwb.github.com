@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: mobile | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/mobile/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Show jQuery Mobile Page Loading With Text And Spinner]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/"/>
+    <updated>2012-06-30T21:47:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner</id>
+    <content type="html"><![CDATA[<p>I like jQuery Mobile's page loading spinner. When you transition between pages it displays a nice subtle spinner while the page loads, only if the page load takes more than a configured number of milliseconds.</p>
+
+<p>So, I wanted to use their page-loading spinner for in-page wait times in my app. The user clicks something, I do some AJAX stuff and show them a nice spinner with a message telling them what's going on until the results come back. jQuery Mobile has javascript functions for this called <code>$.mobile.showPageLoadingMsg</code> and <code>$.hidePageLoadingMsg</code>. The problem is, you can either show a spinner only, or a text-message only. You can't show both a spinner <em>and</em> a text message, even though they clearly support it. Well, you <em>can</em> do that if you have the global setting <code>$.mobile.loadingMessageTextVisible = true</code>, but then you get a text with your normal page-load spinners.</p>
+
+<!-- MORE -->
+
+
+<p>I've created a workaround for this and included it in my <a href="https://github.com/scottwb/jquery.mobile.utils">jquery.mobile.utils</a> library. Using this you can call:</p>
+
+<p><code>javascript
+// Params: jqm theme swatch, and message text
+$.mobile.utils.showWaitBox("a", "Hang on while I do work...");
+// ... some time later...
+$.mobile.utils.hideWaitBox();
+</code></p>
+
+<p>That will let you leave the standard textless page-loading spinenrs alone, but be able to show a nice themed wait box with a spinner while your app is doing something the user needs to wait for, that looks like this:</p>
+
+<p><img class="center" src="http://img.skitch.com/20120701-met428ntqsxrest228pxgrrxjs.png"></p>
+
+<p>To use these methods, download the JavaScript or CoffeeScript version of the jquery.mobile.utils library from the <a href="https://github.com/scottwb/jquery.mobile.utils">project's github page</a> and include it in your jQuery Mobile page after <code>jquery.mobile-1.1.0.js</code> is loaded.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Reload The Same Page Without Blinking On jQuery Mobile]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile/"/>
+    <updated>2012-06-29T09:53:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile</id>
+    <content type="html"><![CDATA[<p>When using jQuery Mobile, if you try to reload the current page from javascript using the usual tactics of assigning <code>window.location.href</code>, you might notice some unsightly artifacts and page blinking. This is particularly noticeable on iOS Mobile Safari (mainly on iPhone), because the reload also causes the address bar to slide down and back up.</p>
+
+<p>Below is function I made to refresh the current page successfully with no visible artifacts: no blinking, no address bar showing, transitions:</p>
+
+<p>```javascript
+function refreshPage() {
+  $.mobile.changePage(</p>
+
+<pre><code>window.location.href,
+{
+  allowSamePageTransition : true,
+  transition              : 'none',
+  showLoadMsg             : false,
+  reloadPage              : true
+}
+</code></pre>
+
+<p>  );
+}
+```</p>
+
+<p><em>This was done on jQuery Mobile 1.1.0.</em></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[jQuery Mobile Breaks Your HREFs on iOS Mobile Safari]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
+    <updated>2012-06-29T00:00:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
+    <content type="html"><![CDATA[<p>Starting with verison 1.1.0RC1, jQuery Mobile changes the <code>href</code> of any link to be <code>#</code> when it is clicked, but <em>only on iOS Mobile Safari</em>. If you try to make a click handler that reads the <code>href</code> attribute, you will be surprised to find that it does not get the href you intended. For example:</p>
+
+<p><code>javascript
+$('a').click(function() {
+  console.log($(this).attr('href'));
+});
+</code></p>
+
+<p>When using jQuery Mobile, this code will print out the href you expect on every browser except Mobile Safari on iOS (both real devices and simulators, but <em>not with other browsers faking their User-Agent</em>). On Mobile Safari, this will print out that the href is "#".</p>
+
+<h2>The Problem</h2>
+
+<p>Obviously this is a problem if you have code that operates in a click handler that reads the clicked element's <code>href</code> attribute. jQuery Mobile changes that href before you get a chance to read it.</p>
+
+<p>One common place this is used is with the <code>link_to</code> helper in Ruby on Rails, for links that need to use other HTTP methods. For example, the standard RESTful way to delete a resource will be with a link that sets <code>:method</code> to <code>:delete</code>. Rails handles this with a library called jQuery UJS that needs to read the href from the link when it is clicked.</p>
+
+<p>Unfortunately for Rails users, this means that Rails method links don't work with jQuery Mobile on iOS Mobile Safari.</p>
+
+<!-- MORE -->
+
+
+<h2>The Reason</h2>
+
+<p>The jQuery Mobile team is doing this on purpose, to make it so the address bar on iPhone does not drop down when changing pages (and we all love that feature!). In <a href="https://github.com/jquery/jquery-mobile/issues/3777">this discussion</a> and <a href="https://github.com/jquery/jquery-mobile/issues/3686">this discussion</a>, they seem to understand that this makes custom click handlers get the wrong href, but decide to go ahead with it anyway.</p>
+
+<p>You can see it happen in this excerpt from the jQuery Mobile 1.1.0 source (reformatted for blog-friendlyness):</p>
+
+<p><code>javascript
+// By caching the href value to data and switching the href to a #,
+// we can avoid address bar showing in iOS. The click handler resets
+// the href during its initial steps if this data is present
+$( link )
+  .jqmData( "href", $( link  ).attr( "href" )  )
+  .attr( "href", "#" );
+</code></p>
+
+<h2>The Solution</h2>
+
+<p>Here's the part that seems to be undocumented other than in that comment: <em>they store the href in a data attribute!</em> This makes this problem easy to workaround. Simply change your click handler to check for the data attribute first and fall back to the href:</p>
+
+<p><code>javascript
+$('a').click(function() {
+  console.log($(this).data('href') || $(this).attr('href'));
+});
+</code></p>
+
+<p>That would be easy enough to encapsulate in a nice helper function...</p>
+
+<h2>Applying This To Rails jQuery UJS</h2>
+
+<p>If you use the Rails <code>link_to</code> helper with the <code>:method</code> option set to anything other than <code>:get</code>, links are handled by the <code>jquery_ujs</code> library that comes with Rails (often referred to as Rails UJS, jQuery UJS, rails.js). You'll notice, for example that none of your <code>:delete</code> links work with jQuery Mobile when you are on iOS Mobile Safari. You might see this as a missing route for your <code>show</code> or <code>edit</code> method depending on where you are linking from.</p>
+
+<p>It turns out the fix is easy. The jquery_ujs code already has a method to encapsulate getting the href from an element, complete with a comment telling you how you can override it. All it does out of the box is read <code>element.attr('href')</code>. All we have to do is override it and make it try the data attribute first.</p>
+
+<p>Somewhere after <code>jquery_ujs.js</code> is loaded, define this:</p>
+
+<p><code>javascript
+$.rails.href = function(element) {
+  return element.data('href') || element.attr('href');
+}
+</code></p>
+
+<p>Now your Rails <code>link_to</code> calls with custom <code>:method</code> options such as <code>:delete</code> will work just fine with jQuery Mobile 1.1.0 on iOS Mobile Safari, and you don't have to lose that clever bit that keeps the address bar hidden.</p>
+
+<hr />
+
+<p><em><strong>UPDATED Jan. 3, 2013:</strong> I have confirmed that this problem has been solved in jQuery Mobile 1.2.0, and this work-around is no longer required. I did try to upgrade one of my jQuery Mobile 1.1.0 apps to 1.1.1 (but rolled back for other reasons), and in that process I believe that the above solution was still required.</em></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[A Better Way To Add Mobile Pages To A Rails Site]]></title>
+    <link href="http://scottwb.github.com/blog/2012/02/23/a-better-way-to-add-mobile-pages-to-a-rails-site/"/>
+    <updated>2012-02-23T10:42:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/02/23/a-better-way-to-add-mobile-pages-to-a-rails-site</id>
+    <content type="html"><![CDATA[<p>Having a mobile version of your website is a pretty common thing these days. Doing it with Ruby on Rails seems pretty common as well. Yet there seems to be a lot of misguidance on the web when you search google for advice on making mobile sites in Rails. There are two prevailing suggestions for accomplishing this that I think are undesirable. I've come up with another variation on this that I think is more maintainable and better for the end user.</p>
+
+<p>But first...some background...</p>
+
+<p><em><strong>TL;DR:</strong> Don't use custom MIME formats or domain redirects. Use custom view paths. Skip to "The Final Solution" at the bottom, if you don't care why.</em></p>
+
+<!-- MORE -->
+
+
+<h2>Adding a Custom Format Sucks</h2>
+
+<p>I don't like everyone's suggestion of adding a <code>:mobile</code> or <code>:iphone</code> MIME type like this:</p>
+
+<p><code>ruby
+Mime::Type.register_alias "text/html", :mobile
+</code></p>
+
+<p>These solutions detect the User-Agent in a <code>before_filter</code> and set the request format like this:</p>
+
+<p><code>ruby
+request.format = :mobile
+</code></p>
+
+<p>This sucks if you want to use any of your partials for both mobile and desktop pages, because they are considered to be different formats. Say you have a template <code>show.html.haml</code> for the desktop version of the page, and a <code>show.mobile.haml</code> template for the mobile version. You can't have them both render the same partial. Now imagine you have a common footer you want to use in both version. You'd like to just <code>render :partial =&gt; 'footer'</code> and have it work. But it doesn't. If your partial is named <code>_footer.html.haml</code>, rendering the mobile template will complain that it can't find <code>_footer.mobile.haml</code>. You're stuck maintaining two identical copies of this partial. This <em>really</em> sucks if you have a lot of these kinds of partials.</p>
+
+<p>Some people suggest removing the format in the filename, so you'd have <code>_footer.haml</code>. I am not fond of this solution.</p>
+
+<h2>Adding a Custom Domain Sucks</h2>
+
+<p>Don't you hate it when you see a link to an article on Twitter and click it on your desktop, only to be taken to http://m.whatever.com/ because someone shared this link from their mobile device? Now you're reading a mobile version of this article full screen on your desktop and it looks ridiculous. Or you hit a full version URL from your mobile device and have to suffer yet another redirect. As a user, I would prefer to see one page that looks mobile-friendly on a mobile device, and looks like a full version on a desktop. As a developer, redirecting seems like a cop-out. It also feels like it violates a good RESTful design. There should be one URL for this resource and its view should be tailored to the device on which I am viewing it.</p>
+
+<h2>There Is A Better Way</h2>
+
+<p>I like to leverage the same <code>before_filter</code> concept of the custom format solution to detect whether or not you are on a mobile device. You can even add a check for a query param that allows a request to set a flag in the session that overrides the mobile-or-not setting. The first step to this is to build some filters and helpers into your <code>ApplicationController</code>:</p>
+
+<p>```ruby
+def check_for_mobile
+  session[:mobile_override] = params[:mobile] if params[:mobile]
+end</p>
+
+<p>def mobile_device?
+  if session[:mobile_override]</p>
+
+<pre><code>session[:mobile_override] == "1"
+</code></pre>
+
+<p>  else</p>
+
+<pre><code># Season this regexp to taste. I prefer to treat iPad as non-mobile.
+(request.user_agent =~ /Mobile|webOS) &amp;&amp; (request.user_agent !~ /iPad/)
+</code></pre>
+
+<p>  end
+end
+helper_method :mobile_device?
+```</p>
+
+<p>With these in your <code>ApplicationControlelr</code>, you can add <code>before_filter :check_for_mobile</code> to any controller/action and have it detect whether or not a request is mobile, or is forced to be mobile (or not) with a query parameter <code>mobile=1</code> (or <code>mobile=0</code>). You also have a <code>mobile_device?</code> method that you can call from any controller or view to see if you are currently rendering a mobile-formatted page. (This is rarely needed, but can be handy in certain situations.)</p>
+
+<p>The next step is to tell Rails to render mobile versions of the templates if the request is deemed to be from a mobile device. Rather than using a custom format, use a <strong><em>custom view path</em></strong>. This is the trick used by Rails engines and plugins to extend the app with its own view templates, while still allowing them to be overridden by the app. To make this work, you need to <strong><em>create a separate directory structure for mobile view templates</em></strong> and add it to the front of the view load path. This way, you can still use the <code>:html</code> format, and can still share templates between mobile and desktop templates. As an added bonus, you can still serve full versions of pages to mobile devices if you haven't implemented the mobile version yet. This is huge if you're trying to incrementally add mobile-friendly pages to an existing desktop-oriented site.</p>
+
+<p>For purposes of this example, I'll call this parallel mobile views directory <code>views_mobile</code>. The way you prepend that to the view load path is with the <code>prepend_view_path</code> method. I prefer to put this in a method in <code>ApplicationController</code> that I can call from the <code>check_for_mobile</code> filter if a mobile device is detected, or that I can use directly as it's own filter:</p>
+
+<p><code>ruby
+def prepare_for_mobile
+  prepend_view_path Rails.root + 'app' + 'views_mobile'
+end
+</code></p>
+
+<p>Now, if you use <code>before_filter :prepare_for_mobile</code> on any action, it will <em>always</em> be treated as mobile, rendering templates from your <code>app/views_mobile</code> directory tree if they exist, falling back to those in your <code>app/views</code> directory tree if they don't. This is great if you have a <em>mobile-first responsive design</em> for your page that you want to always serve to mobile and desktop devices, but still have other pages (and layouts) that are fully designed for the desktop that you don't want to mix with.</p>
+
+<p>The last step is to augment the <code>check_for_mobile</code> filter method to call <code>prepare_for_mobile</code> if it detects a mobile device. That way you can use <code>before_filter :check_for_mobile</code> on methods that have two versions. Those actions will render the mobile version from <code>app/views_mobile</code> for mobile devices and from <code>app/views</code> for non-mobile devices -- and they can both render the same shared partials living in <code>app/views</code>.</p>
+
+<h2>The Final Solution</h2>
+
+<p>```ruby</p>
+
+<h1>app/controllers/application_controller.rb</h1>
+
+<p>class ApplicationController &lt; ActionController::Base
+  def check_for_mobile</p>
+
+<pre><code>session[:mobile_override] = params[:mobile] if params[:mobile]
+prepare_for_mobile if mobile_device?
+</code></pre>
+
+<p>  end</p>
+
+<p>  def prepare_for_mobile</p>
+
+<pre><code>prepend_view_path Rails.root + 'app' + 'views_mobile'
+</code></pre>
+
+<p>  end</p>
+
+<p>  def mobile_device?</p>
+
+<pre><code>if session[:mobile_override]
+  session[:mobile_override] == "1"
+else
+  # Season this regexp to taste. I prefer to treat iPad as non-mobile.
+  (request.user_agent =~ /Mobile|webOS) &amp;&amp; (request.user_agent !~ /iPad/)
+end
+</code></pre>
+
+<p>  end
+  helper_method :mobile_device?
+end</p>
+
+<h1>app/controllers/posts_controller.rb</h1>
+
+<p>class PostsController &lt; ApplicationController
+  # Render mobile or desktop depending on User-Agent for these actions.
+  before_filter :check_for_mobile, :only => [:new, :edit]</p>
+
+<p>  # Always render mobile versions for these, regardless of User-Agent.
+  before_filter :prepare_for_mobile, :only => :show
+end
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[HTML5 Placeholder Polyfill With jQuery Mobile]]></title>
+    <link href="http://scottwb.github.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile/"/>
+    <updated>2012-02-22T11:29:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile</id>
+    <content type="html"><![CDATA[<p>IE9 doesn't support the <code>placeholder</code> attribute on <code>input</code> elements. Why does this matter for a jQuery Mobile site? If you want to build a single mobile-first page with jQuery Mobile, and use resposive design techiniques to display the same page on desktop browsers, you might appreciate the ability to use the HTML5 <code>placeholder</code> in your design, and still need to support at least IE9.</p>
+
+<p>Using a <code>placeholder</code> on an input field is a nice way to save space on a mobile form. It lets you forgo the field labels while still telling the user what the fields are for. In many cases its utility goes beyond labeling; you might need it to express input requirements such as what unit of measurement to use in a "distance" field. This is just as useful in a desktop design as it is in a mobile design.</p>
+
+<p>There is a growing movement of creating polyfills for this sort of thing - especially targeted at Internet Explorer. If you're not already using something like <a href="http://www.modernizr.com/">Modernizr</a> to fulfill all your HTML5 polyfill needs, and just want a solution for the <code>placeholder</code> attribute, you're in luck. The Modernizr wiki has a <a href="https://github.com/Modernizr/Modernizr/wiki/HTML5-Cross-browser-Polyfills">list of polyfills</a>. You'll see that there are quite a few placeholder polyfills...but they are not all created equal.</p>
+
+<!-- MORE -->
+
+
+<p>I tried a few of these, and read through the code, and realized that a few of them have some problems. Problems like not supporting password fields, or incorrectly styling non-focused input placeholders. After reviewing these, I decided that the best one to go with was <a href="http://mths.be/placeholder">jquery-placeholder</a> by <a href="http://mathiasbynens.be/">Mathias Bynens</a>. This one is easy to use, no-ops on browsers that natively support input placeholders, and nicely handles all the corner cases I tested for.</p>
+
+<p>To use jquery-placeholder, simply download <code>jquery.placeholder.js</code> from the <a href="http://mths.be/placeholder">project page</a> and make sure it gets included in your page after jQuery. Then you'll need to apply it to every element you want with a jQuery statement like:</p>
+
+<p><code>javascript
+$(selector).placeholder();
+</code></p>
+
+<p>If you want to use this with jQuery Mobile and its AJAX page-loading mode, you'll need to make sure to execute this statement on every page that gets loaded. You can do that in your main javascript for the document with something like this:</p>
+
+<p><code>javascript
+$(document).bind('pageshow', function() {
+  var activePage = $('.page.ui-page-active');
+  activePage.find('input[placeholder], textarea[placeholder]').placeholder();
+});
+</code></p>
+
+<p>From there, you may notice that the placeholder looks different on all the different browsers. You can style this to be consistent with CSS. You'll need to be a bit repetitive here, because of the way putting the placeholder selectors on the same line breaks some of the browsers. If you use a CSS preprocessor this gets a little easier. Here is an example using Sass's SCSS syntax:</p>
+
+<p>``` scss
+input, textarea {
+  &amp;.placeholder {</p>
+
+<pre><code>color: #A9A9A9;
+</code></pre>
+
+<p>  }
+  &amp;:-moz-placeholder {</p>
+
+<pre><code>color: #A9A9A9;
+</code></pre>
+
+<p>  }
+  &amp;::-webkit-input-placeholder {</p>
+
+<pre><code>color: #A9A9A9;
+</code></pre>
+
+<p>  }
+}
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

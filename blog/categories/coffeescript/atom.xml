@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: coffeescript | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/coffeescript/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Compile A Single CoffeeScript File From Your Rails Project]]></title>
+    <link href="http://scottwb.github.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project/"/>
+    <updated>2012-06-30T20:56:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project</id>
+    <content type="html"><![CDATA[<p>Using Rails 3.2 (or 3.1 for that matter), you typically have CoffeeScript (and a javascript engine like therubyracer/V8) installed as gems - probably via Bundler from your Gemfile, possibly in a per-project RVM gemset.</p>
+
+<p>It doesn't seem that this type of setup includes direct access to the <code>coffee</code> command-line compiler. Instead the <code>coffee-script</code> gem uses calls directly to the compiler. Sometimes I'd just like to compile one of the CoffeeScript files in my Rails app just to look at the javascript, or maybe to export it somewhere that I'm not using CoffeeScript.</p>
+
+<p>To do this, I've made a simple Rake task. Just drop this into <code>lib/tasks/coffee.rake</code> in your Rails project:</p>
+
+<p>``` ruby coffee.rake https://gist.github.com/3026787 View Gist
+namespace :coffee do
+  task :compile, :filename do |t, args|</p>
+
+<pre><code>filename = args.filename
+puts CoffeeScript.compile(File.open(filename))
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Then, you can compile a single file from like this:</p>
+
+<p><code>bash
+$ rake coffee:compile[app/assets/javascripts/mystuff.js.coffee]
+</code></p>
+
+<p>This will output it to stdout so you can redirect that to a file, or the <code>gist</code> command, or whatever.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rspec | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/rspec/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Have Some Fun With Your Tests]]></title>
+    <link href="http://scottwb.github.com/blog/2012/01/13/have-some-fun-with-your-tests/"/>
+    <updated>2012-01-13T14:36:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2012/01/13/have-some-fun-with-your-tests</id>
+    <content type="html"><![CDATA[<p>I just came across this test case in some old code I had forgotten about:</p>
+
+<p>``` ruby
+it "validates that the address is geocodable" do
+  @user.address = "Death Star, Suite 1138"
+  @user.city    = "Moon System"
+  @user.state   = "Endor"
+  @user.zipcode = "1138"</p>
+
+<p>  expect{@user.save!}.to raise_exception ActiveRecord::RecordInvalid
+  @user.errors[:address].should include "could not be found on the map"
+end
+```</p>
+
+<p>It reminded me of something I actually think is important: have a little fun with the examples in your test cases. Not so much as to be distracting, but a little humor can add some fun to an otherwise mechanical, boring task.</p>
+
+<p>I like to think of the guy who comes along a year later trying to understand my code by reading the tests. Telling a small story or making some pop-culture references will hopefully brighten his task.</p>
+]]></content>
+  </entry>
+  
+</feed>

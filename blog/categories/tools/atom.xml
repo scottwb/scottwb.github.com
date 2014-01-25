@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: tools | Scott W. Bradley]]></title>
+  <link href="http://scottwb.github.com/blog/categories/tools/atom.xml" rel="self"/>
+  <link href="http://scottwb.github.com/"/>
+  <updated>2014-01-24T20:59:29-08:00</updated>
+  <id>http://scottwb.github.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Easy Papertrail Deployment Using Rake]]></title>
+    <link href="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
+    <updated>2013-11-08T06:37:00-08:00</updated>
+    <id>http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
+    <content type="html"><![CDATA[<p><a href="http://papertrailapp.com/">Papertrail</a> is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, across numerous hosts. Having all your logs in one place, live tail-able, searchable, and archived is key to debugging such systems in production.</p>
+
+<p>There are a few ways to set it up, as documented on their quick start page, such as a system-wide installation via <a href="http://community.opscode.com/cookbooks/papertrail-rsyslog">Chef</a>, or configuring your app to use the syslog protocol. They also provide a convenient Ruby gem called <a href="http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-text-log-files-in-unix">remote_syslog</a> that can be configured to read a configured set of log files and send them to Papertrail.</p>
+
+<p>I've found for simple Ruby project structures, it can often be easier to deploy Papertrail by installing this gem with Bundler via your project Gemfile, and then creating a simple set of Rake tasks to manage starting and stopping the service. This way it's self-contained within your application repository, gets deployed with the same mechanism you deploy your application code, and can be used on your development and staging systems just as easily, without any Chef cookbooks or other configuration hassle.</p>
+
+<!-- MORE -->
+
+
+<h2>Rake-based Deployment</h2>
+
+<p>I typically build most of my production deployment with modular Rake tasks. This way your Capistrano/OpsWorks/Chef/whatever deployment tools can invoke Rake tasks -- and you can use these same tasks manually on production and development systems alike.</p>
+
+<p>I have a <code>papertrail.rake</code> in my <a href="https://github.com/scottwb/rake-tasks">rake-tasks repository on GitHub</a> that demonstrates how I use this. The contents are shown below, but the rest of the repository demonstrates the other required ingredients, such as a the papertrail config file. With this file in your <code>tasks</code> directory, and the <code>remote_syslog</code> gem in your <code>Gemfile</code>, you now have access to three simple tasks:</p>
+
+<p><code>bash
+$ rake -T papertrail
+(in /Users/scottwb/src/rake-tasks)
+rake papertrail:start   # Start papertrail remote_syslog daemon.
+rake papertrail:status  # Show status of papertrail remote_syslog daemon.
+rake papertrail:stop    # Stop papertrail remote_syslog daemon.
+</code></p>
+
+<p>You can now manually start logging to Papertrail with <code>rake papertrail:start</code>...or you can hook up the start/stop tasks to your automated deployment tools.</p>
+
+<p>Here are the contents of the main rakefile for this. See the <a href="https://github.com/scottwb/rake-tasks">rake-tasks repository</a> for example config file, Gemfile, and directory structure.</p>
+
+<h2>The papertrail.rake File</h2>
+
+<p>``` ruby
+PAPERTRAIL_CONFIG = File.expand_path("../../config/remote_syslog.yml", <strong>FILE</strong>)
+PAPERTRAIL_PID    = File.expand_path("../../tmp/pids/remote_syslog.pid", <strong>FILE</strong>)</p>
+
+<p>namespace :papertrail do</p>
+
+<p>  def papertrail_is_running?</p>
+
+<pre><code>File.exists?(PAPERTRAIL_PID) &amp;&amp; system("ps x | grep `cat #{PAPERTRAIL_PID}` 2&gt;&amp;1 &gt; /dev/null")
+</code></pre>
+
+<p>  end</p>
+
+<p>  desc "Start papertrail remote_syslog daemon."
+  task :start => :stop do</p>
+
+<pre><code>if papertrail_is_running?
+  puts "Papertrail is already running."
+else
+  sh "remote_syslog -c #{PAPERTRAIL_CONFIG} --pid-file #{PAPERTRAIL_PID}"
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  desc "Stop papertrail remote_syslog daemon."
+  task :stop do</p>
+
+<pre><code>if File.exists? PAPERTRAIL_PID
+  sh "kill `cat #{PAPERTRAIL_PID}`"
+  rm_f PAPERTRAIL_PID
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  desc "Show status of papertrail remote_syslog daemon."
+  task :status do</p>
+
+<pre><code>if papertrail_is_running?
+  puts "Papertrail remote_syslog is running"
+else
+  puts "Papertrail remote_syslog is stopped"
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Quick and Dirty CampaignMonitor Webhook Management]]></title>
+    <link href="http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/"/>
+    <updated>2013-06-24T16:33:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management</id>
+    <content type="html"><![CDATA[<p>You've got a CampaignMonitor mailing list and you're using their API to add/update/remove subscribers as they sign up for your app and opt-in to your mailing list. Great. But you also want to know when they unsubscribe from your newsletter, or when an existing user subscribes via a separate newsletter form on your website, and be able to keep that information sync'd with your user database.</p>
+
+<p>CampaignMonitor provides the ability to create <a href="http://www.campaignmonitor.com/api/webhooks/">Webhooks</a> that will drive an HTTP POST callback to your app when subscribe/unsubscribe events happen. Once you dive into this, you'll realize that you also need a way to deploy and update your webhooks. They only allow you to do this through their API -- there is no GUI for it.</p>
+
+<!-- MORE -->
+
+
+<p>I threw together a quick-and-dirty Rakefile using the <code>createsend</code> gem. First make sure you have either done <code>gem install createsend</code> or have added the <code>createsend</code> gem to your Gemfile. Then, you can create a Rakefile that looks something like this:</p>
+
+<p>``` ruby
+API_KEY = 'your_secret_api_key_here'
+LIST_ID = 'your_mailing_list_id_here'  # Get this from the "change type" page for the list
+WEBHOOK_URL = 'http://example.com/path/to/your_webhook.json'</p>
+
+<p>def campaign_monitor_list
+  CreateSend::List.new({:api_key => API_KEY}, LIST_ID)
+end</p>
+
+<h1>NOTE: That I depend on :environment for all of these. That is to load the</h1>
+
+<h1>Rails environment I use them in. You can change that and require 'createsend'</h1>
+
+<h1>explicitly if you like.</h1>
+
+<p>namespace :campaign_monitor do
+  namespace :webhooks do</p>
+
+<pre><code>desc "List all the CampaignMonitor webhooks"
+task :list =&gt; :environment do
+  puts campaign_monitor_list.webhooks.inspect
+end
+
+desc "Register all our CampaignMonitor webhooks"
+task :create =&gt; :environment do
+  campaign_monitor_list.create_webhook(
+    ["Subscribe", "Deactivate"],
+    WEBHOOK_URL,
+    'json'
+  )
+end
+
+desc "Test all our CampaignMonitor webhooks"
+task :test =&gt; :environment do
+  list = campaign_monitor_list
+  list.webhooks.each do |hook|
+    list.test_webhook(hook[:WebhookID])
+  end
+end
+
+desc "Uninstall all our CampaignMonitor webhooks"
+task :clear =&gt; :environment do
+  list = campaign_monitor_list
+  list.webhooks.each do |hook|
+    list.delete_webhook(hook[:WebhookID])
+  end
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>With this saved as <code>campaign_monitor.rake</code> and loaded by rake, you will now have the following tasks you can integrate into your deployment system:</p>
+
+<p><code>bash
+% rake -T campaign_monitor:webhooks
+rake campaign_monitor:webhooks:clear   # Uninstall all our CampaignMonitor webhooks
+rake campaign_monitor:webhooks:create  # Register all our CampaignMonitor webhooks
+rake campaign_monitor:webhooks:list    # List all the CampaignMonitor webhooks
+rake campaign_monitor:webhooks:test    # Test all our CampaignMonitor webhooks
+</code></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Using NewRelic With Custom Ruby Worker Daemons]]></title>
+    <link href="http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/"/>
+    <updated>2013-05-23T07:48:00-07:00</updated>
+    <id>http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons</id>
+    <content type="html"><![CDATA[<p>The NewRelic Ruby Agent comes with great support for Rails, Sinatra, and other frameworks and web servers out of the box. It also supports background jobs for frameworks like DelayedJob and Resque.</p>
+
+<p>But what if you have your own custom background worker mechanism?</p>
+
+<p>It's fairly simple to get NewRelic working to report your custom background workers, but finding the right combination of setup calls in their docs can be a little tricky. The biggest issue is dealing with background tasks that daemonize and fork child worker processes. This is because the NewRelic agent needs to do unique instrumenting, monitoring, and reporting per process. Setting it up that way can be tricky if you're using Bundler or another mechanism to load the <code>newrelic_rpm</code> gem <em>before</em> the child processes are forked.</p>
+
+<!-- MORE -->
+
+
+<p>Assuming you are already familiar with the mechanics of Ruby-based daemon processes, here are the key ingredients you need to integrate the NewRelic Ruby Agent:</p>
+
+<ol>
+<li>Store your <code>newrelic.yml</code> config file somewhere and make a place for its log file to be written.</li>
+<li>Setup the environment variables <code>RUBY_ENV</code>, <code>NRCONFIG</code>, and <code>NEW_RELIC_LOG</code> to take the place of <code>RAILS_ENV</code> and default config and log paths you may be used to in Rails.</li>
+<li>Require the <code>newrelic_rpm</code> gem or add it to your <code>Gemfile</code> and require it via Bundler.</li>
+<li>Add instrumentation to your main job class with <code>include ::NewRelic::Agent::Instrumentation::ControllerInstrumentation</code></li>
+<li>Add a tracer to your main job execution method, e.g.: <code>add_transation_tracer :execute, :category =&gt; :task</code>, in your main job class.</li>
+<li>Before you daemonize and fork child processes, make sure to call <code>::NewRelic::Agent.manual_start</code>.</li>
+<li>In the child process, right after it's been forked, make sure to call <code>::NewRelic::Agent.after_fork(:force_reconnection =&gt; true)</code>.</li>
+</ol>
+
+
+<p>This will now make sure that the NewRelic Agent is started correctly for each child process and will report metrics on the <code>execute</code> method of your job class.</p>
+
+<h2>Example</h2>
+
+<p>While it's not my intention to go into detail on how to build out a daemonized forking worker mechanism, below is a very simple worker script that demonstrates all of these pieces together. It assumes the use of Bundler and a directory structure like this:</p>
+
+<p>```
+project_dir
+  |
+  +--Gemfile
+  |
+  +--worker.rb
+  |
+  +--config
+  |    |
+  |    +--newrelic.yml
+  |
+  +--log</p>
+
+<pre><code>   |
+   +--newrelic_agent.log
+</code></pre>
+
+<p>```</p>
+
+<p>This example <code>worker.rb</code> script forks 4 worker daemon processes, each of which will report timing metrics to NewRelic for the jobs it runs. Note the comments correlating to the bullet points above.</p>
+
+<p>``` ruby</p>
+
+<h1>!/usr/bin/env ruby</h1>
+
+<h1>STEP 2:</h1>
+
+<p>#</p>
+
+<h1>Setup NewRelic environment before NewRelic gets loaded by Bundler. This</h1>
+
+<h1>is necessary because we don't have the luxury of relying on the NewRelic</h1>
+
+<h1>defaults that are geared towards Rails.</h1>
+
+<p>ENV['RUBY_ENV'] = 'production'
+ENV['NRCONFIG'] ||= File.expand_path('../config/newrelic.yml', <strong>FILE</strong>)
+ENV['NEW_RELIC_LOG'] ||= File.expand_path('../log/newrelic_agent.log', <strong>FILE</strong>)</p>
+
+<h1>STEP 3:</h1>
+
+<p>#</p>
+
+<h1>Setup Bundler and use it to require all the gems from Gemfile, including</h1>
+
+<h1>the <code>newrelic_rpm</code> gem.</h1>
+
+<p>require 'rubygems'
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', <strong>FILE</strong>)
+require 'bundler/setup' if File.exists?(ENV['BUNDLE_GEMFILE'])
+if defined?(Bundler)
+  Bundler.require(:default, 'production')
+end</p>
+
+<p>class Job
+  # STEP 4: Add instrumation to main job class.
+  include ::NewRelic::Agent::Instrumentation::ControllerInstrumentation</p>
+
+<p>  def execute</p>
+
+<pre><code># do work
+</code></pre>
+
+<p>  end</p>
+
+<p>  # STEP 5: Add a tracer to the main job execution method
+  add_transaction_tracer :execute, :category => :task
+end</p>
+
+<p>class Worker
+  def run(num_processes = 1)</p>
+
+<pre><code># STEP 6: Set NewRelic Agent to manual start before daemonizing.
+::NewRelic::Agent.manual_start
+
+# Double fork daemonize so that forked child processes do not get SIGHUP
+# when the controlling tty dies.
+fork and exit
+Process.setsid
+fork and exit
+
+num_processes.times do
+  if pid = Process.fork
+    Process.detach(pid)
+  else
+    # STEP 7: Force NewRelic Agent to reconnect in forked child process.
+    ::NewRelic::Agent.after_fork(:force_reconnection =&gt; true)
+
+    loop { next_job.execute }
+  end
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  private</p>
+
+<p>  def next_job</p>
+
+<pre><code># TODO: Do whatever you do to get your next Job instance to execute.
+#       Read from a queue, etc...
+</code></pre>
+
+<p>  end
+end</p>
+
+<h1>Run 4 forked worker daemon processes.</h1>
+
+<p>Worker.new.run(4)
+```</p>
+]]></content>
+  </entry>
+  
+</feed>
