@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: papertrail | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/papertrail/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/papertrail/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Easy Papertrail Deployment Using Rake]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
+    <link href="http://scottwb.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
     <updated>2013-11-08T06:37:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
+    <id>http://scottwb.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
     <content type="html"><![CDATA[<p><a href="http://papertrailapp.com/">Papertrail</a> is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, across numerous hosts. Having all your logs in one place, live tail-able, searchable, and archived is key to debugging such systems in production.</p>
 
 <p>There are a few ways to set it up, as documented on their quick start page, such as a system-wide installation via <a href="http://community.opscode.com/cookbooks/papertrail-rsyslog">Chef</a>, or configuring your app to use the syslog protocol. They also provide a convenient Ruby gem called <a href="http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-text-log-files-in-unix">remote_syslog</a> that can be configured to read a configured set of log files and send them to Papertrail.</p>

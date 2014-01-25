@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: twitter | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/twitter/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/twitter/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Embedded Tweet Tag For Jekyll]]></title>
-    <link href="http://scottwb.github.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll/"/>
+    <link href="http://scottwb.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll/"/>
     <updated>2012-01-29T15:54:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll</id>
+    <id>http://scottwb.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll</id>
     <content type="html"><![CDATA[<p>A nice way to quote a tweet in your blog post is to use Twitter's <a href="https://dev.twitter.com/docs/embedded-tweets">Embedded Tweet</a> feature. Not only does it provide a familiar Twitter style, it also provides features like being able to directly retweet, follow, etc., without leaving your page. For example:</p>
 
 <p><div class='embed tweet'><blockquote class="twitter-tweet" align="center" width="350"><p>Best analogy I find so far for explain concept of ScrumMaster to new devops is Tooth Fairy.</p>&mdash; DevOps Borat (@DEVOPS_BORAT) <a href="https://twitter.com/DEVOPS_BORAT/statuses/159849628819402752">January 19, 2012</a></blockquote>
@@ -50,9 +50,9 @@
   
   <entry>
     <title type="html"><![CDATA[Twitter Image Search and Download]]></title>
-    <link href="http://scottwb.github.com/blog/2012/01/14/twitter-image-search-and-download/"/>
+    <link href="http://scottwb.com/blog/2012/01/14/twitter-image-search-and-download/"/>
     <updated>2012-01-14T14:03:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/01/14/twitter-image-search-and-download</id>
+    <id>http://scottwb.com/blog/2012/01/14/twitter-image-search-and-download</id>
     <content type="html"><![CDATA[<p>Last night the sunset in the Seattle area was in rare form. You might have thought there was a <a href="http://www.funnyordie.com/videos/dcf83410c7/insane-double-rainbow-guy">double rainbow</a> by the way everyone was going on about it. My wife even noted that her Facebook feed was filled with pictures of it.</p>
 
 <p>So I thought it would be funny to scour Twitter for all the pictures of it that I could find and post them to Facebook just to be a smart-ass.</p>

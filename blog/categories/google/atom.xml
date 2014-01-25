@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: google | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/google/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/google/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Tracking Facebook Ads With Google Analytics]]></title>
-    <link href="http://scottwb.github.com/blog/2012/01/16/tracking-facebook-ads-with-google-analytics/"/>
+    <link href="http://scottwb.com/blog/2012/01/16/tracking-facebook-ads-with-google-analytics/"/>
     <updated>2012-01-16T13:37:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/01/16/tracking-facebook-ads-with-google-analytics</id>
+    <id>http://scottwb.com/blog/2012/01/16/tracking-facebook-ads-with-google-analytics</id>
     <content type="html"><![CDATA[<p>By default, Google Analytics does not do a very good job at categorizing traffic you receive from placing an ad on an external ad network such as Facebook Ads. In the case of Facebook in particular, traffic referred from your ad will show up as "direct" or generically as "facebook" because of they way the redirect the user to your ad through their own analytics back-end.</p>
 
 <p>The intended way to track through this redirection is using "UTM codes": parameters appended to the URL you use in your ad, that lets Google track that user's behavior on your site for the lifecycle of their visit. This is great, because you want to know more than just how many people have clicked on your ad. You want to know what they do once they get to your site (e.g.: if they buy something).</p>

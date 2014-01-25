@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: career | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/career/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/career/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[The Joys of Working From Home]]></title>
-    <link href="http://scottwb.github.com/blog/2012/08/15/the-joys-of-working-from-home/"/>
+    <link href="http://scottwb.com/blog/2012/08/15/the-joys-of-working-from-home/"/>
     <updated>2012-08-15T17:21:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/08/15/the-joys-of-working-from-home</id>
+    <id>http://scottwb.com/blog/2012/08/15/the-joys-of-working-from-home</id>
     <content type="html"><![CDATA[<p><a href="http://www.flickr.com/photos/scottwb69/sets/72157630674264242/detail/"><img class="left" src="http://farm9.staticflickr.com/8022/7612882390_880e5abdc8.jpg"></a></p>
 
 <p>I work in a team that is distributed around the country, where everyone works from their home offices. Sounds great, doesn't it? Well, it's not for everyone. First, you have to be seriously self-motivated. Personally, I get more done at home than I ever have at an office, because I get to choose when to be distracted and <em>I'm good at staying focused</em>. For some people, choosing when to be distracted is a curse. They choose to be distracted all the time. Facebook, twitter, bathroom, kitchen, twitter, kids, etc.</p>
@@ -57,9 +57,9 @@
   
   <entry>
     <title type="html"><![CDATA[My New Home]]></title>
-    <link href="http://scottwb.github.com/blog/2012/04/27/my-new-home/"/>
+    <link href="http://scottwb.com/blog/2012/04/27/my-new-home/"/>
     <updated>2012-04-27T13:00:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/04/27/my-new-home</id>
+    <id>http://scottwb.com/blog/2012/04/27/my-new-home</id>
     <content type="html"><![CDATA[<p>I am pleased to announce that I have found my new home. As of next week, I'll be starting my new position as the VP of Engineering at <a href="http://www.validas.com/">Validas</a>.</p>
 
 <p><a href="http://www.validas.com/"><img class="left" src="/images/validas-logo.png" title="Validas" alt="Validas"></a></p>
@@ -83,9 +83,9 @@
   
   <entry>
     <title type="html"><![CDATA[Moving On]]></title>
-    <link href="http://scottwb.github.com/blog/2012/03/06/moving-on/"/>
+    <link href="http://scottwb.com/blog/2012/03/06/moving-on/"/>
     <updated>2012-03-06T12:25:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/03/06/moving-on</id>
+    <id>http://scottwb.com/blog/2012/03/06/moving-on</id>
     <content type="html"><![CDATA[<p>Last week I resigned my position as CTO at <a href="http://www.balassanianenterprises.com/">Balassanian Enterprises</a>.</p>
 
 <p>Those of you who know me know that this is <em>huge</em>. I've been working closely with the founder, Edward Balassanian, for a <em>long</em> time. It's been spread over multiple companies and an array of varying products, but it's always been a shared ethos with the same core group of people that has defined that period of my career. Leaving that behind feels a bit like an emotional breakup. Such a big part of my professional and personal identity was wrapped up in how we worked together, what we built, where we've been, and our vision of the future. We put everything into it.</p>

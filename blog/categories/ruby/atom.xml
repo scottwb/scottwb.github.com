@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: ruby | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/ruby/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/ruby/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Defeating The Infamous CHEF-3694 Warning]]></title>
-    <link href="http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/"/>
+    <link href="http://scottwb.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/"/>
     <updated>2014-01-24T19:47:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning</id>
+    <id>http://scottwb.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning</id>
     <content type="html"><![CDATA[<p><em><strong>TL;DR:</strong> I hate the CHEF-3694 warning, so I made a <a href="https://github.com/facetdigital/chef_resource_merging">cookbook</a> to get rid of it. YMMV.</em></p>
 
 <p>Resource cloning in Chef is a bit of a minefield. They have a ticket known as <a href="https://tickets.opscode.com/browse/CHEF-3694">CHEF-3694</a> saying that the feature should be removed, and indicating that it will be by the time Chef 12.0.0 comes out. However, a lot of their Opscode-developed community cookbooks use (abuse?) resource cloning. The result is that you get tons of warnings about resource cloning that look like this:</p>
@@ -247,9 +247,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Optimistic Locking With Couchbase and Ruby]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/"/>
+    <link href="http://scottwb.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/"/>
     <updated>2013-11-11T10:35:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby</id>
+    <id>http://scottwb.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby</id>
     <content type="html"><![CDATA[<p>Concurrent modification of shared data can be a problem in any distributed system regardless of what data store you are using. With ACID-compliant relational databases, a common tactic is to use pessimistic locking at the table or row level. Most NoSQL data stores do not have a pessimistic lock operation, and even when they do, it is often considered a performance hazard. So, most applications do not lock objects before writing them to a NoSQL datastore (or they use an external lock of some sort). This can quickly become a problem when you have a distributed system with write contention, as shown in the figure below:</p>
 
 <p><img class="center" src="/images/posts/2013-11-11-optimistic-locking-with-couchbase-and-ruby/wrong.png"></p>
@@ -339,9 +339,9 @@ end</p>
   
   <entry>
     <title type="html"><![CDATA[Defeating The Infamous Mechanize "Too Many Connection Resets" Bug]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/"/>
+    <link href="http://scottwb.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/"/>
     <updated>2013-11-09T07:56:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug</id>
+    <id>http://scottwb.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug</id>
     <content type="html"><![CDATA[<p>Have you ever seen this nasty, obnoxious error when using the Mechanize gem to write a screen scraper in Ruby?</p>
 
 <p><code>
@@ -429,9 +429,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Easy Papertrail Deployment Using Rake]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
+    <link href="http://scottwb.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
     <updated>2013-11-08T06:37:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
+    <id>http://scottwb.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
     <content type="html"><![CDATA[<p><a href="http://papertrailapp.com/">Papertrail</a> is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, across numerous hosts. Having all your logs in one place, live tail-able, searchable, and archived is key to debugging such systems in production.</p>
 
 <p>There are a few ways to set it up, as documented on their quick start page, such as a system-wide installation via <a href="http://community.opscode.com/cookbooks/papertrail-rsyslog">Chef</a>, or configuring your app to use the syslog protocol. They also provide a convenient Ruby gem called <a href="http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-text-log-files-in-unix">remote_syslog</a> that can be configured to read a configured set of log files and send them to Papertrail.</p>
@@ -515,9 +515,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Quick and Dirty CampaignMonitor Webhook Management]]></title>
-    <link href="http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/"/>
+    <link href="http://scottwb.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/"/>
     <updated>2013-06-24T16:33:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management</id>
+    <id>http://scottwb.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management</id>
     <content type="html"><![CDATA[<p>You've got a CampaignMonitor mailing list and you're using their API to add/update/remove subscribers as they sign up for your app and opt-in to your mailing list. Great. But you also want to know when they unsubscribe from your newsletter, or when an existing user subscribes via a separate newsletter form on your website, and be able to keep that information sync'd with your user database.</p>
 
 <p>CampaignMonitor provides the ability to create <a href="http://www.campaignmonitor.com/api/webhooks/">Webhooks</a> that will drive an HTTP POST callback to your app when subscribe/unsubscribe events happen. Once you dive into this, you'll realize that you also need a way to deploy and update your webhooks. They only allow you to do this through their API -- there is no GUI for it.</p>

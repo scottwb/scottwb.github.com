@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: addthis | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/addthis/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/addthis/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Using AddThis With jQuery Mobile]]></title>
-    <link href="http://scottwb.github.com/blog/2012/01/23/using-addthis-with-jquery-mobile/"/>
+    <link href="http://scottwb.com/blog/2012/01/23/using-addthis-with-jquery-mobile/"/>
     <updated>2012-01-23T14:38:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/01/23/using-addthis-with-jquery-mobile</id>
+    <id>http://scottwb.com/blog/2012/01/23/using-addthis-with-jquery-mobile</id>
     <content type="html"><![CDATA[<p>Because of the way AddThis works, it can be tricky to use the <a href="http://www.addthis.com/">AddThis</a> sharing widget within sections of a page that are dynamically vloaded via AJAX. The main <a href="http://www.addthis.com/forum/viewtopic.php?f=8&amp;t=13982&amp;st=0&amp;sk=t&amp;sd=a&amp;start=20">trick they suggest in their forum</a> is to re-initialize the script after you've dynamically added or modified an AddThis widget. This can be done with a method like this:</p>
 
 <p>``` javascript

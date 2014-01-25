@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: philosophy | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/philosophy/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/philosophy/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Inspiration is Perishable]]></title>
-    <link href="http://scottwb.github.com/blog/2012/02/09/inspiration-is-perishable/"/>
+    <link href="http://scottwb.com/blog/2012/02/09/inspiration-is-perishable/"/>
     <updated>2012-02-09T07:49:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/02/09/inspiration-is-perishable</id>
+    <id>http://scottwb.com/blog/2012/02/09/inspiration-is-perishable</id>
     <content type="html"><![CDATA[<p><a href="http://www.amazon.com/gp/product/B002MUAJ2A/ref=as_li_ss_il?ie=UTF8&amp;tag=sleepcodin-20&amp;linkCode=as2&amp;camp=1789&amp;creative=390957&amp;creativeASIN=B002MUAJ2A"><img class="left" src="http://ws.assoc-amazon.com/widgets/q?<em>encoding=UTF8&amp;Format=</em>SL200_&amp;ASIN=B002MUAJ2A&amp;MarketPlace=US&amp;ID=AsinImage&amp;WS=1&amp;tag=sleepcodin-20&amp;ServiceVersion=20070822" title="Rework" alt="rework"></a></p>
 
 <p>I woke up inspired to build something new this morning. I also woke up with this phrase echoing through my head: "Inspiration has a shelf life". I laid in bed staring at the ceiling reciting to myself, "If you're inspired now, do it now. Otherwise, it won't ever happen."</p>

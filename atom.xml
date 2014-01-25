@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Defeating The Infamous CHEF-3694 Warning]]></title>
-    <link href="http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/"/>
+    <link href="http://scottwb.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/"/>
     <updated>2014-01-24T19:47:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning</id>
+    <id>http://scottwb.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning</id>
     <content type="html"><![CDATA[<p><em><strong>TL;DR:</strong> I hate the CHEF-3694 warning, so I made a <a href="https://github.com/facetdigital/chef_resource_merging">cookbook</a> to get rid of it. YMMV.</em></p>
 
 <p>Resource cloning in Chef is a bit of a minefield. They have a ticket known as <a href="https://tickets.opscode.com/browse/CHEF-3694">CHEF-3694</a> saying that the feature should be removed, and indicating that it will be by the time Chef 12.0.0 comes out. However, a lot of their Opscode-developed community cookbooks use (abuse?) resource cloning. The result is that you get tons of warnings about resource cloning that look like this:</p>
@@ -41,13 +41,13 @@
 
 <p>Here&#8217;s an example of stock <code>perl</code> and <code>iptables</code> cookbooks causing this problem:</p>
 
-<p><a href="http://scottwb.github.com/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"><img class="center" src="http://scottwb.github.com/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"></a></p>
+<p><a href="http://scottwb.com/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"><img class="center" src="http://scottwb.com/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-perl.png"></a></p>
 
 <p>I really wouldn&#8217;t want <code>perl</code> and <code>iptables</code> to have to coordinate between each other in order to avoid this warning. Perhaps there is a way to re-order them? Not that I could figure out&#8230;at least not without either making dangerous assumptions or editing stock community cookbook code.</p>
 
 <p>Even so&#8230;there are cookbooks that have this problem by themselves without the help of other cookbooks. For example, one of the most popular cookbooks, <code>apache2</code>:</p>
 
-<p><a href="http://scottwb.github.com/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"><img class="center" src="http://scottwb.github.com/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"></a></p>
+<p><a href="http://scottwb.com/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"><img class="center" src="http://scottwb.com/images/posts/2014-01-24-defeating-the-infamous-chef-3694-warning/CHEF-3694-apache.png"></a></p>
 
 <h2>Can we just remove resource cloning?</h2>
 
@@ -364,12 +364,12 @@
   
   <entry>
     <title type="html"><![CDATA[Optimistic Locking With Couchbase and Ruby]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/"/>
+    <link href="http://scottwb.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/"/>
     <updated>2013-11-11T10:35:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby</id>
+    <id>http://scottwb.com/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby</id>
     <content type="html"><![CDATA[<p>Concurrent modification of shared data can be a problem in any distributed system regardless of what data store you are using. With ACID-compliant relational databases, a common tactic is to use pessimistic locking at the table or row level. Most NoSQL data stores do not have a pessimistic lock operation, and even when they do, it is often considered a performance hazard. So, most applications do not lock objects before writing them to a NoSQL datastore (or they use an external lock of some sort). This can quickly become a problem when you have a distributed system with write contention, as shown in the figure below:</p>
 
-<p><img class="center" src="http://scottwb.github.com/images/posts/2013-11-11-optimistic-locking-with-couchbase-and-ruby/wrong.png"></p>
+<p><img class="center" src="http://scottwb.com/images/posts/2013-11-11-optimistic-locking-with-couchbase-and-ruby/wrong.png"></p>
 
 <p>One of the nice features of Couchbase is its &#8220;CAS&#8221; operation. This provides the ability to do an atomic check-and-set operation. You can set the value of a key, providing the last known version identifier (called a &#8220;CAS value&#8221;). The write will succeed if the document has not been modified since you read it, or it will fail if it has been modified and now has a different CAS value.</p>
 
@@ -380,7 +380,7 @@
 
 <p>With this, the figure above would look like this:</p>
 
-<p><img class="center" src="http://scottwb.github.com/images/posts/2013-11-11-optimistic-locking-with-couchbase-and-ruby/right.png"></p>
+<p><img class="center" src="http://scottwb.com/images/posts/2013-11-11-optimistic-locking-with-couchbase-and-ruby/right.png"></p>
 
 <p>There are a few things that are important to note about this technique.</p>
 
@@ -488,9 +488,9 @@
   
   <entry>
     <title type="html"><![CDATA[5 Things Your Code Must Be]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/10/5-things-your-code-must-be/"/>
+    <link href="http://scottwb.com/blog/2013/11/10/5-things-your-code-must-be/"/>
     <updated>2013-11-10T06:47:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/10/5-things-your-code-must-be</id>
+    <id>http://scottwb.com/blog/2013/11/10/5-things-your-code-must-be</id>
     <content type="html"><![CDATA[<p>If you work for me, with me, or near me, there are certain qualities of your code that must be met before I will let you get away with calling it &#8220;done&#8221;. Developers love to brag about a piece of code being done the second it sort of works for the main &#8220;happy path&#8221; use case it was intended for&#8230;on their development system. Developers are also optimists when it comes to estimation. Some of that has to do with their enthusiasm for achieving the &#8220;done&#8221; state based on their own notion of just having solved the base problem they set out to solve.</p>
 
 <p>This creates all kinds of schedule problems, expectation/reality mismatch problems with management, marketing, sales, etc.</p>
@@ -526,9 +526,9 @@
   
   <entry>
     <title type="html"><![CDATA[Defeating The Infamous Mechanize "Too Many Connection Resets" Bug]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/"/>
+    <link href="http://scottwb.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/"/>
     <updated>2013-11-09T07:56:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug</id>
+    <id>http://scottwb.com/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug</id>
     <content type="html"><![CDATA[<p>Have you ever seen this nasty, obnoxious error when using the Mechanize gem to write a screen scraper in Ruby?</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -663,9 +663,9 @@
   
   <entry>
     <title type="html"><![CDATA[Easy Papertrail Deployment Using Rake]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
+    <link href="http://scottwb.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
     <updated>2013-11-08T06:37:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
+    <id>http://scottwb.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
     <content type="html"><![CDATA[<p><a href="http://papertrailapp.com/">Papertrail</a> is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, across numerous hosts. Having all your logs in one place, live tail-able, searchable, and archived is key to debugging such systems in production.</p>
 
 <p>There are a few ways to set it up, as documented on their quick start page, such as a system-wide installation via <a href="http://community.opscode.com/cookbooks/papertrail-rsyslog">Chef</a>, or configuring your app to use the syslog protocol. They also provide a convenient Ruby gem called <a href="http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-text-log-files-in-unix">remote_syslog</a> that can be configured to read a configured set of log files and send them to Papertrail.</p>
@@ -777,9 +777,9 @@
   
   <entry>
     <title type="html"><![CDATA[Always-On HTTPS With Nginx Behind an ELB]]></title>
-    <link href="http://scottwb.github.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/"/>
+    <link href="http://scottwb.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/"/>
     <updated>2013-10-28T18:42:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb</id>
+    <id>http://scottwb.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb</id>
     <content type="html"><![CDATA[<p>A while back, I wrote about <a href="http://scottwb.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/">configuring a Rails app to always enforce HTTPS behind an ELB</a>. The main problem is that it&#8217;s easy to setup the blanket requirement for HTTPS, but when you are behind an ELB, where the ELB is acting as the HTTPS endpoint and only sending HTTP traffic to your server, you break the ability to respond with an <code>HTTP 200 OK</code> response for the health check that the ELB needs. This is because your blanket HTTPS enforcement will redirect the ELB&#8217;s health check from HTTP to HTTPS &#8211; and that redirection is not considered to be a healthy response by the ELB.</p>
 
 <p>The same applies to any server you&#8217;re running behind an ELB in this fashion.</p>
@@ -895,9 +895,9 @@
   
   <entry>
     <title type="html"><![CDATA[Quick and Dirty CampaignMonitor Webhook Management]]></title>
-    <link href="http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/"/>
+    <link href="http://scottwb.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/"/>
     <updated>2013-06-24T16:33:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management</id>
+    <id>http://scottwb.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management</id>
     <content type="html"><![CDATA[<p>You&#8217;ve got a CampaignMonitor mailing list and you&#8217;re using their API to add/update/remove subscribers as they sign up for your app and opt-in to your mailing list. Great. But you also want to know when they unsubscribe from your newsletter, or when an existing user subscribes via a separate newsletter form on your website, and be able to keep that information sync&#8217;d with your user database.</p>
 
 <p>CampaignMonitor provides the ability to create <a href="http://www.campaignmonitor.com/api/webhooks/">Webhooks</a> that will drive an HTTP POST callback to your app when subscribe/unsubscribe events happen. Once you dive into this, you&#8217;ll realize that you also need a way to deploy and update your webhooks. They only allow you to do this through their API &#8211; there is no GUI for it.</p>
@@ -1017,9 +1017,9 @@
   
   <entry>
     <title type="html"><![CDATA[Spicy Summer Drink]]></title>
-    <link href="http://scottwb.github.com/blog/2013/06/21/spicy-summer-drink/"/>
+    <link href="http://scottwb.com/blog/2013/06/21/spicy-summer-drink/"/>
     <updated>2013-06-21T20:08:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2013/06/21/spicy-summer-drink</id>
+    <id>http://scottwb.com/blog/2013/06/21/spicy-summer-drink</id>
     <content type="html"><![CDATA[<p>Introducing the &#8220;Picante Paloma&#8221;. It&#8217;s a sweet, spicy, and refreshing drink that&#8217;s perfect for the first day of summer. This is a mix of a recipe my wife and I found on the internet, a drink we tasted at a friend&#8217;s wedding called &#8220;Late For Work&#8221;, and our own experimentation. It&#8217;s more-or-less paleo-friendly, depending on how picky you are about the ingredients.</p>
 
 <!-- MORE -->
@@ -1080,9 +1080,9 @@
   
   <entry>
     <title type="html"><![CDATA[Using NewRelic With Custom Ruby Worker Daemons]]></title>
-    <link href="http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/"/>
+    <link href="http://scottwb.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/"/>
     <updated>2013-05-23T07:48:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons</id>
+    <id>http://scottwb.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons</id>
     <content type="html"><![CDATA[<p>The NewRelic Ruby Agent comes with great support for Rails, Sinatra, and other frameworks and web servers out of the box. It also supports background jobs for frameworks like DelayedJob and Resque.</p>
 
 <p>But what if you have your own custom background worker mechanism?</p>
@@ -1282,9 +1282,9 @@
   
   <entry>
     <title type="html"><![CDATA[Always-On HTTPS With Rails Behind an ELB]]></title>
-    <link href="http://scottwb.github.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/"/>
+    <link href="http://scottwb.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/"/>
     <updated>2013-02-06T11:43:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb</id>
+    <id>http://scottwb.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb</id>
     <content type="html"><![CDATA[<p>So you want to run your Rails site such that it always uses HTTPS, and you want all HTTP URLs to redirect to their HTTPS counterparts? Typically you use <code>config.force_ssl = true</code> in your initializer, or you use <code>force_ssl</code> in your controllers. For various reasons having to do with late-binding configuration, I have typically not been able to use the <code>config.force_ssl</code> method. This means the easiest way to force the whole site to use HTTPS has been to use <code>force_ssl</code> on the base <code>ApplicationController</code>, like this:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -1402,9 +1402,9 @@
   
   <entry>
     <title type="html"><![CDATA[HSTS on Rails]]></title>
-    <link href="http://scottwb.github.com/blog/2013/02/06/hsts-on-rails/"/>
+    <link href="http://scottwb.com/blog/2013/02/06/hsts-on-rails/"/>
     <updated>2013-02-06T09:47:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/02/06/hsts-on-rails</id>
+    <id>http://scottwb.com/blog/2013/02/06/hsts-on-rails</id>
     <content type="html"><![CDATA[<p><a href="http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">HTTP Strict Transport Security</a> (HSTS) is a recent specification aimed at stopping a certain type of man-in-the-middle attack known as <em>SSL Stripping</em>. By default, when a user types &#8220;example.com&#8221; into their browser, the browser prefixes that with &#8220;http://&#8221;. A man-in-the-middle attack can hijack the connection before the server redirect to HTTPS gets back to the browser, spoofing the site and potentially luring the user into providing sensitive data to the attacker.</p>
 
 <p>You can read a nice explanation of this attack, and how HSTS helps to prevent it <a href="http://www.imperialviolet.org/2012/07/19/hope9talk.html">here</a>.</p>
@@ -1436,9 +1436,9 @@
   
   <entry>
     <title type="html"><![CDATA[Cohort Analysis]]></title>
-    <link href="http://scottwb.github.com/blog/2013/01/21/cohort-analysis/"/>
+    <link href="http://scottwb.com/blog/2013/01/21/cohort-analysis/"/>
     <updated>2013-01-21T13:58:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/01/21/cohort-analysis</id>
+    <id>http://scottwb.com/blog/2013/01/21/cohort-analysis</id>
     <content type="html"><![CDATA[<p>After a few conversations with a former colleauge about statistics, metrics, and analytics, I thought I&#8217;d dig up some good articles to summarize some of the key Lean Startup principles surrounding metrics and data-driven decision-making for those who haven&#8217;t had the pleasure of reading Eric Reis&#8217;s book <em>Lean Startup</em>. That turned into a blog post about what metrics we report as developers and ops guys, and why we need to focus on <em>Actionable Metrics</em> over <em>Vanity Metrics</em>.</p>
 
 <p> My goal is to provide a little background on <em>Actionable Metrics</em> and how they differ from <em>Vanity Metrics</em>. Understanding this is a central theme of the book <em>Lean Startup</em>, by Eric Reis, and the writings and teachings of a number of other prominent startup/entrepreneur/lean proponents such as Steve Blank, Dave McClure, and Ash Maurya. Fred Wilson of Union Square Ventures, has been quoted saying, &#8220;one of our firm&#8217;s favorite measurements is the cohort analysis&#8221;.</p>
@@ -1494,9 +1494,9 @@
   
   <entry>
     <title type="html"><![CDATA[Provision and Bootstrap Windows EC2 Instances With Chef]]></title>
-    <link href="http://scottwb.github.com/blog/2012/12/13/provision-and-bootstrap-windows-ec2-instances-with-chef/"/>
+    <link href="http://scottwb.com/blog/2012/12/13/provision-and-bootstrap-windows-ec2-instances-with-chef/"/>
     <updated>2012-12-13T05:17:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/12/13/provision-and-bootstrap-windows-ec2-instances-with-chef</id>
+    <id>http://scottwb.com/blog/2012/12/13/provision-and-bootstrap-windows-ec2-instances-with-chef</id>
     <content type="html"><![CDATA[<p>This post illustrates how you can have a single script on your workstation (yes, of course, it&#8217;s a Mac) that provisions a new Windows EC2 instance and bootstraps it using Opscode Chef &#8211; written from the point of view of someone who is used to doing this all the time with ease for Linux instances using the <code>knife-ec2</code> gem. I&#8217;ll assume the reader:</p>
 
 <ul>
@@ -1807,9 +1807,9 @@
   
   <entry>
     <title type="html"><![CDATA[The Joys of Working From Home]]></title>
-    <link href="http://scottwb.github.com/blog/2012/08/15/the-joys-of-working-from-home/"/>
+    <link href="http://scottwb.com/blog/2012/08/15/the-joys-of-working-from-home/"/>
     <updated>2012-08-15T17:21:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/08/15/the-joys-of-working-from-home</id>
+    <id>http://scottwb.com/blog/2012/08/15/the-joys-of-working-from-home</id>
     <content type="html"><![CDATA[<p><a href="http://www.flickr.com/photos/scottwb69/sets/72157630674264242/detail/"><img class="left" src="http://farm9.staticflickr.com/8022/7612882390_880e5abdc8.jpg"></a></p>
 
 <p>I work in a team that is distributed around the country, where everyone works from their home offices. Sounds great, doesn&#8217;t it? Well, it&#8217;s not for everyone. First, you have to be seriously self-motivated. Personally, I get more done at home than I ever have at an office, because I get to choose when to be distracted and <em>I&#8217;m good at staying focused</em>. For some people, choosing when to be distracted is a curse. They choose to be distracted all the time. Facebook, twitter, bathroom, kitchen, twitter, kids, etc.</p>
@@ -1849,9 +1849,9 @@
   
   <entry>
     <title type="html"><![CDATA[Merge Git Repositories and Preseve Commit History]]></title>
-    <link href="http://scottwb.github.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history/"/>
+    <link href="http://scottwb.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history/"/>
     <updated>2012-07-14T11:42:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history</id>
+    <id>http://scottwb.com/blog/2012/07/14/merge-git-repositories-and-preseve-commit-history</id>
     <content type="html"><![CDATA[<p>Every time I want to combine two git repositories into a new high-level repository, I have to re-figure it out. I decided this time to write it down. Maybe someone else will find this useful too.</p>
 
 <p>Here is my scenario: I have two repositories. I want to make a new empty repository and move the other two into it as subdirectories. I also want to preserve all the commit history of the original repositories.</p>
@@ -2044,9 +2044,9 @@
   
   <entry>
     <title type="html"><![CDATA[Customize Attribute Accessors on Ripple Models]]></title>
-    <link href="http://scottwb.github.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models/"/>
+    <link href="http://scottwb.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models/"/>
     <updated>2012-07-12T09:18:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models</id>
+    <id>http://scottwb.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models</id>
     <content type="html"><![CDATA[<p>Sometimes in your Ruby on Rails models, you want to override the attribute accessors to do additional processing on the values on their way in and out of the data storage layer. Custom serialization is a common use of this.</p>
 
 <p>For example, when using ActiveRecord for your Rails models, you can provide custom attribute accessors, say to serialize a Hash to JSON, using the <code>read_attribute</code> and <code>write_attribute</code> methods like this:</p>
@@ -2150,9 +2150,9 @@
   
   <entry>
     <title type="html"><![CDATA[Show jQuery Mobile Page Loading With Text And Spinner]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/"/>
+    <link href="http://scottwb.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/"/>
     <updated>2012-06-30T21:47:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner</id>
+    <id>http://scottwb.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner</id>
     <content type="html"><![CDATA[<p>I like jQuery Mobile&#8217;s page loading spinner. When you transition between pages it displays a nice subtle spinner while the page loads, only if the page load takes more than a configured number of milliseconds.</p>
 
 <p>So, I wanted to use their page-loading spinner for in-page wait times in my app. The user clicks something, I do some AJAX stuff and show them a nice spinner with a message telling them what&#8217;s going on until the results come back. jQuery Mobile has javascript functions for this called <code>$.mobile.showPageLoadingMsg</code> and <code>$.hidePageLoadingMsg</code>. The problem is, you can either show a spinner only, or a text-message only. You can&#8217;t show both a spinner <em>and</em> a text message, even though they clearly support it. Well, you <em>can</em> do that if you have the global setting <code>$.mobile.loadingMessageTextVisible = true</code>, but then you get a text with your normal page-load spinners.</p>
@@ -2183,9 +2183,9 @@
   
   <entry>
     <title type="html"><![CDATA[Compile A Single CoffeeScript File From Your Rails Project]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project/"/>
+    <link href="http://scottwb.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project/"/>
     <updated>2012-06-30T20:56:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project</id>
+    <id>http://scottwb.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project</id>
     <content type="html"><![CDATA[<p>Using Rails 3.2 (or 3.1 for that matter), you typically have CoffeeScript (and a javascript engine like therubyracer/V8) installed as gems - probably via Bundler from your Gemfile, possibly in a per-project RVM gemset.</p>
 
 <p>It doesn&#8217;t seem that this type of setup includes direct access to the <code>coffee</code> command-line compiler. Instead the <code>coffee-script</code> gem uses calls directly to the compiler. Sometimes I&#8217;d just like to compile one of the CoffeeScript files in my Rails app just to look at the javascript, or maybe to export it somewhere that I&#8217;m not using CoffeeScript.</p>
@@ -2220,9 +2220,9 @@
   
   <entry>
     <title type="html"><![CDATA[Reload The Same Page Without Blinking On jQuery Mobile]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile/"/>
+    <link href="http://scottwb.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile/"/>
     <updated>2012-06-29T09:53:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile</id>
+    <id>http://scottwb.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile</id>
     <content type="html"><![CDATA[<p>When using jQuery Mobile, if you try to reload the current page from javascript using the usual tactics of assigning <code>window.location.href</code>, you might notice some unsightly artifacts and page blinking. This is particularly noticeable on iOS Mobile Safari (mainly on iPhone), because the reload also causes the address bar to slide down and back up.</p>
 
 <p>Below is function I made to refresh the current page successfully with no visible artifacts: no blinking, no address bar showing, transitions:</p>
@@ -2258,9 +2258,9 @@
   
   <entry>
     <title type="html"><![CDATA[jQuery Mobile Breaks Your HREFs on iOS Mobile Safari]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
+    <link href="http://scottwb.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
     <updated>2012-06-29T00:00:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
+    <id>http://scottwb.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
     <content type="html"><![CDATA[<p>Starting with verison 1.1.0RC1, jQuery Mobile changes the <code>href</code> of any link to be <code>#</code> when it is clicked, but <em>only on iOS Mobile Safari</em>. If you try to make a click handler that reads the <code>href</code> attribute, you will be surprised to find that it does not get the href you intended. For example:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>

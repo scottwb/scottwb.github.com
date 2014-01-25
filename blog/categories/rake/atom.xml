@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: rake | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/rake/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/rake/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Easy Papertrail Deployment Using Rake]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
+    <link href="http://scottwb.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
     <updated>2013-11-08T06:37:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
+    <id>http://scottwb.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
     <content type="html"><![CDATA[<p><a href="http://papertrailapp.com/">Papertrail</a> is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, across numerous hosts. Having all your logs in one place, live tail-able, searchable, and archived is key to debugging such systems in production.</p>
 
 <p>There are a few ways to set it up, as documented on their quick start page, such as a system-wide installation via <a href="http://community.opscode.com/cookbooks/papertrail-rsyslog">Chef</a>, or configuring your app to use the syslog protocol. They also provide a convenient Ruby gem called <a href="http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-text-log-files-in-unix">remote_syslog</a> that can be configured to read a configured set of log files and send them to Papertrail.</p>
@@ -101,9 +101,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Compile A Single CoffeeScript File From Your Rails Project]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project/"/>
+    <link href="http://scottwb.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project/"/>
     <updated>2012-06-30T20:56:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project</id>
+    <id>http://scottwb.com/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project</id>
     <content type="html"><![CDATA[<p>Using Rails 3.2 (or 3.1 for that matter), you typically have CoffeeScript (and a javascript engine like therubyracer/V8) installed as gems - probably via Bundler from your Gemfile, possibly in a per-project RVM gemset.</p>
 
 <p>It doesn't seem that this type of setup includes direct access to the <code>coffee</code> command-line compiler. Instead the <code>coffee-script</code> gem uses calls directly to the compiler. Sometimes I'd just like to compile one of the CoffeeScript files in my Rails app just to look at the javascript, or maybe to export it somewhere that I'm not using CoffeeScript.</p>
@@ -134,9 +134,9 @@ $ rake coffee:compile[app/assets/javascripts/mystuff.js.coffee]
   
   <entry>
     <title type="html"><![CDATA[Middleman Deployment Rakefile]]></title>
-    <link href="http://scottwb.github.com/blog/2012/02/24/middleman-deployment-rakefile/"/>
+    <link href="http://scottwb.com/blog/2012/02/24/middleman-deployment-rakefile/"/>
     <updated>2012-02-24T09:30:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/02/24/middleman-deployment-rakefile</id>
+    <id>http://scottwb.com/blog/2012/02/24/middleman-deployment-rakefile</id>
     <content type="html"><![CDATA[<p>I started tinkering with <a href="http://middlemanapp.com/">Middleman</a> the other day to build a small static website.</p>
 
 <p>In the past, I've used <a href="http://staticmatic.rubyforge.org/">StaticMatic</a>, <a href="http://jekyllrb.com/">Jekyll</a>, or <a href="http://octopress.org/">Octopress</a> for this sort of thing. Jekyll and Octopress are great for blogs. StaticMatic is great for prototyping a static site with Haml and Sass that you can easily migrate to your Rails app.</p>

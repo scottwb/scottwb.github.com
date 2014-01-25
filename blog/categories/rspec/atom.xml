@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: rspec | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/rspec/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/rspec/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Have Some Fun With Your Tests]]></title>
-    <link href="http://scottwb.github.com/blog/2012/01/13/have-some-fun-with-your-tests/"/>
+    <link href="http://scottwb.com/blog/2012/01/13/have-some-fun-with-your-tests/"/>
     <updated>2012-01-13T14:36:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/01/13/have-some-fun-with-your-tests</id>
+    <id>http://scottwb.com/blog/2012/01/13/have-some-fun-with-your-tests</id>
     <content type="html"><![CDATA[<p>I just came across this test case in some old code I had forgotten about:</p>
 
 <p>``` ruby

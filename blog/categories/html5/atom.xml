@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: html5 | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/html5/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/html5/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[HTML5 Placeholder Polyfill With jQuery Mobile]]></title>
-    <link href="http://scottwb.github.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile/"/>
+    <link href="http://scottwb.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile/"/>
     <updated>2012-02-22T11:29:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile</id>
+    <id>http://scottwb.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile</id>
     <content type="html"><![CDATA[<p>IE9 doesn't support the <code>placeholder</code> attribute on <code>input</code> elements. Why does this matter for a jQuery Mobile site? If you want to build a single mobile-first page with jQuery Mobile, and use resposive design techiniques to display the same page on desktop browsers, you might appreciate the ability to use the HTML5 <code>placeholder</code> in your design, and still need to support at least IE9.</p>
 
 <p>Using a <code>placeholder</code> on an input field is a nice way to save space on a mobile form. It lets you forgo the field labels while still telling the user what the fields are for. In many cases its utility goes beyond labeling; you might need it to express input requirements such as what unit of measurement to use in a "distance" field. This is just as useful in a desktop design as it is in a mobile design.</p>

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: riak | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/riak/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/riak/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Customize Attribute Accessors on Ripple Models]]></title>
-    <link href="http://scottwb.github.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models/"/>
+    <link href="http://scottwb.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models/"/>
     <updated>2012-07-12T09:18:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models</id>
+    <id>http://scottwb.com/blog/2012/07/12/customize-attribute-accessors-on-ripple-models</id>
     <content type="html"><![CDATA[<p>Sometimes in your Ruby on Rails models, you want to override the attribute accessors to do additional processing on the values on their way in and out of the data storage layer. Custom serialization is a common use of this.</p>
 
 <p>For example, when using ActiveRecord for your Rails models, you can provide custom attribute accessors, say to serialize a Hash to JSON, using the <code>read_attribute</code> and <code>write_attribute</code> methods like this:</p>

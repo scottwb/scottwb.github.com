@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: architecture | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/architecture/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/architecture/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[5 Things Your Code Must Be]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/10/5-things-your-code-must-be/"/>
+    <link href="http://scottwb.com/blog/2013/11/10/5-things-your-code-must-be/"/>
     <updated>2013-11-10T06:47:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/10/5-things-your-code-must-be</id>
+    <id>http://scottwb.com/blog/2013/11/10/5-things-your-code-must-be</id>
     <content type="html"><![CDATA[<p>If you work for me, with me, or near me, there are certain qualities of your code that must be met before I will let you get away with calling it "done". Developers love to brag about a piece of code being done the second it sort of works for the main "happy path" use case it was intended for...on their development system. Developers are also optimists when it comes to estimation. Some of that has to do with their enthusiasm for achieving the "done" state based on their own notion of just having solved the base problem they set out to solve.</p>
 
 <p>This creates all kinds of schedule problems, expectation/reality mismatch problems with management, marketing, sales, etc.</p>

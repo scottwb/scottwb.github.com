@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: jquery | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/jquery/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/jquery/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Show jQuery Mobile Page Loading With Text And Spinner]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/"/>
+    <link href="http://scottwb.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/"/>
     <updated>2012-06-30T21:47:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner</id>
+    <id>http://scottwb.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner</id>
     <content type="html"><![CDATA[<p>I like jQuery Mobile's page loading spinner. When you transition between pages it displays a nice subtle spinner while the page loads, only if the page load takes more than a configured number of milliseconds.</p>
 
 <p>So, I wanted to use their page-loading spinner for in-page wait times in my app. The user clicks something, I do some AJAX stuff and show them a nice spinner with a message telling them what's going on until the results come back. jQuery Mobile has javascript functions for this called <code>$.mobile.showPageLoadingMsg</code> and <code>$.hidePageLoadingMsg</code>. The problem is, you can either show a spinner only, or a text-message only. You can't show both a spinner <em>and</em> a text message, even though they clearly support it. Well, you <em>can</em> do that if you have the global setting <code>$.mobile.loadingMessageTextVisible = true</code>, but then you get a text with your normal page-load spinners.</p>
@@ -44,9 +44,9 @@ $.mobile.utils.hideWaitBox();
   
   <entry>
     <title type="html"><![CDATA[Reload The Same Page Without Blinking On jQuery Mobile]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile/"/>
+    <link href="http://scottwb.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile/"/>
     <updated>2012-06-29T09:53:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile</id>
+    <id>http://scottwb.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile</id>
     <content type="html"><![CDATA[<p>When using jQuery Mobile, if you try to reload the current page from javascript using the usual tactics of assigning <code>window.location.href</code>, you might notice some unsightly artifacts and page blinking. This is particularly noticeable on iOS Mobile Safari (mainly on iPhone), because the reload also causes the address bar to slide down and back up.</p>
 
 <p>Below is function I made to refresh the current page successfully with no visible artifacts: no blinking, no address bar showing, transitions:</p>
@@ -74,9 +74,9 @@ function refreshPage() {
   
   <entry>
     <title type="html"><![CDATA[jQuery Mobile Breaks Your HREFs on iOS Mobile Safari]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
+    <link href="http://scottwb.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
     <updated>2012-06-29T00:00:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
+    <id>http://scottwb.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
     <content type="html"><![CDATA[<p>Starting with verison 1.1.0RC1, jQuery Mobile changes the <code>href</code> of any link to be <code>#</code> when it is clicked, but <em>only on iOS Mobile Safari</em>. If you try to make a click handler that reads the <code>href</code> attribute, you will be surprised to find that it does not get the href you intended. For example:</p>
 
 <p><code>javascript
@@ -149,9 +149,9 @@ $.rails.href = function(element) {
   
   <entry>
     <title type="html"><![CDATA[HTML5 Placeholder Polyfill With jQuery Mobile]]></title>
-    <link href="http://scottwb.github.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile/"/>
+    <link href="http://scottwb.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile/"/>
     <updated>2012-02-22T11:29:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile</id>
+    <id>http://scottwb.com/blog/2012/02/22/html5-placeholder-polyfill-with-jquery-mobile</id>
     <content type="html"><![CDATA[<p>IE9 doesn't support the <code>placeholder</code> attribute on <code>input</code> elements. Why does this matter for a jQuery Mobile site? If you want to build a single mobile-first page with jQuery Mobile, and use resposive design techiniques to display the same page on desktop browsers, you might appreciate the ability to use the HTML5 <code>placeholder</code> in your design, and still need to support at least IE9.</p>
 
 <p>Using a <code>placeholder</code> on an input field is a nice way to save space on a mobile form. It lets you forgo the field labels while still telling the user what the fields are for. In many cases its utility goes beyond labeling; you might need it to express input requirements such as what unit of measurement to use in a "distance" field. This is just as useful in a desktop design as it is in a mobile design.</p>
@@ -207,9 +207,9 @@ input, textarea {
   
   <entry>
     <title type="html"><![CDATA[jQuery Mobile and Rails UJS Method Links]]></title>
-    <link href="http://scottwb.github.com/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links/"/>
+    <link href="http://scottwb.com/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links/"/>
     <updated>2012-02-17T19:59:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links</id>
+    <id>http://scottwb.com/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links</id>
     <content type="html"><![CDATA[<p>Rails UJS and jQuery Mobile do not play nice together when it comes to combining Rails UJS's handling of non-GET/POST links with jQuery Mobile's data attributes such as <code>data-ajax</code>, <code>data-direction</code>, and <code>data-transition</code>. This post demonstrates a quick hack you can use to remedy this.</p>
 
 <!-- MORE -->

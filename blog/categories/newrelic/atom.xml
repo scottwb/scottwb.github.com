@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: newrelic | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/newrelic/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/newrelic/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Using NewRelic With Custom Ruby Worker Daemons]]></title>
-    <link href="http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/"/>
+    <link href="http://scottwb.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/"/>
     <updated>2013-05-23T07:48:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons</id>
+    <id>http://scottwb.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons</id>
     <content type="html"><![CDATA[<p>The NewRelic Ruby Agent comes with great support for Rails, Sinatra, and other frameworks and web servers out of the box. It also supports background jobs for frameworks like DelayedJob and Resque.</p>
 
 <p>But what if you have your own custom background worker mechanism?</p>

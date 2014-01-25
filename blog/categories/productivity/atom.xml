@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: productivity | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/productivity/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/productivity/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[The Joys of Working From Home]]></title>
-    <link href="http://scottwb.github.com/blog/2012/08/15/the-joys-of-working-from-home/"/>
+    <link href="http://scottwb.com/blog/2012/08/15/the-joys-of-working-from-home/"/>
     <updated>2012-08-15T17:21:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/08/15/the-joys-of-working-from-home</id>
+    <id>http://scottwb.com/blog/2012/08/15/the-joys-of-working-from-home</id>
     <content type="html"><![CDATA[<p><a href="http://www.flickr.com/photos/scottwb69/sets/72157630674264242/detail/"><img class="left" src="http://farm9.staticflickr.com/8022/7612882390_880e5abdc8.jpg"></a></p>
 
 <p>I work in a team that is distributed around the country, where everyone works from their home offices. Sounds great, doesn't it? Well, it's not for everyone. First, you have to be seriously self-motivated. Personally, I get more done at home than I ever have at an office, because I get to choose when to be distracted and <em>I'm good at staying focused</em>. For some people, choosing when to be distracted is a curse. They choose to be distracted all the time. Facebook, twitter, bathroom, kitchen, twitter, kids, etc.</p>
@@ -57,9 +57,9 @@
   
   <entry>
     <title type="html"><![CDATA[Off The Grid - Part Two]]></title>
-    <link href="http://scottwb.github.com/blog/2012/02/13/off-the-grid-part-two/"/>
+    <link href="http://scottwb.com/blog/2012/02/13/off-the-grid-part-two/"/>
     <updated>2012-02-13T14:25:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/02/13/off-the-grid-part-two</id>
+    <id>http://scottwb.com/blog/2012/02/13/off-the-grid-part-two</id>
     <content type="html"><![CDATA[<p>It's been almost two weeks since my first <a href="/blog/2012/02/01/off-the-grid/">Off The Grid</a> post, so I figured I'd report back on how it's been going.</p>
 
 <p>The bottom line is that I really like not being constantly distracted by growl notifications, iPhone push notifications, and little beeps vying for my attention. The biggest issue I had with constant communication connectivity was these concentration-killers. By turning off growl and push notifications, shutting down all social networking apps, and setting pre-defined times to check all these channels, I freed my mind up to focus on being creative for longer spurts.</p>
@@ -76,9 +76,9 @@ My biggest concern about this experiment was that I wouldn't be able to resist c
   
   <entry>
     <title type="html"><![CDATA[Off The Grid]]></title>
-    <link href="http://scottwb.github.com/blog/2012/02/01/off-the-grid/"/>
+    <link href="http://scottwb.com/blog/2012/02/01/off-the-grid/"/>
     <updated>2012-02-01T21:24:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/02/01/off-the-grid</id>
+    <id>http://scottwb.com/blog/2012/02/01/off-the-grid</id>
     <content type="html"><![CDATA[<p>Tomorrow I am conducting an experiment: <em>I am going off the grid for a day.</em></p>
 
 <p>Well, not really. But I do have a plan for taming the distractions of the internet. I am going to turn off all push notifications on my phone and all growl notifications on my desktop. I am going to keep my email client closed, shut down the Twitter app, the Yammer app, and avoid opening Facebook in my browser and phone. Maybe I'll allow Google+ because it's quieter in there than it is in my office with the door shut. My instant messenger client will be set to "do not disturb".</p>

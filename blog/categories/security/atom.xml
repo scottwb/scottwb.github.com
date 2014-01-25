@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: security | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/security/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/security/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Always-On HTTPS With Nginx Behind an ELB]]></title>
-    <link href="http://scottwb.github.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/"/>
+    <link href="http://scottwb.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb/"/>
     <updated>2013-10-28T18:42:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb</id>
+    <id>http://scottwb.com/blog/2013/10/28/always-on-https-with-nginx-behind-an-elb</id>
     <content type="html"><![CDATA[<p>A while back, I wrote about <a href="http://scottwb.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/">configuring a Rails app to always enforce HTTPS behind an ELB</a>. The main problem is that it's easy to setup the blanket requirement for HTTPS, but when you are behind an ELB, where the ELB is acting as the HTTPS endpoint and only sending HTTP traffic to your server, you break the ability to respond with an <code>HTTP 200 OK</code> response for the health check that the ELB needs. This is because your blanket HTTPS enforcement will redirect the ELB's health check from HTTP to HTTPS -- and that redirection is not considered to be a healthy response by the ELB.</p>
 
 <p>The same applies to any server you're running behind an ELB in this fashion.</p>
@@ -97,9 +97,9 @@ add_header Strict-Transport-Security "max-age=31536000; includeSubDomains;";
   
   <entry>
     <title type="html"><![CDATA[Always-On HTTPS With Rails Behind an ELB]]></title>
-    <link href="http://scottwb.github.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/"/>
+    <link href="http://scottwb.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/"/>
     <updated>2013-02-06T11:43:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb</id>
+    <id>http://scottwb.com/blog/2013/02/06/always-on-https-with-rails-behind-an-elb</id>
     <content type="html"><![CDATA[<p>So you want to run your Rails site such that it always uses HTTPS, and you want all HTTP URLs to redirect to their HTTPS counterparts? Typically you use <code>config.force_ssl = true</code> in your initializer, or you use <code>force_ssl</code> in your controllers. For various reasons having to do with late-binding configuration, I have typically not been able to use the <code>config.force_ssl</code> method. This means the easiest way to force the whole site to use HTTPS has been to use <code>force_ssl</code> on the base <code>ApplicationController</code>, like this:</p>
 
 <p>``` ruby</p>
@@ -196,9 +196,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[HSTS on Rails]]></title>
-    <link href="http://scottwb.github.com/blog/2013/02/06/hsts-on-rails/"/>
+    <link href="http://scottwb.com/blog/2013/02/06/hsts-on-rails/"/>
     <updated>2013-02-06T09:47:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/02/06/hsts-on-rails</id>
+    <id>http://scottwb.com/blog/2013/02/06/hsts-on-rails</id>
     <content type="html"><![CDATA[<p><a href="http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security">HTTP Strict Transport Security</a> (HSTS) is a recent specification aimed at stopping a certain type of man-in-the-middle attack known as <em>SSL Stripping</em>. By default, when a user types "example.com" into their browser, the browser prefixes that with "http://". A man-in-the-middle attack can hijack the connection before the server redirect to HTTPS gets back to the browser, spoofing the site and potentially luring the user into providing sensitive data to the attacker.</p>
 
 <p>You can read a nice explanation of this attack, and how HSTS helps to prevent it <a href="http://www.imperialviolet.org/2012/07/19/hope9talk.html">here</a>.</p>

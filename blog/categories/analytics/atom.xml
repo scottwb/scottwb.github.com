@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: analytics | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/analytics/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/analytics/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Cohort Analysis]]></title>
-    <link href="http://scottwb.github.com/blog/2013/01/21/cohort-analysis/"/>
+    <link href="http://scottwb.com/blog/2013/01/21/cohort-analysis/"/>
     <updated>2013-01-21T13:58:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/01/21/cohort-analysis</id>
+    <id>http://scottwb.com/blog/2013/01/21/cohort-analysis</id>
     <content type="html"><![CDATA[<p>After a few conversations with a former colleauge about statistics, metrics, and analytics, I thought I'd dig up some good articles to summarize some of the key Lean Startup principles surrounding metrics and data-driven decision-making for those who haven't had the pleasure of reading Eric Reis's book <em>Lean Startup</em>. That turned into a blog post about what metrics we report as developers and ops guys, and why we need to focus on <em>Actionable Metrics</em> over <em>Vanity Metrics</em>.</p>
 
 <p> My goal is to provide a little background on <em>Actionable Metrics</em> and how they differ from <em>Vanity Metrics</em>. Understanding this is a central theme of the book <em>Lean Startup</em>, by Eric Reis, and the writings and teachings of a number of other prominent startup/entrepreneur/lean proponents such as Steve Blank, Dave McClure, and Ash Maurya. Fred Wilson of Union Square Ventures, has been quoted saying, "one of our firm's favorite measurements is the cohort analysis".</p>
@@ -73,9 +73,9 @@
   
   <entry>
     <title type="html"><![CDATA[Tracking Facebook Ads With Google Analytics]]></title>
-    <link href="http://scottwb.github.com/blog/2012/01/16/tracking-facebook-ads-with-google-analytics/"/>
+    <link href="http://scottwb.com/blog/2012/01/16/tracking-facebook-ads-with-google-analytics/"/>
     <updated>2012-01-16T13:37:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/01/16/tracking-facebook-ads-with-google-analytics</id>
+    <id>http://scottwb.com/blog/2012/01/16/tracking-facebook-ads-with-google-analytics</id>
     <content type="html"><![CDATA[<p>By default, Google Analytics does not do a very good job at categorizing traffic you receive from placing an ad on an external ad network such as Facebook Ads. In the case of Facebook in particular, traffic referred from your ad will show up as "direct" or generically as "facebook" because of they way the redirect the user to your ad through their own analytics back-end.</p>
 
 <p>The intended way to track through this redirection is using "UTM codes": parameters appended to the URL you use in your ad, that lets Google track that user's behavior on your site for the lifecycle of their visit. This is great, because you want to know more than just how many people have clicked on your ad. You want to know what they do once they get to your site (e.g.: if they buy something).</p>

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: chef | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/chef/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/chef/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Defeating The Infamous CHEF-3694 Warning]]></title>
-    <link href="http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/"/>
+    <link href="http://scottwb.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/"/>
     <updated>2014-01-24T19:47:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning</id>
+    <id>http://scottwb.com/blog/2014/01/24/defeating-the-infamous-chef-3694-warning</id>
     <content type="html"><![CDATA[<p><em><strong>TL;DR:</strong> I hate the CHEF-3694 warning, so I made a <a href="https://github.com/facetdigital/chef_resource_merging">cookbook</a> to get rid of it. YMMV.</em></p>
 
 <p>Resource cloning in Chef is a bit of a minefield. They have a ticket known as <a href="https://tickets.opscode.com/browse/CHEF-3694">CHEF-3694</a> saying that the feature should be removed, and indicating that it will be by the time Chef 12.0.0 comes out. However, a lot of their Opscode-developed community cookbooks use (abuse?) resource cloning. The result is that you get tons of warnings about resource cloning that look like this:</p>
@@ -247,9 +247,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Provision and Bootstrap Windows EC2 Instances With Chef]]></title>
-    <link href="http://scottwb.github.com/blog/2012/12/13/provision-and-bootstrap-windows-ec2-instances-with-chef/"/>
+    <link href="http://scottwb.com/blog/2012/12/13/provision-and-bootstrap-windows-ec2-instances-with-chef/"/>
     <updated>2012-12-13T05:17:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/12/13/provision-and-bootstrap-windows-ec2-instances-with-chef</id>
+    <id>http://scottwb.com/blog/2012/12/13/provision-and-bootstrap-windows-ec2-instances-with-chef</id>
     <content type="html"><![CDATA[<p>This post illustrates how you can have a single script on your workstation (yes, of course, it's a Mac) that provisions a new Windows EC2 instance and bootstraps it using Opscode Chef -- written from the point of view of someone who is used to doing this all the time with ease for Linux instances using the <code>knife-ec2</code> gem. I'll assume the reader:</p>
 
 <ul>

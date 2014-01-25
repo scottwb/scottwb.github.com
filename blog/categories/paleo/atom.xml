@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: paleo | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/paleo/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/paleo/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Spicy Summer Drink]]></title>
-    <link href="http://scottwb.github.com/blog/2013/06/21/spicy-summer-drink/"/>
+    <link href="http://scottwb.com/blog/2013/06/21/spicy-summer-drink/"/>
     <updated>2013-06-21T20:08:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2013/06/21/spicy-summer-drink</id>
+    <id>http://scottwb.com/blog/2013/06/21/spicy-summer-drink</id>
     <content type="html"><![CDATA[<p>Introducing the "Picante Paloma". It's a sweet, spicy, and refreshing drink that's perfect for the first day of summer. This is a mix of a recipe my wife and I found on the internet, a drink we tasted at a friend's wedding called "Late For Work", and our own experimentation. It's more-or-less paleo-friendly, depending on how picky you are about the ingredients.</p>
 
 <!-- MORE -->

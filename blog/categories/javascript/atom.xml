@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: javascript | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/javascript/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/javascript/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Show jQuery Mobile Page Loading With Text And Spinner]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/"/>
+    <link href="http://scottwb.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/"/>
     <updated>2012-06-30T21:47:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner</id>
+    <id>http://scottwb.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner</id>
     <content type="html"><![CDATA[<p>I like jQuery Mobile's page loading spinner. When you transition between pages it displays a nice subtle spinner while the page loads, only if the page load takes more than a configured number of milliseconds.</p>
 
 <p>So, I wanted to use their page-loading spinner for in-page wait times in my app. The user clicks something, I do some AJAX stuff and show them a nice spinner with a message telling them what's going on until the results come back. jQuery Mobile has javascript functions for this called <code>$.mobile.showPageLoadingMsg</code> and <code>$.hidePageLoadingMsg</code>. The problem is, you can either show a spinner only, or a text-message only. You can't show both a spinner <em>and</em> a text message, even though they clearly support it. Well, you <em>can</em> do that if you have the global setting <code>$.mobile.loadingMessageTextVisible = true</code>, but then you get a text with your normal page-load spinners.</p>
@@ -44,9 +44,9 @@ $.mobile.utils.hideWaitBox();
   
   <entry>
     <title type="html"><![CDATA[Reload The Same Page Without Blinking On jQuery Mobile]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile/"/>
+    <link href="http://scottwb.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile/"/>
     <updated>2012-06-29T09:53:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile</id>
+    <id>http://scottwb.com/blog/2012/06/29/reload-the-same-page-without-blinking-on-jquery-mobile</id>
     <content type="html"><![CDATA[<p>When using jQuery Mobile, if you try to reload the current page from javascript using the usual tactics of assigning <code>window.location.href</code>, you might notice some unsightly artifacts and page blinking. This is particularly noticeable on iOS Mobile Safari (mainly on iPhone), because the reload also causes the address bar to slide down and back up.</p>
 
 <p>Below is function I made to refresh the current page successfully with no visible artifacts: no blinking, no address bar showing, transitions:</p>
@@ -74,9 +74,9 @@ function refreshPage() {
   
   <entry>
     <title type="html"><![CDATA[jQuery Mobile Breaks Your HREFs on iOS Mobile Safari]]></title>
-    <link href="http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
+    <link href="http://scottwb.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
     <updated>2012-06-29T00:00:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
+    <id>http://scottwb.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
     <content type="html"><![CDATA[<p>Starting with verison 1.1.0RC1, jQuery Mobile changes the <code>href</code> of any link to be <code>#</code> when it is clicked, but <em>only on iOS Mobile Safari</em>. If you try to make a click handler that reads the <code>href</code> attribute, you will be surprised to find that it does not get the href you intended. For example:</p>
 
 <p><code>javascript
@@ -149,9 +149,9 @@ $.rails.href = function(element) {
   
   <entry>
     <title type="html"><![CDATA[Custom Error Handling With Express Resource Auto-Loading]]></title>
-    <link href="http://scottwb.github.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading/"/>
+    <link href="http://scottwb.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading/"/>
     <updated>2012-04-19T14:05:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading</id>
+    <id>http://scottwb.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading</id>
     <content type="html"><![CDATA[<p><span class='pullquote-right' data-pullquote='You get no control over how the errors are handled, and the default mechanism is ignorant of the requested format.'>
 <a href="https://github.com/visionmedia/express-resource">Express Resource</a> adds RESTful resource routing on top of the <a href="http://expressjs.com/">Express</a> framework for <a href="http://nodejs.org/">Node.js</a>. It includes a nice feature called "Auto-Loading" that allows you to define a single <code>load</code> method that will automatically be used to load your resource object from a URL id parameter and set it in the request object to be accessed by your conventional RESTful methods that need it. Another great feature of Express Resource is what they call "Content-Negotiation". URLs with format extensions like <code>.xml</code> or <code>.json</code> automatically set an indicator of the format in the request so your actions can respond accordingly.</p>
 

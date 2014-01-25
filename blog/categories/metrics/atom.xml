@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: metrics | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/metrics/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/metrics/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Cohort Analysis]]></title>
-    <link href="http://scottwb.github.com/blog/2013/01/21/cohort-analysis/"/>
+    <link href="http://scottwb.com/blog/2013/01/21/cohort-analysis/"/>
     <updated>2013-01-21T13:58:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/01/21/cohort-analysis</id>
+    <id>http://scottwb.com/blog/2013/01/21/cohort-analysis</id>
     <content type="html"><![CDATA[<p>After a few conversations with a former colleauge about statistics, metrics, and analytics, I thought I'd dig up some good articles to summarize some of the key Lean Startup principles surrounding metrics and data-driven decision-making for those who haven't had the pleasure of reading Eric Reis's book <em>Lean Startup</em>. That turned into a blog post about what metrics we report as developers and ops guys, and why we need to focus on <em>Actionable Metrics</em> over <em>Vanity Metrics</em>.</p>
 
 <p> My goal is to provide a little background on <em>Actionable Metrics</em> and how they differ from <em>Vanity Metrics</em>. Understanding this is a central theme of the book <em>Lean Startup</em>, by Eric Reis, and the writings and teachings of a number of other prominent startup/entrepreneur/lean proponents such as Steve Blank, Dave McClure, and Ash Maurya. Fred Wilson of Union Square Ventures, has been quoted saying, "one of our firm's favorite measurements is the cohort analysis".</p>

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: devise | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/devise/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/devise/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Revisited: Adding Filters to Stock Devise Controllers]]></title>
-    <link href="http://scottwb.github.com/blog/2012/02/16/revisited-adding-filters-to-stock-devise-controllers/"/>
+    <link href="http://scottwb.com/blog/2012/02/16/revisited-adding-filters-to-stock-devise-controllers/"/>
     <updated>2012-02-16T23:54:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/02/16/revisited-adding-filters-to-stock-devise-controllers</id>
+    <id>http://scottwb.com/blog/2012/02/16/revisited-adding-filters-to-stock-devise-controllers</id>
     <content type="html"><![CDATA[<p>Six months ago, I wrote a quick blog post about <a href="http://sleeplesscoding.blogspot.com/2011/08/adding-filters-to-stock-device.html">adding custom filters to stock Devise controllers</a> without subclassing all the Devise controllers. At the end of the post I noted that the prescribed method only worked in the production environment, and not in development.</p>
 
 <p>Today I come to you with a solution that works in development as well as production. The basic mechanics are the same, but we'll factor it slightly differently.</p>

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: express | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/express/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/express/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Custom Error Handling With Express Resource Auto-Loading]]></title>
-    <link href="http://scottwb.github.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading/"/>
+    <link href="http://scottwb.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading/"/>
     <updated>2012-04-19T14:05:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading</id>
+    <id>http://scottwb.com/blog/2012/04/19/custom-error-handling-with-express-resource-auto-loading</id>
     <content type="html"><![CDATA[<p><span class='pullquote-right' data-pullquote='You get no control over how the errors are handled, and the default mechanism is ignorant of the requested format.'>
 <a href="https://github.com/visionmedia/express-resource">Express Resource</a> adds RESTful resource routing on top of the <a href="http://expressjs.com/">Express</a> framework for <a href="http://nodejs.org/">Node.js</a>. It includes a nice feature called "Auto-Loading" that allows you to define a single <code>load</code> method that will automatically be used to load your resource object from a URL id parameter and set it in the request object to be accessed by your conventional RESTful methods that need it. Another great feature of Express Resource is what they call "Content-Negotiation". URLs with format extensions like <code>.xml</code> or <code>.json</code> automatically set an indicator of the format in the request so your actions can respond accordingly.</p>
 

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: tools | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/tools/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/tools/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Easy Papertrail Deployment Using Rake]]></title>
-    <link href="http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
+    <link href="http://scottwb.com/blog/2013/11/08/easy-papertrail-deployment-using-rake/"/>
     <updated>2013-11-08T06:37:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
+    <id>http://scottwb.com/blog/2013/11/08/easy-papertrail-deployment-using-rake</id>
     <content type="html"><![CDATA[<p><a href="http://papertrailapp.com/">Papertrail</a> is a great centralized logging service you can use for distributed systems that have numerous processes creating numerous log files, across numerous hosts. Having all your logs in one place, live tail-able, searchable, and archived is key to debugging such systems in production.</p>
 
 <p>There are a few ways to set it up, as documented on their quick start page, such as a system-wide installation via <a href="http://community.opscode.com/cookbooks/papertrail-rsyslog">Chef</a>, or configuring your app to use the syslog protocol. They also provide a convenient Ruby gem called <a href="http://help.papertrailapp.com/kb/configuration/configuring-centralized-logging-from-text-log-files-in-unix">remote_syslog</a> that can be configured to read a configured set of log files and send them to Papertrail.</p>
@@ -101,9 +101,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Quick and Dirty CampaignMonitor Webhook Management]]></title>
-    <link href="http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/"/>
+    <link href="http://scottwb.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/"/>
     <updated>2013-06-24T16:33:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management</id>
+    <id>http://scottwb.com/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management</id>
     <content type="html"><![CDATA[<p>You've got a CampaignMonitor mailing list and you're using their API to add/update/remove subscribers as they sign up for your app and opt-in to your mailing list. Great. But you also want to know when they unsubscribe from your newsletter, or when an existing user subscribes via a separate newsletter form on your website, and be able to keep that information sync'd with your user database.</p>
 
 <p>CampaignMonitor provides the ability to create <a href="http://www.campaignmonitor.com/api/webhooks/">Webhooks</a> that will drive an HTTP POST callback to your app when subscribe/unsubscribe events happen. Once you dive into this, you'll realize that you also need a way to deploy and update your webhooks. They only allow you to do this through their API -- there is no GUI for it.</p>
@@ -180,9 +180,9 @@ rake campaign_monitor:webhooks:test    # Test all our CampaignMonitor webhooks
   
   <entry>
     <title type="html"><![CDATA[Using NewRelic With Custom Ruby Worker Daemons]]></title>
-    <link href="http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/"/>
+    <link href="http://scottwb.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons/"/>
     <updated>2013-05-23T07:48:00-07:00</updated>
-    <id>http://scottwb.github.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons</id>
+    <id>http://scottwb.com/blog/2013/05/23/using-newrelic-with-custom-ruby-worker-daemons</id>
     <content type="html"><![CDATA[<p>The NewRelic Ruby Agent comes with great support for Rails, Sinatra, and other frameworks and web servers out of the box. It also supports background jobs for frameworks like DelayedJob and Resque.</p>
 
 <p>But what if you have your own custom background worker mechanism?</p>

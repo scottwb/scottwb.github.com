@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: blogging | Scott W. Bradley]]></title>
-  <link href="http://scottwb.github.com/blog/categories/blogging/atom.xml" rel="self"/>
-  <link href="http://scottwb.github.com/"/>
-  <updated>2014-01-24T20:59:29-08:00</updated>
-  <id>http://scottwb.github.com/</id>
+  <link href="http://scottwb.com/blog/categories/blogging/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-01-24T22:04:51-08:00</updated>
+  <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Embedded Tweet Tag For Jekyll]]></title>
-    <link href="http://scottwb.github.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll/"/>
+    <link href="http://scottwb.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll/"/>
     <updated>2012-01-29T15:54:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll</id>
+    <id>http://scottwb.com/blog/2012/01/29/embedded-tweet-tag-for-jekyll</id>
     <content type="html"><![CDATA[<p>A nice way to quote a tweet in your blog post is to use Twitter's <a href="https://dev.twitter.com/docs/embedded-tweets">Embedded Tweet</a> feature. Not only does it provide a familiar Twitter style, it also provides features like being able to directly retweet, follow, etc., without leaving your page. For example:</p>
 
 <p><div class='embed tweet'><blockquote class="twitter-tweet" align="center" width="350"><p>Best analogy I find so far for explain concept of ScrumMaster to new devops is Tooth Fairy.</p>&mdash; DevOps Borat (@DEVOPS_BORAT) <a href="https://twitter.com/DEVOPS_BORAT/statuses/159849628819402752">January 19, 2012</a></blockquote>
@@ -50,9 +50,9 @@
   
   <entry>
     <title type="html"><![CDATA[I've Moved My Blog To Github]]></title>
-    <link href="http://scottwb.github.com/blog/2012/01/12/ive-moved-my-blog-to-github/"/>
+    <link href="http://scottwb.com/blog/2012/01/12/ive-moved-my-blog-to-github/"/>
     <updated>2012-01-12T17:09:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/01/12/ive-moved-my-blog-to-github</id>
+    <id>http://scottwb.com/blog/2012/01/12/ive-moved-my-blog-to-github</id>
     <content type="html"><![CDATA[<p>It seems like more and more in the development community, I'm seeing blog posts titled "I've moved my blog to Github". After hearing so much about the combination of <a href="http://octopress.org/">Octopress</a> and <a href="http://pages.github.com">Github Pages</a>, I figured I'd give it a look.</p>
 
 <p>The result is what you see here. This is of course still a work-in-progress. I'd like to customize my own theme and style, but the default one provided by Octopress is so nice that I'm perfectly happy to let this sit for a while.</p>
@@ -63,9 +63,9 @@
   
   <entry>
     <title type="html"><![CDATA[A Link To My Old Blog]]></title>
-    <link href="http://scottwb.github.com/blog/2012/01/11/a-link-to-my-old-blog/"/>
+    <link href="http://scottwb.com/blog/2012/01/11/a-link-to-my-old-blog/"/>
     <updated>2012-01-11T17:27:00-08:00</updated>
-    <id>http://scottwb.github.com/blog/2012/01/11/a-link-to-my-old-blog</id>
+    <id>http://scottwb.com/blog/2012/01/11/a-link-to-my-old-blog</id>
     <content type="html"><![CDATA[<p>I am starting a new blog here at scottwb.com, and moving away from my old blog <a href="http://sleeplesscoding.blogspot.com/">Sleepless Coding</a>.</p>
 
 <p>There are a few reasons for this:</p>
