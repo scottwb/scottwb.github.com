@@ -4,7 +4,7 @@
   <title><![CDATA[Scott W. Bradley]]></title>
   <link href="http://scottwb.com/atom.xml" rel="self"/>
   <link href="http://scottwb.com/"/>
-  <updated>2014-02-09T17:05:20-08:00</updated>
+  <updated>2014-02-09T17:31:27-08:00</updated>
   <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
@@ -174,7 +174,7 @@
 
 <p>It&#8217;s very cool that out of the box, RubyMotion comes with <a href="http://testflightapp.com/">TestFlight</a> integration. That&#8217;s hands-down the best way to get your pre-release app builds in the hands of beta-testers and stakeholders.</p>
 
-<p>If you&#8217;re not into Emacs (why wouldn&#8217;t you be?), <a href="http://www.jetbrains.com/ruby/">RubyMine</a> by JetBrains is a great IDE for RubyMotion (as well as Ruby on Rails). It integrates with auto-completion of the iOS SDK API, and the rake-baesd test runner too. And it has support for Emacs key-bindings. ;)</p>
+<p>If you&#8217;re not into Emacs (why wouldn&#8217;t you be?), <a href="http://www.jetbrains.com/ruby/">RubyMine</a> by JetBrains is a great IDE for RubyMotion (as well as Ruby on Rails). It integrates with auto-completion of the iOS SDK API, and the rake-based test runner too. And it has support for Emacs key-bindings. ;)</p>
 
 <h3>5. Great Libraries</h3>
 
