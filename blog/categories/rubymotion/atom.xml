@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rubymotion | Scott W. Bradley]]></title>
+  <link href="http://scottwb.com/blog/categories/rubymotion/atom.xml" rel="self"/>
+  <link href="http://scottwb.com/"/>
+  <updated>2014-02-09T17:05:20-08:00</updated>
+  <id>http://scottwb.com/</id>
+  <author>
+    <name><![CDATA[Scott W. Bradley]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Wake Surfing With RubyMotion]]></title>
+    <link href="http://scottwb.com/blog/2014/02/09/wake-surfing-with-rubymotion/"/>
+    <updated>2014-02-09T13:53:00-08:00</updated>
+    <id>http://scottwb.com/blog/2014/02/09/wake-surfing-with-rubymotion</id>
+    <content type="html"><![CDATA[<p><a href="https://itunes.apple.com/us/app/supra-boats-swell-surf-system/id804765775?mt=8"><img class="left" src="/images/posts/2014-02-09-wake-surfing-with-rubymotion/swell.jpg" width="350" title="Supra Boats Swell System" alt="Supra Boats Swell System"></a></p>
+
+<p>A couple weeks ago, our first <a href="http://facetdigital.com/">Facet Digital</a> client project to go public in 2014 was launched in the Apple App Store: <a href="https://itunes.apple.com/us/app/supra-boats-swell-surf-system/id804765775?mt=8">Supra Boats Swell Surf System</a>.</p>
+
+<p>This is a multimedia catalog app designed for reps and resellers on the boat show floor, allowing them to show off their <a href="http://supraboats.com/swell/">Swell System</a> for wake surfing. It features an interactive look at some of the unqiue features of this system, such as the ability to change the shape of the wave and even which side of the boat the wave is on! I'm no professional wake surfer, but just watching some of the videos embedded in this app make me anxious for summer to arrive...and to participate in some of these fun photo shoots with the great folks at Supra Boats for next year's app.</p>
+
+<p><a href="http://ramsmusings.com/">Jeremy</a>, <a href="http://koolmanchu.com/">Leif</a>, and I had a blast building this app. Part of that was because the content was so cool. A bigger part was because because we decided, for the first time, to build an iOS app using 100% RubyMotion, instead of going the traditional XCode and Objective-C route.</p>
+
+<p>So, I thought I'd share a litte bit about why we enjoyed using RubyMotion...</p>
+
+<!-- MORE -->
+
+
+<h2>7 Reasons We Liked RubyMotion</h2>
+
+<p>Most of the code we've written in the last 5 - 10 years has been in higher-level, programmer-pleasing, dynamic languages like Ruby, Python, and JavaScript. While I do have an extensive background in C and C++, sometimes I cringe at the thought of going back there. That's what Objective-C represents to me. Sure, it has message passing like Smalltalk, and the last few years of improvements like ARC and some of the excellent static analysis tools are great, but for my programmer productivity buck, Objective-C in all its verbosity doesn't even compare to the expressiveness of Ruby.</p>
+
+<p>Plus, I hate XCode. I'm an Emacs, Vim, and zsh guy. Keep my hands on the keyboard.</p>
+
+<p>Here are a few of the highlights we experienced:</p>
+
+<h3>1. The Language</h3>
+
+<p>If you ask me, the Objective-C syntax is ugly and cumbersome. Maybe that's just the view through my Ruby-colored glasses, but just compare this simple Objective-C code:</p>
+
+<p><code>objc
+// Objective-C
+UIView *view=[[UIView alloc] initWithFrame:CGRectMake(x, y, width, height)];
+[view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"a.png"]]];
+</code></p>
+
+<p>to the equivalent RubyMotion code:</p>
+
+<p>```ruby</p>
+
+<h1>ruby</h1>
+
+<p>view = UIView.alloc.initWithFrame([[x, y], [width, height]])
+view.backgroundColor = UIColor.colorWithPatternImage(UIImage.imageNamed('a.png'))
+```</p>
+
+<p>Or how about native types, list comprehension, and block syntax?</p>
+
+<p>```objc
+// Objective-C
+NSMutableDictionary<em> d = [NSMutableDictionary dictionary];
+for (int i = 0; i &lt; 100; ++i) {
+  NSNumber </em>v = @(i);
+  d[[v stringValue]] = v;
+}</p>
+
+<p>__block int sum = 0;
+[d enumerateKeysAndObjectsUserBlock:<sup>(id</sup> key, id onj, BOOL *stop) {
+  sum += [obj intValue];
+}];
+```</p>
+
+<p>```ruby</p>
+
+<h1>ruby</h1>
+
+<p>d = {}
+(0..100).each { |i| d[i.to_s] = i }</p>
+
+<p>sum = d.values.inject(0) { |memo, value| memo + value }
+```</p>
+
+<p>Even though RubyMotion is compiled to LLVM just like the Objective-C code is, I am sure one could make a performance argument in favor of Objective-C in examples like this. However, I prefer to optimize for developer productivity, time to market, and ease of correctness. The beauty of RubyMotion is that you can call anything natively written in Objective-C or C anyway, so you always have the option to factor out performance sensitive pieces if you feel it is necessary.</p>
+
+<h3>2. The Test Infrastructure</h3>
+
+<p>If you're used to TDD in a language like Ruby, using tools like RSpec, you'll find the iOS/Objective-C ecosystem lacking in this department. RubyMotion integrates Bacon, a mini RSpec of sorts, that provides a great DSL for unit and integration testing. For example:</p>
+
+<p>```ruby
+describe "Dealer" do
+  before do</p>
+
+<pre><code>@dealer = Dealer.new(40, -100, "Cool Dealer", "http://dealer.com/")
+</code></pre>
+
+<p>  end</p>
+
+<p>  it ".closest_dealer_to finds the closest dealer to a given location" do</p>
+
+<pre><code>closest_dealer = Dealer.closest_dealer_to(
+  CLLocation.alloc.initWithLatitude(
+    47.7,
+    longitude: -122.2
+  )
+)
+closest_dealer.is_a?(Dealer).should == true
+closest_dealer.title.should == "Active Watersports"
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Running these tests is as easy as running the <code>rake spec</code> command. This builds all your app and library code, yoru test code, downloads a test executable to the simulator, runs it, and prints typical RSpec-style output right to the terminal. The build/test cycle is almost identical to what you'd do for a Ruby on Rails app. You can even run the test suite on the device with <code>rake spec:device</code> and can filter to specific test cases when you want to focus on one part of the app.</p>
+
+<h3>3. The Workflow</h3>
+
+<p>The workflow is all based around <code>rake</code>. Everything is done via the command line. No XCode required. For an old-school guy like me, this is way it should be. My workflow goes like this:</p>
+
+<ul>
+<li>Write code in Emacs</li>
+<li>Run <code>rake spec</code> to build the test suite, download it to the simulator, and and run it, seeing the output in my terminal.</li>
+<li>Run <code>rake</code> to build the app, downloaded it to the simulator, and run it.</li>
+<li>Play with the app on simulator.</li>
+<li>Use the REPL to tinker with layout, variables, etc. live on the simulator!</li>
+<li>Repeat as necessary.</li>
+<li>Run <code>rake device</code> to build the app for my target device, download it there, and run it, so I can play with it on a real iPhone or iPad.</li>
+<li>Run <code>rake testflight notes="Added new features!"</code> to build an AdHoc distribution, upload it to TestFlight, and push it out to all of my beta-testers.</li>
+<li>Run <code>rake archive</code> to build the whole submission to the app store.</li>
+<li>Drag the <code>.ipa</code> that outputs into the Application Loader, and I'm off to the App Store!</li>
+</ul>
+
+
+<p>Note the part about the REPL! This is one of my favorite parts. I can't stand working in a langauge without a good REPL. It's one of the reasons I love working in Ruby and Python. Not only does RubyMotion provide a nice REPL, it is run in the context of the running app. That means you can call methods on live objects, print out their values, etc. This can come in super handy when you just want to tweak the positioning of something until you like it, and then read out its final values.</p>
+
+<p>You can also use <code>puts</code> to print to <code>stdout</code> right there in the REPL in your terminal, like you're used to with your usual Ruby apps.</p>
+
+<h3>4. The Integration</h3>
+
+<p>It's very cool that out of the box, RubyMotion comes with <a href="http://testflightapp.com/">TestFlight</a> integration. That's hands-down the best way to get your pre-release app builds in the hands of beta-testers and stakeholders.</p>
+
+<p>If you're not into Emacs (why wouldn't you be?), <a href="http://www.jetbrains.com/ruby/">RubyMine</a> by JetBrains is a great IDE for RubyMotion (as well as Ruby on Rails). It integrates with auto-completion of the iOS SDK API, and the rake-baesd test runner too. And it has support for Emacs key-bindings. ;)</p>
+
+<h3>5. Great Libraries</h3>
+
+<p>You can't talk about RubyMotion without mentioning <a href="https://github.com/rubymotion/BubbleWrap">BubbleWrap</a> and <a href="https://github.com/rubymotion/sugarcube">SugarCube</a>. Both of these libraries add tremendous value and easy-of-use to RubyMotion. They provide two different perspectives on wrapping CocoaTouch/iOS APIs with more idiomatic Ruby interfaces -- with some amount of overlap. These go a long way to making your code even less verbose -- particularly when dealing with the direction one-to-one nature of calling Objective-C APIs from RubyMotion.</p>
+
+<p>Consider SugarCube, for example:</p>
+
+<p><code>ruby
+view.on_swipe(direction: :left, fingers: 2) do |gesture|
+  # handle two-finger left swipe
+end
+</code></p>
+
+<p>You don't even want to know what that code looks like in raw RubyMotion, let alone Objective-C. SugarCubes adds some useful tools to the REPL as well, like the <code>tree</code> command that outputs information about your view hierarchy, and lets you gain access to these easily:</p>
+
+<p><code>
+(main)&gt; tree
+  0: . UIWindow(#6e1f950: [[0.0, 0.0], [320.0, 480.0]])
+  1: `-- UIView(#8b203b0: [[0.0, 20.0], [320.0, 460.0]])
+  2:     +-- UIButton(#d028de0: [[10.0, 10.0], [320.0, 463.400512695312]])
+</code></p>
+
+<p>BubbleWrap provides a JSON interface that is identical to the native Ruby JSON API, making your web service consumers from your Rails apps easy to port over. It also gives us some great one-line high-level wrappers for common operations like playing a movie or taking a picture with the camera, for example:</p>
+
+<p>```ruby</p>
+
+<h1>Uses the rear camera</h1>
+
+<p>BW::Device.camera.rear.picture(media_types: [:movie, :image]) do |result|
+  image_view = UIImageView.alloc.initWithImage(result[:original_image])
+end
+```</p>
+
+<p>Before you re-invent anything in RubyMotion...look in BubbleWrap and SugarCube first. They're open source, of course, so even if you need to customize their behavior, you can learn a lot by looking at their source code.</p>
+
+<h3>6. Compiled Performance</h3>
+
+<p>Unlike other non-Objective-C iOS app frameworks like Sencha Touch or PhoneGap, RubyMotion compiles to the same LLVM code that Objective-C does. It uses the same compilers. The secret is that RubyMotion is not Ruby. It is a subset of Ruby, based on MacRuby. There are a few features of Ruby that do not exist, but most of them do. This is because Objective-C and Ruby are very similar, and both attribute their message-passing and object-oriented nature to a Smalltalk heritage.</p>
+
+<p>You can program slick animations with RubyMotion that perform as well as those made in Objective-C, without dealing with the sub-par performance of the JavaScript engine running a bloated jQuery library inside a <code>UIWebView</code>, like you would with PhoneGap.</p>
+
+<h3>7. Memory Management</h3>
+
+<p>Memory Management - you don't have to. The RubyMotion team has basically built their own ARC-style memory management baked into the language constructs. You use Ruby like you always do, the RubyMotion framework takes care of auto-releasing unreferenced objects, similar to Apple's ARC. You rarely need to worry about references, but in the rare case that you do (e.g., for cyclical references), the <a href="http://www.rubymotion.com/developer-center/guides/runtime/#_weak_references">WeakRef</a> class gives you what you need. The RubyMotion docs are pretty good too, and they generally point out very explicitly when you are in danger of needing to use a <code>WeakRef</code>.</p>
+
+<h2>Conclusion</h2>
+
+<p>Developing an iOS app with RubyMotion was fast and fun. I believe programming should be fun as much as possible. Anything tedious should be automated or abstracted -- and that's exactly what RubyMotion has done for iOS programming. We'll definitely be using RubyMotion at <a href="http://facetdigital.com/">Facet Digital</a> for a few more iOS apps coming out in the next few months...</p>
+]]></content>
+  </entry>
+  
+</feed>

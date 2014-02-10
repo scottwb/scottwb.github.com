@@ -9,7 +9,7 @@
   <meta name="author" content="Scott W. Bradley">
 
   
-  <meta name="description" content="TL;DR: I hate the CHEF-3694 warning, so I made a cookbook to get rid of it. YMMV. Resource cloning in Chef is a bit of a minefield. They have a &hellip;">
+  <meta name="description" content="A couple weeks ago, our first Facet Digital client project to go public in 2014 was launched in the Apple App Store: Supra Boats Swell Surf System. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -54,7 +54,7 @@
   
     <h2>in which scottwb thinks out loud</h2>
   
-  <a href="http://github.com/scottwb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/camo.github.com/abad93f42020b733148435e2cd92ce15c542d320/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub"></a>
+  <a href="https://github.com/scottwb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
 </hgroup>
 
 </header>
@@ -81,6 +81,57 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/02/09/wake-surfing-with-rubymotion/">Wake Surfing With RubyMotion</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-09T13:53:00-08:00" pubdate data-updated="true">Feb 9<span>th</span>, 2014</time>
+        
+         | <a href="/blog/2014/02/09/wake-surfing-with-rubymotion/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://itunes.apple.com/us/app/supra-boats-swell-surf-system/id804765775?mt=8"><img class="left" src="/images/posts/2014-02-09-wake-surfing-with-rubymotion/swell.jpg" width="350" title="Supra Boats Swell System" alt="Supra Boats Swell System"></a></p>
+
+<p>A couple weeks ago, our first <a href="http://facetdigital.com/">Facet Digital</a> client project to go public in 2014 was launched in the Apple App Store: <a href="https://itunes.apple.com/us/app/supra-boats-swell-surf-system/id804765775?mt=8">Supra Boats Swell Surf System</a>.</p>
+
+<p>This is a multimedia catalog app designed for reps and resellers on the boat show floor, allowing them to show off their <a href="http://supraboats.com/swell/">Swell System</a> for wake surfing. It features an interactive look at some of the unqiue features of this system, such as the ability to change the shape of the wave and even which side of the boat the wave is on! I&#8217;m no professional wake surfer, but just watching some of the videos embedded in this app make me anxious for summer to arrive&#8230;and to participate in some of these fun photo shoots with the great folks at Supra Boats for next year&#8217;s app.</p>
+
+<p><a href="http://ramsmusings.com/">Jeremy</a>, <a href="http://koolmanchu.com/">Leif</a>, and I had a blast building this app. Part of that was because the content was so cool. A bigger part was because because we decided, for the first time, to build an iOS app using 100% RubyMotion, instead of going the traditional XCode and Objective-C route.</p>
+
+<p>So, I thought I&#8217;d share a litte bit about why we enjoyed using RubyMotion&#8230;</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/02/09/wake-surfing-with-rubymotion/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -515,62 +566,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/">Always-On HTTPS With Rails Behind an ELB</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-06T11:43:00-08:00" pubdate data-updated="true">Feb 6<span>th</span>, 2013</time>
-        
-         | <a href="/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>So you want to run your Rails site such that it always uses HTTPS, and you want all HTTP URLs to redirect to their HTTPS counterparts? Typically you use <code>config.force_ssl = true</code> in your initializer, or you use <code>force_ssl</code> in your controllers. For various reasons having to do with late-binding configuration, I have typically not been able to use the <code>config.force_ssl</code> method. This means the easiest way to force the whole site to use HTTPS has been to use <code>force_ssl</code> on the base <code>ApplicationController</code>, like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># app/controllers/application_controller.rb</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">force_ssl</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>However&#8230;when you deploy this to Amazon EC2 behind an ELB (Elastic Load Balancer), you can run into problems.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/02/06/always-on-https-with-rails-behind-an-elb/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -591,6 +586,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/02/09/wake-surfing-with-rubymotion/">Wake Surfing With RubyMotion</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
       </li>
     
@@ -604,10 +603,6 @@
     
       <li class="post">
         <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating The Infamous Mechanize &#8220;Too Many Connection Resets&#8221; Bug</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/11/08/easy-papertrail-deployment-using-rake/">Easy Papertrail Deployment Using Rake</a>
       </li>
     
   </ul>

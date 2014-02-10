@@ -4,7 +4,7 @@
   <title><![CDATA[Scott W. Bradley]]></title>
   <link href="http://scottwb.com/atom.xml" rel="self"/>
   <link href="http://scottwb.com/"/>
-  <updated>2014-01-24T22:04:51-08:00</updated>
+  <updated>2014-02-09T17:05:20-08:00</updated>
   <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
@@ -12,6 +12,228 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Wake Surfing With RubyMotion]]></title>
+    <link href="http://scottwb.com/blog/2014/02/09/wake-surfing-with-rubymotion/"/>
+    <updated>2014-02-09T13:53:00-08:00</updated>
+    <id>http://scottwb.com/blog/2014/02/09/wake-surfing-with-rubymotion</id>
+    <content type="html"><![CDATA[<p><a href="https://itunes.apple.com/us/app/supra-boats-swell-surf-system/id804765775?mt=8"><img class="left" src="http://scottwb.com/images/posts/2014-02-09-wake-surfing-with-rubymotion/swell.jpg" width="350" title="Supra Boats Swell System" alt="Supra Boats Swell System"></a></p>
+
+<p>A couple weeks ago, our first <a href="http://facetdigital.com/">Facet Digital</a> client project to go public in 2014 was launched in the Apple App Store: <a href="https://itunes.apple.com/us/app/supra-boats-swell-surf-system/id804765775?mt=8">Supra Boats Swell Surf System</a>.</p>
+
+<p>This is a multimedia catalog app designed for reps and resellers on the boat show floor, allowing them to show off their <a href="http://supraboats.com/swell/">Swell System</a> for wake surfing. It features an interactive look at some of the unqiue features of this system, such as the ability to change the shape of the wave and even which side of the boat the wave is on! I&#8217;m no professional wake surfer, but just watching some of the videos embedded in this app make me anxious for summer to arrive&#8230;and to participate in some of these fun photo shoots with the great folks at Supra Boats for next year&#8217;s app.</p>
+
+<p><a href="http://ramsmusings.com/">Jeremy</a>, <a href="http://koolmanchu.com/">Leif</a>, and I had a blast building this app. Part of that was because the content was so cool. A bigger part was because because we decided, for the first time, to build an iOS app using 100% RubyMotion, instead of going the traditional XCode and Objective-C route.</p>
+
+<p>So, I thought I&#8217;d share a litte bit about why we enjoyed using RubyMotion&#8230;</p>
+
+<!-- MORE -->
+
+
+<h2>7 Reasons We Liked RubyMotion</h2>
+
+<p>Most of the code we&#8217;ve written in the last 5 - 10 years has been in higher-level, programmer-pleasing, dynamic languages like Ruby, Python, and JavaScript. While I do have an extensive background in C and C++, sometimes I cringe at the thought of going back there. That&#8217;s what Objective-C represents to me. Sure, it has message passing like Smalltalk, and the last few years of improvements like ARC and some of the excellent static analysis tools are great, but for my programmer productivity buck, Objective-C in all its verbosity doesn&#8217;t even compare to the expressiveness of Ruby.</p>
+
+<p>Plus, I hate XCode. I&#8217;m an Emacs, Vim, and zsh guy. Keep my hands on the keyboard.</p>
+
+<p>Here are a few of the highlights we experienced:</p>
+
+<h3>1. The Language</h3>
+
+<p>If you ask me, the Objective-C syntax is ugly and cumbersome. Maybe that&#8217;s just the view through my Ruby-colored glasses, but just compare this simple Objective-C code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="c1">// Objective-C</span>
+</span><span class='line'><span class="n">UIView</span> <span class="o">*</span><span class="n">view</span><span class="o">=</span><span class="p">[[</span><span class="n">UIView</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithFrame:</span><span class="n">CGRectMake</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)];</span>
+</span><span class='line'><span class="p">[</span><span class="n">view</span> <span class="nl">setBackgroundColor:</span><span class="p">[</span><span class="n">UIColor</span> <span class="nl">colorWithPatternImage:</span><span class="p">[</span><span class="n">UIImage</span> <span class="nl">imageNamed:</span><span class="s">@&quot;a.png&quot;</span><span class="p">]]];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>to the equivalent RubyMotion code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># ruby</span>
+</span><span class='line'><span class="n">view</span> <span class="o">=</span> <span class="no">UIView</span><span class="o">.</span><span class="n">alloc</span><span class="o">.</span><span class="n">initWithFrame</span><span class="p">(</span><span class="o">[[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">]]</span><span class="p">)</span>
+</span><span class='line'><span class="n">view</span><span class="o">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="no">UIColor</span><span class="o">.</span><span class="n">colorWithPatternImage</span><span class="p">(</span><span class="no">UIImage</span><span class="o">.</span><span class="n">imageNamed</span><span class="p">(</span><span class="s1">&#39;a.png&#39;</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Or how about native types, list comprehension, and block syntax?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="c1">// Objective-C</span>
+</span><span class='line'><span class="n">NSMutableDictionary</span><span class="o">*</span> <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSMutableDictionary</span> <span class="n">dictionary</span><span class="p">];</span>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">NSNumber</span> <span class="o">*</span><span class="n">v</span> <span class="o">=</span> <span class="err">@</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">d</span><span class="p">[[</span><span class="n">v</span> <span class="n">stringValue</span><span class="p">]]</span> <span class="o">=</span> <span class="n">v</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">__block</span> <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">[</span><span class="n">d</span> <span class="nl">enumerateKeysAndObjectsUserBlock:</span><span class="o">^</span><span class="p">(</span><span class="kt">id</span> <span class="n">key</span><span class="p">,</span> <span class="kt">id</span> <span class="n">onj</span><span class="p">,</span> <span class="kt">BOOL</span> <span class="o">*</span><span class="n">stop</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">sum</span> <span class="o">+=</span> <span class="p">[</span><span class="n">obj</span> <span class="n">intValue</span><span class="p">];</span>
+</span><span class='line'><span class="p">}];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># ruby</span>
+</span><span class='line'><span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class='line'><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span> <span class="n">d</span><span class="o">[</span><span class="n">i</span><span class="o">.</span><span class="n">to_s</span><span class="o">]</span> <span class="o">=</span> <span class="n">i</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">sum</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">memo</span><span class="p">,</span> <span class="n">value</span><span class="o">|</span> <span class="n">memo</span> <span class="o">+</span> <span class="n">value</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Even though RubyMotion is compiled to LLVM just like the Objective-C code is, I am sure one could make a performance argument in favor of Objective-C in examples like this. However, I prefer to optimize for developer productivity, time to market, and ease of correctness. The beauty of RubyMotion is that you can call anything natively written in Objective-C or C anyway, so you always have the option to factor out performance sensitive pieces if you feel it is necessary.</p>
+
+<h3>2. The Test Infrastructure</h3>
+
+<p>If you&#8217;re used to TDD in a language like Ruby, using tools like RSpec, you&#8217;ll find the iOS/Objective-C ecosystem lacking in this department. RubyMotion integrates Bacon, a mini RSpec of sorts, that provides a great DSL for unit and integration testing. For example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="s2">&quot;Dealer&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">before</span> <span class="k">do</span>
+</span><span class='line'>    <span class="vi">@dealer</span> <span class="o">=</span> <span class="no">Dealer</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;Cool Dealer&quot;</span><span class="p">,</span> <span class="s2">&quot;http://dealer.com/&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;.closest_dealer_to finds the closest dealer to a given location&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">closest_dealer</span> <span class="o">=</span> <span class="no">Dealer</span><span class="o">.</span><span class="n">closest_dealer_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="no">CLLocation</span><span class="o">.</span><span class="n">alloc</span><span class="o">.</span><span class="n">initWithLatitude</span><span class="p">(</span>
+</span><span class='line'>        <span class="mi">47</span><span class="o">.</span><span class="mi">7</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">longitude</span><span class="p">:</span> <span class="o">-</span><span class="mi">122</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>      <span class="p">)</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>    <span class="n">closest_dealer</span><span class="o">.</span><span class="n">is_a?</span><span class="p">(</span><span class="no">Dealer</span><span class="p">)</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="kp">true</span>
+</span><span class='line'>    <span class="n">closest_dealer</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="s2">&quot;Active Watersports&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Running these tests is as easy as running the <code>rake spec</code> command. This builds all your app and library code, yoru test code, downloads a test executable to the simulator, runs it, and prints typical RSpec-style output right to the terminal. The build/test cycle is almost identical to what you&#8217;d do for a Ruby on Rails app. You can even run the test suite on the device with <code>rake spec:device</code> and can filter to specific test cases when you want to focus on one part of the app.</p>
+
+<h3>3. The Workflow</h3>
+
+<p>The workflow is all based around <code>rake</code>. Everything is done via the command line. No XCode required. For an old-school guy like me, this is way it should be. My workflow goes like this:</p>
+
+<ul>
+<li>Write code in Emacs</li>
+<li>Run <code>rake spec</code> to build the test suite, download it to the simulator, and and run it, seeing the output in my terminal.</li>
+<li>Run <code>rake</code> to build the app, downloaded it to the simulator, and run it.</li>
+<li>Play with the app on simulator.</li>
+<li>Use the REPL to tinker with layout, variables, etc. live on the simulator!</li>
+<li>Repeat as necessary.</li>
+<li>Run <code>rake device</code> to build the app for my target device, download it there, and run it, so I can play with it on a real iPhone or iPad.</li>
+<li>Run <code>rake testflight notes="Added new features!"</code> to build an AdHoc distribution, upload it to TestFlight, and push it out to all of my beta-testers.</li>
+<li>Run <code>rake archive</code> to build the whole submission to the app store.</li>
+<li>Drag the <code>.ipa</code> that outputs into the Application Loader, and I&#8217;m off to the App Store!</li>
+</ul>
+
+
+<p>Note the part about the REPL! This is one of my favorite parts. I can&#8217;t stand working in a langauge without a good REPL. It&#8217;s one of the reasons I love working in Ruby and Python. Not only does RubyMotion provide a nice REPL, it is run in the context of the running app. That means you can call methods on live objects, print out their values, etc. This can come in super handy when you just want to tweak the positioning of something until you like it, and then read out its final values.</p>
+
+<p>You can also use <code>puts</code> to print to <code>stdout</code> right there in the REPL in your terminal, like you&#8217;re used to with your usual Ruby apps.</p>
+
+<h3>4. The Integration</h3>
+
+<p>It&#8217;s very cool that out of the box, RubyMotion comes with <a href="http://testflightapp.com/">TestFlight</a> integration. That&#8217;s hands-down the best way to get your pre-release app builds in the hands of beta-testers and stakeholders.</p>
+
+<p>If you&#8217;re not into Emacs (why wouldn&#8217;t you be?), <a href="http://www.jetbrains.com/ruby/">RubyMine</a> by JetBrains is a great IDE for RubyMotion (as well as Ruby on Rails). It integrates with auto-completion of the iOS SDK API, and the rake-baesd test runner too. And it has support for Emacs key-bindings. ;)</p>
+
+<h3>5. Great Libraries</h3>
+
+<p>You can&#8217;t talk about RubyMotion without mentioning <a href="https://github.com/rubymotion/BubbleWrap">BubbleWrap</a> and <a href="https://github.com/rubymotion/sugarcube">SugarCube</a>. Both of these libraries add tremendous value and easy-of-use to RubyMotion. They provide two different perspectives on wrapping CocoaTouch/iOS APIs with more idiomatic Ruby interfaces &#8211; with some amount of overlap. These go a long way to making your code even less verbose &#8211; particularly when dealing with the direction one-to-one nature of calling Objective-C APIs from RubyMotion.</p>
+
+<p>Consider SugarCube, for example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">view</span><span class="o">.</span><span class="n">on_swipe</span><span class="p">(</span><span class="n">direction</span><span class="p">:</span> <span class="ss">:left</span><span class="p">,</span> <span class="n">fingers</span><span class="p">:</span> <span class="mi">2</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">gesture</span><span class="o">|</span>
+</span><span class='line'>  <span class="c1"># handle two-finger left swipe</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You don&#8217;t even want to know what that code looks like in raw RubyMotion, let alone Objective-C. SugarCubes adds some useful tools to the REPL as well, like the <code>tree</code> command that outputs information about your view hierarchy, and lets you gain access to these easily:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">tree</span>
+</span><span class='line'>  <span class="mi">0</span><span class="p">:</span> <span class="o">.</span> <span class="no">UIWindow</span><span class="p">(</span><span class="c1">#6e1f950: [[0.0, 0.0], [320.0, 480.0]])</span>
+</span><span class='line'>  <span class="mi">1</span><span class="p">:</span> <span class="sb">`-- UIView(#8b203b0: [[0.0, 20.0], [320.0, 460.0]])</span>
+</span><span class='line'><span class="sb">  2:     +-- UIButton(#d028de0: [[10.0, 10.0], [320.0, 463.400512695312]])</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>BubbleWrap provides a JSON interface that is identical to the native Ruby JSON API, making your web service consumers from your Rails apps easy to port over. It also gives us some great one-line high-level wrappers for common operations like playing a movie or taking a picture with the camera, for example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Uses the rear camera</span>
+</span><span class='line'><span class="no">BW</span><span class="o">::</span><span class="no">Device</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">rear</span><span class="o">.</span><span class="n">picture</span><span class="p">(</span><span class="n">media_types</span><span class="p">:</span> <span class="o">[</span><span class="ss">:movie</span><span class="p">,</span> <span class="ss">:image</span><span class="o">]</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">result</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">image_view</span> <span class="o">=</span> <span class="no">UIImageView</span><span class="o">.</span><span class="n">alloc</span><span class="o">.</span><span class="n">initWithImage</span><span class="p">(</span><span class="n">result</span><span class="o">[</span><span class="ss">:original_image</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Before you re-invent anything in RubyMotion&#8230;look in BubbleWrap and SugarCube first. They&#8217;re open source, of course, so even if you need to customize their behavior, you can learn a lot by looking at their source code.</p>
+
+<h3>6. Compiled Performance</h3>
+
+<p>Unlike other non-Objective-C iOS app frameworks like Sencha Touch or PhoneGap, RubyMotion compiles to the same LLVM code that Objective-C does. It uses the same compilers. The secret is that RubyMotion is not Ruby. It is a subset of Ruby, based on MacRuby. There are a few features of Ruby that do not exist, but most of them do. This is because Objective-C and Ruby are very similar, and both attribute their message-passing and object-oriented nature to a Smalltalk heritage.</p>
+
+<p>You can program slick animations with RubyMotion that perform as well as those made in Objective-C, without dealing with the sub-par performance of the JavaScript engine running a bloated jQuery library inside a <code>UIWebView</code>, like you would with PhoneGap.</p>
+
+<h3>7. Memory Management</h3>
+
+<p>Memory Management - you don&#8217;t have to. The RubyMotion team has basically built their own ARC-style memory management baked into the language constructs. You use Ruby like you always do, the RubyMotion framework takes care of auto-releasing unreferenced objects, similar to Apple&#8217;s ARC. You rarely need to worry about references, but in the rare case that you do (e.g., for cyclical references), the <a href="http://www.rubymotion.com/developer-center/guides/runtime/#_weak_references">WeakRef</a> class gives you what you need. The RubyMotion docs are pretty good too, and they generally point out very explicitly when you are in danger of needing to use a <code>WeakRef</code>.</p>
+
+<h2>Conclusion</h2>
+
+<p>Developing an iOS app with RubyMotion was fast and fun. I believe programming should be fun as much as possible. Anything tedious should be automated or abstracted &#8211; and that&#8217;s exactly what RubyMotion has done for iOS programming. We&#8217;ll definitely be using RubyMotion at <a href="http://facetdigital.com/">Facet Digital</a> for a few more iOS apps coming out in the next few months&#8230;</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Defeating The Infamous CHEF-3694 Warning]]></title>
@@ -2253,96 +2475,6 @@
 
 
 <p><em>This was done on jQuery Mobile 1.1.0.</em></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[jQuery Mobile Breaks Your HREFs on iOS Mobile Safari]]></title>
-    <link href="http://scottwb.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari/"/>
-    <updated>2012-06-29T00:00:00-07:00</updated>
-    <id>http://scottwb.com/blog/2012/06/29/jquery-mobile-breaks-your-hrefs-on-ios-mobile-safari</id>
-    <content type="html"><![CDATA[<p>Starting with verison 1.1.0RC1, jQuery Mobile changes the <code>href</code> of any link to be <code>#</code> when it is clicked, but <em>only on iOS Mobile Safari</em>. If you try to make a click handler that reads the <code>href</code> attribute, you will be surprised to find that it does not get the href you intended. For example:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">));</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>When using jQuery Mobile, this code will print out the href you expect on every browser except Mobile Safari on iOS (both real devices and simulators, but <em>not with other browsers faking their User-Agent</em>). On Mobile Safari, this will print out that the href is &#8220;#&#8221;.</p>
-
-<h2>The Problem</h2>
-
-<p>Obviously this is a problem if you have code that operates in a click handler that reads the clicked element&#8217;s <code>href</code> attribute. jQuery Mobile changes that href before you get a chance to read it.</p>
-
-<p>One common place this is used is with the <code>link_to</code> helper in Ruby on Rails, for links that need to use other HTTP methods. For example, the standard RESTful way to delete a resource will be with a link that sets <code>:method</code> to <code>:delete</code>. Rails handles this with a library called jQuery UJS that needs to read the href from the link when it is clicked.</p>
-
-<p>Unfortunately for Rails users, this means that Rails method links don&#8217;t work with jQuery Mobile on iOS Mobile Safari.</p>
-
-<!-- MORE -->
-
-
-<h2>The Reason</h2>
-
-<p>The jQuery Mobile team is doing this on purpose, to make it so the address bar on iPhone does not drop down when changing pages (and we all love that feature!). In <a href="https://github.com/jquery/jquery-mobile/issues/3777">this discussion</a> and <a href="https://github.com/jquery/jquery-mobile/issues/3686">this discussion</a>, they seem to understand that this makes custom click handlers get the wrong href, but decide to go ahead with it anyway.</p>
-
-<p>You can see it happen in this excerpt from the jQuery Mobile 1.1.0 source (reformatted for blog-friendlyness):</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// By caching the href value to data and switching the href to a #,</span>
-</span><span class='line'><span class="c1">// we can avoid address bar showing in iOS. The click handler resets</span>
-</span><span class='line'><span class="c1">// the href during its initial steps if this data is present</span>
-</span><span class='line'><span class="nx">$</span><span class="p">(</span> <span class="nx">link</span> <span class="p">)</span>
-</span><span class='line'>  <span class="p">.</span><span class="nx">jqmData</span><span class="p">(</span> <span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="nx">$</span><span class="p">(</span> <span class="nx">link</span>  <span class="p">).</span><span class="nx">attr</span><span class="p">(</span> <span class="s2">&quot;href&quot;</span> <span class="p">)</span>  <span class="p">)</span>
-</span><span class='line'>  <span class="p">.</span><span class="nx">attr</span><span class="p">(</span> <span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span> <span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>The Solution</h2>
-
-<p>Here&#8217;s the part that seems to be undocumented other than in that comment: <em>they store the href in a data attribute!</em> This makes this problem easy to workaround. Simply change your click handler to check for the data attribute first and fall back to the href:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">).</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">));</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>That would be easy enough to encapsulate in a nice helper function&#8230;</p>
-
-<h2>Applying This To Rails jQuery UJS</h2>
-
-<p>If you use the Rails <code>link_to</code> helper with the <code>:method</code> option set to anything other than <code>:get</code>, links are handled by the <code>jquery_ujs</code> library that comes with Rails (often referred to as Rails UJS, jQuery UJS, rails.js). You&#8217;ll notice, for example that none of your <code>:delete</code> links work with jQuery Mobile when you are on iOS Mobile Safari. You might see this as a missing route for your <code>show</code> or <code>edit</code> method depending on where you are linking from.</p>
-
-<p>It turns out the fix is easy. The jquery_ujs code already has a method to encapsulate getting the href from an element, complete with a comment telling you how you can override it. All it does out of the box is read <code>element.attr('href')</code>. All we have to do is override it and make it try the data attribute first.</p>
-
-<p>Somewhere after <code>jquery_ujs.js</code> is loaded, define this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">rails</span><span class="p">.</span><span class="nx">href</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">element</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">element</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">)</span> <span class="o">||</span> <span class="nx">element</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now your Rails <code>link_to</code> calls with custom <code>:method</code> options such as <code>:delete</code> will work just fine with jQuery Mobile 1.1.0 on iOS Mobile Safari, and you don&#8217;t have to lose that clever bit that keeps the address bar hidden.</p>
-
-<hr />
-
-<p><em><strong>UPDATED Jan. 3, 2013:</strong> I have confirmed that this problem has been solved in jQuery Mobile 1.2.0, and this work-around is no longer required. I did try to upgrade one of my jQuery Mobile 1.1.0 apps to 1.1.1 (but rolled back for other reasons), and in that process I believe that the above solution was still required.</em></p>
 ]]></content>
   </entry>
   
