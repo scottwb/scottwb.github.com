@@ -4,7 +4,7 @@
   <title><![CDATA[Category: facetdigital | Scott W. Bradley]]></title>
   <link href="http://scottwb.com/blog/categories/facetdigital/atom.xml" rel="self"/>
   <link href="http://scottwb.com/"/>
-  <updated>2014-02-09T17:31:27-08:00</updated>
+  <updated>2014-05-27T11:59:25-07:00</updated>
   <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
@@ -12,6 +12,42 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[8 Startup Lessons in 6 Months]]></title>
+    <link href="http://scottwb.com/blog/2014/05/27/8-startup-lessons-in-6-months/"/>
+    <updated>2014-05-27T11:49:00-07:00</updated>
+    <id>http://scottwb.com/blog/2014/05/27/8-startup-lessons-in-6-months</id>
+    <content type="html"><![CDATA[<p><em>The following is an excerpt from a <a href="http://facetdigital.com/facet-digital-first-six-months/">blog post</a> I wrote for my company, <a href="http://facetdigital.com/">Facet Digital</a>, that was published today. We've been in business for six months, and we wanted to share what we have learned so far.</em></p>
+
+<h2>So what have we learned?</h2>
+
+<p>Stay committed. The first six months are about grit and hustle. Keep your eye on the ball, and know when to walk away from a bad deal. Remember how valuable you really are.</p>
+
+<p>Doing this has taught us a few key lessons that we'd like to share with our 6-month-younger selves...</p>
+
+<!-- MORE -->
+
+
+<ol>
+<li><p><strong>Know what your customer needs.</strong> At first we struggled to succinctly describe what we do as a technology consulting firm. We build apps. We write code. We design things. We know how to manage projects. We handcraft delightful user experiences that...blah blah blah. Those things are not what are customers need. <em>Our customers need their problems solved.</em> You have technology problems. We solve them for you so that you can focus on your business.</p></li>
+<li><p><strong>Don't sacrifice quality.</strong> One of my favorite quotes as a consultant:</p>
+
+<blockquote><p> "If you think it's expensive to hire a professional to do the job, wait until you hire an amateur." --Red Adair</p></blockquote>
+
+<p>We've seen the reality in this time and time again. In fact, we've made a good living cleaning up after amateurs. The cost of hiring an amateur is not immediately realized. It comes back to haunt you again and again over the lifetime of your project. We don't want our names on that. When potential customers ask us to drop our rates to match some half-priced bargain firm, we politely decline. We know they'll be back when the excrement hits the proverbial whirling blades.</p></li>
+<li><p><strong>Never lock in a client.</strong> I never sign up for an online service that won't let me quit on a moment's notice and export all my data. Why shouldn't we give <em>our</em> customers the same benefit? In software consulting this means providing full transparency into everything we do. Written records of deliverables, wireframes, ERDs, blueprints, API docs, wiki instructions, etc. We strive to make it 100% easy to replace us, and we let our customers know this. You're never locked into us. Our clients stick with us because of the value we provide, not because we enact dubious practices to try to force them to be dependent upon us.</p></li>
+<li><p><strong>Work for payers. Be a payer.</strong> "<a href="http://smashingreader.com/How_do_you_persuade_someone_to_pay_for_%E2%80%9Cfree%E2%80%9D_information_i23805563">Payers value their time more than their money.</a>" Amy Hoy nails it with this simple piece. A client that will pay you for your expertise, to get the job done, while they are off solving their own bigger and better problems, is like GOLD. They value their time and will pay you to solve problems and save them time. A client that doesn't value their time will spend six hours researching the solutions to a problem <em>you're</em> hired to be the expert in. They'll impede your ability to provide them value, and they'll nickel-and-dime you to death. Run away.</p>
+
+<p>By the same token, when running a small business, you should <em>be a payer</em>. We're way more productive and profitable when we focus on what we do best, and pay someone else to save us time and money on the rest. That's why after learning the ropes of business accounting, we hired an awesome accountant.</p></li>
+<li><p><strong>Invest in tools, platforms, and processes.</strong> I always take notice of a professional carpenter's tools and processes, and how those serve as multipliers for their skill. A pro has the right tools and he knows which tools to apply to which problems. Building software is no different. Small teams often try to get by only using free tools, cobbling together pieces of custom code, and trying to build everything in-house to save cash, when buying a solution would move them so much farther ahead. At Facet, we're not afraid to pay for platforms like AWS and Heroku, buy tools like Adobe Creative Cloud, and outsource commodity technology to SaaS platforms like SendGrid. Likewise, we're in a great position to identify common problems across multiple clients, and solve them with one solution that we can sell over and over again.</p></li>
+<li><p><strong>Give back.</strong> So much of what our industry builds today is based on the free and open-source software world. When we started Facet Digital, we gave ourselves a goal of contributing back an average of <a href="https://github.com/facetdigital">one open-source project per month</a>, no matter how big or small, and we're right on track. Not only is it rewarding to be a part of that community, it generates real leads and sparks valuable networking.</p></li>
+<li><p><strong>Trust your co-founders.</strong> We've all seen the stereotypical co-founder feuds. One founder manipulating the other. Bad-mouthing behind each others' backs. Countering each others' every move. Why even go into business together if that's how you're going to act? One of Facet Digital's core principles is to let each other fail and learn. We try things outside of our comfort zones. We make the bold moves, and we trust each other's motivation and intellect. If we're always worrying about each other, we're not putting our energy in the right place.</p></li>
+<li><p><strong><em>Audentes fortuna iuvat.</em></strong> Fortune favors the bold. Starting a company is great exposure therapy for fear of failure. The easy, comfortable path is not fulfilling. The quickest way to stunt the growth of a fledgling company is to play it safe. Babies learn to walk by trying to stand up and falling over thousands of times. Their egos don't get hurt by failure. They just get up and keep trying. At Facet, we have a ton of bold moves on deck. Baby steps...</p></li>
+</ol>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Wake Surfing With RubyMotion]]></title>

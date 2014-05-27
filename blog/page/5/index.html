@@ -9,7 +9,16 @@
   <meta name="author" content="Scott W. Bradley">
 
   
-  <meta name="description" content="It seems like more and more in the development community, I&#8217;m seeing blog posts titled &#8220;I&#8217;ve moved my blog to Github&#8221;. After &hellip;">
+  <meta name="description" content="I just came across this test case in some old code I had forgotten about: 1
+2
+3
+4
+5
+6
+7
+8
+9
+it &quot;validates that the address is geocodable&quot; &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +90,69 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/01/13/have-some-fun-with-your-tests/">Have Some Fun With Your Tests</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-13T14:36:00-08:00" pubdate data-updated="true">Jan 13<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/01/13/have-some-fun-with-your-tests/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I just came across this test case in some old code I had forgotten about:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">it</span> <span class="s2">&quot;validates that the address is geocodable&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="vi">@user</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="s2">&quot;Death Star, Suite 1138&quot;</span>
+</span><span class='line'>  <span class="vi">@user</span><span class="o">.</span><span class="n">city</span>    <span class="o">=</span> <span class="s2">&quot;Moon System&quot;</span>
+</span><span class='line'>  <span class="vi">@user</span><span class="o">.</span><span class="n">state</span>   <span class="o">=</span> <span class="s2">&quot;Endor&quot;</span>
+</span><span class='line'>  <span class="vi">@user</span><span class="o">.</span><span class="n">zipcode</span> <span class="o">=</span> <span class="s2">&quot;1138&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">expect</span><span class="p">{</span><span class="vi">@user</span><span class="o">.</span><span class="n">save!</span><span class="p">}</span><span class="o">.</span><span class="n">to</span> <span class="n">raise_exception</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">RecordInvalid</span>
+</span><span class='line'>  <span class="vi">@user</span><span class="o">.</span><span class="n">errors</span><span class="o">[</span><span class="ss">:address</span><span class="o">].</span><span class="n">should</span> <span class="kp">include</span> <span class="s2">&quot;could not be found on the map&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It reminded me of something I actually think is important: have a little fun with the examples in your test cases. Not so much as to be distracting, but a little humor can add some fun to an otherwise mechanical, boring task.</p>
+
+<p>I like to think of the guy who comes along a year later trying to understand my code by reading the tests. Telling a small story or making some pop-culture references will hopefully brighten his task.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -196,6 +268,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/05/27/8-startup-lessons-in-6-months/">8 Startup Lessons in 6 Months</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/02/09/wake-surfing-with-rubymotion/">Wake Surfing With RubyMotion</a>
       </li>
     
@@ -209,10 +285,6 @@
     
       <li class="post">
         <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/11/09/defeating-the-infamous-mechanize-too-many-connection-resets-bug/">Defeating The Infamous Mechanize &#8220;Too Many Connection Resets&#8221; Bug</a>
       </li>
     
   </ul>
