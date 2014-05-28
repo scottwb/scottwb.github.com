@@ -9,7 +9,7 @@
   <meta name="author" content="Scott W. Bradley">
 
   
-  <meta name="description" content="Six months ago, I wrote a quick blog post about adding custom filters to stock Devise controllers without subclassing all the Devise controllers. At &hellip;">
+  <meta name="description" content="Imagine a series of pages with simple forms on each of them. With jQuery Mobile, you&#8217;ll usually end up transitioning between these pages using &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,67 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/02/17/auto-focus-the-first-form-element-with-jquery-mobile/">Auto-Focus the First Form Element With jQuery Mobile</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-17T10:08:00-08:00" pubdate data-updated="true">Feb 17<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/02/17/auto-focus-the-first-form-element-with-jquery-mobile/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Imagine a series of pages with simple forms on each of them. With jQuery Mobile, you&#8217;ll usually end up transitioning between these pages using AJAX and nice slide transitions. Since all your forms will end up in the same document, you need to be careful to give them unique IDs if you want to access them from javascript.</p>
+
+<p>One thing I like to do with forms, especially on mobile platforms, is to automatically highlight the first field in the form when it comes in to view. The trick with jQuery Mobile is that with AJAX loading, pre-loading, and BACK/FORWARD buttons, you need to figure out which form is currently in view, and when transitions between forms happen.</p>
+
+<p>Fortunately jQuery Mobile provides us the two facilities we need:</p>
+
+<ul>
+<li>The <code>ui-page-active</code> CSS class gets applied to the <code>.page</code> element that is currently in view.</li>
+<li>The <code>pageshow</code> event gets triggered on the document when a page transition has completed to change which page is in view.</li>
+</ul>
+
+
+<p>Combine these two, and you can do something like this in your main javascript once for the whole document:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;pageshow&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.page.ui-page-active form :input:visible&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]).</span><span class="nx">focus</span><span class="p">();</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, after every page transition, if there is a form on the newly-visible page, the first visible input element automatically receives focus. This works across AJAX, non-AJAX, and BACK/FORWARD page transitions.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -670,53 +731,6 @@ Rails 3.2 and in master at the time of this writing.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/01/14/twitter-image-search-and-download/">Twitter Image Search and Download</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-01-14T14:03:00-08:00" pubdate data-updated="true">Jan 14<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/01/14/twitter-image-search-and-download/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Last night the sunset in the Seattle area was in rare form. You might have thought there was a <a href="http://www.funnyordie.com/videos/dcf83410c7/insane-double-rainbow-guy">double rainbow</a> by the way everyone was going on about it. My wife even noted that her Facebook feed was filled with pictures of it.</p>
-
-<p>So I thought it would be funny to scour Twitter for all the pictures of it that I could find and post them to Facebook just to be a smart-ass.</p>
-
-<p>I sat down to whip out a quick-and-dirty script to do this for me. By the time it was ready, I had lost the smart-ass urge to post them to Facebook, but what I ended up with turns out to be a handy little tool.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/01/14/twitter-image-search-and-download/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -739,6 +753,10 @@ Rails 3.2 and in master at the time of this writing.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/05/28/if-i-were-22/">If I Were 22</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/05/27/8-startup-lessons-in-6-months/">8 Startup Lessons in 6 Months</a>
       </li>
     
@@ -752,10 +770,6 @@ Rails 3.2 and in master at the time of this writing.</p>
     
       <li class="post">
         <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
       </li>
     
   </ul>

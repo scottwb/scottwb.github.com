@@ -9,7 +9,7 @@
   <meta name="author" content="Scott W. Bradley">
 
   
-  <meta name="description" content="The NewRelic Ruby Agent comes with great support for Rails, Sinatra, and other frameworks and web servers out of the box. It also supports background &hellip;">
+  <meta name="description" content="Introducing the &#8220;Picante Paloma&#8221;. It&#8217;s a sweet, spicy, and refreshing drink that&#8217;s perfect for the first day of summer. This &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/21/spicy-summer-drink/">Spicy Summer Drink</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-21T20:08:00-07:00" pubdate data-updated="true">Jun 21<span>st</span>, 2013</time>
+        
+         | <a href="/blog/2013/06/21/spicy-summer-drink/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Introducing the &#8220;Picante Paloma&#8221;. It&#8217;s a sweet, spicy, and refreshing drink that&#8217;s perfect for the first day of summer. This is a mix of a recipe my wife and I found on the internet, a drink we tasted at a friend&#8217;s wedding called &#8220;Late For Work&#8221;, and our own experimentation. It&#8217;s more-or-less paleo-friendly, depending on how picky you are about the ingredients.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/06/21/spicy-summer-drink/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -802,72 +845,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project/">Compile a Single CoffeeScript File From Your Rails Project</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-06-30T20:56:00-07:00" pubdate data-updated="true">Jun 30<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/06/30/compile-a-single-coffeescript-file-from-your-rails-project/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Using Rails 3.2 (or 3.1 for that matter), you typically have CoffeeScript (and a javascript engine like therubyracer/V8) installed as gems - probably via Bundler from your Gemfile, possibly in a per-project RVM gemset.</p>
-
-<p>It doesn&#8217;t seem that this type of setup includes direct access to the <code>coffee</code> command-line compiler. Instead the <code>coffee-script</code> gem uses calls directly to the compiler. Sometimes I&#8217;d just like to compile one of the CoffeeScript files in my Rails app just to look at the javascript, or maybe to export it somewhere that I&#8217;m not using CoffeeScript.</p>
-
-<p>To do this, I&#8217;ve made a simple Rake task. Just drop this into <code>lib/tasks/coffee.rake</code> in your Rails project:</p>
-
-<figure class='code'><figcaption><span>coffee.rake </span><a href='https://gist.github.com/3026787'>View Gist</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">namespace</span> <span class="ss">:coffee</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">task</span> <span class="ss">:compile</span><span class="p">,</span> <span class="ss">:filename</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="p">,</span> <span class="n">args</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">filename</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">filename</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="no">CoffeeScript</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then, you can compile a single file from like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>rake coffee:compile<span class="o">[</span>app/assets/javascripts/mystuff.js.coffee<span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This will output it to stdout so you can redirect that to a file, or the <code>gist</code> command, or whatever.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -890,6 +867,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/05/28/if-i-were-22/">If I Were 22</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/05/27/8-startup-lessons-in-6-months/">8 Startup Lessons in 6 Months</a>
       </li>
     
@@ -903,10 +884,6 @@
     
       <li class="post">
         <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/11/10/5-things-your-code-must-be/">5 Things Your Code Must Be</a>
       </li>
     
   </ul>
