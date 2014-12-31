@@ -9,7 +9,7 @@
   <meta name="author" content="Scott W. Bradley">
 
   
-  <meta name="description" content="Imagine a series of pages with simple forms on each of them. With jQuery Mobile, you&#8217;ll usually end up transitioning between these pages using &hellip;">
+  <meta name="description" content="Rails UJS and jQuery Mobile do not play nice together when it comes to combining Rails UJS&#8217;s handling of non-GET/POST links with jQuery Mobile &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links/">jQuery Mobile and Rails UJS Method Links</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-17T19:59:00-08:00" pubdate data-updated="true">Feb 17<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Rails UJS and jQuery Mobile do not play nice together when it comes to combining Rails UJS&#8217;s handling of non-GET/POST links with jQuery Mobile&#8217;s data attributes such as <code>data-ajax</code>, <code>data-direction</code>, and <code>data-transition</code>. This post demonstrates a quick hack you can use to remedy this.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -684,53 +727,6 @@ Rails 3.2 and in master at the time of this writing.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/01/16/tracking-facebook-ads-with-google-analytics/">Tracking Facebook Ads With Google Analytics</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-01-16T13:37:00-08:00" pubdate data-updated="true">Jan 16<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/01/16/tracking-facebook-ads-with-google-analytics/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>By default, Google Analytics does not do a very good job at categorizing traffic you receive from placing an ad on an external ad network such as Facebook Ads. In the case of Facebook in particular, traffic referred from your ad will show up as &#8220;direct&#8221; or generically as &#8220;facebook&#8221; because of they way the redirect the user to your ad through their own analytics back-end.</p>
-
-<p>The intended way to track through this redirection is using &#8220;UTM codes&#8221;: parameters appended to the URL you use in your ad, that lets Google track that user&#8217;s behavior on your site for the lifecycle of their visit. This is great, because you want to know more than just how many people have clicked on your ad. You want to know what they do once they get to your site (e.g.: if they buy something).</p>
-
-<p>Below is a quick primer on getting setup so that your Facebook Ads can be properly tracked with Google Analytics.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/01/16/tracking-facebook-ads-with-google-analytics/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -753,6 +749,10 @@ Rails 3.2 and in master at the time of this writing.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/31/on-retirement/">On Retirement</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/05/28/if-i-were-22/">If I Were 22</a>
       </li>
     
@@ -766,10 +766,6 @@ Rails 3.2 and in master at the time of this writing.</p>
     
       <li class="post">
         <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
       </li>
     
   </ul>

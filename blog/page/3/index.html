@@ -9,7 +9,7 @@
   <meta name="author" content="Scott W. Bradley">
 
   
-  <meta name="description" content="Using Rails 3.2 (or 3.1 for that matter), you typically have CoffeeScript (and a javascript engine like therubyracer/V8) installed as gems - probably &hellip;">
+  <meta name="description" content="I like jQuery Mobile&#8217;s page loading spinner. When you transition between pages it displays a nice subtle spinner while the page loads, only if &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,51 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/">Show jQuery Mobile Page Loading With Text and Spinner</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-06-30T21:47:00-07:00" pubdate data-updated="true">Jun 30<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I like jQuery Mobile&#8217;s page loading spinner. When you transition between pages it displays a nice subtle spinner while the page loads, only if the page load takes more than a configured number of milliseconds.</p>
+
+<p>So, I wanted to use their page-loading spinner for in-page wait times in my app. The user clicks something, I do some AJAX stuff and show them a nice spinner with a message telling them what&#8217;s going on until the results come back. jQuery Mobile has javascript functions for this called <code>$.mobile.showPageLoadingMsg</code> and <code>$.hidePageLoadingMsg</code>. The problem is, you can either show a spinner only, or a text-message only. You can&#8217;t show both a spinner <em>and</em> a text message, even though they clearly support it. Well, you <em>can</em> do that if you have the global setting <code>$.mobile.loadingMessageTextVisible = true</code>, but then you get a text with your normal page-load spinners.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -630,49 +675,6 @@ I&#8217;ve been using Middleman for less than 24 hours at this point, but so far
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links/">jQuery Mobile and Rails UJS Method Links</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-02-17T19:59:00-08:00" pubdate data-updated="true">Feb 17<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Rails UJS and jQuery Mobile do not play nice together when it comes to combining Rails UJS&#8217;s handling of non-GET/POST links with jQuery Mobile&#8217;s data attributes such as <code>data-ajax</code>, <code>data-direction</code>, and <code>data-transition</code>. This post demonstrates a quick hack you can use to remedy this.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/02/17/jquery-mobile-and-rails-ujs-method-links/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -695,6 +697,10 @@ I&#8217;ve been using Middleman for less than 24 hours at this point, but so far
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/31/on-retirement/">On Retirement</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/05/28/if-i-were-22/">If I Were 22</a>
       </li>
     
@@ -708,10 +714,6 @@ I&#8217;ve been using Middleman for less than 24 hours at this point, but so far
     
       <li class="post">
         <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
       </li>
     
   </ul>

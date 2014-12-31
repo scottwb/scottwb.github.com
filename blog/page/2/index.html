@@ -9,7 +9,7 @@
   <meta name="author" content="Scott W. Bradley">
 
   
-  <meta name="description" content="Introducing the &#8220;Picante Paloma&#8221;. It&#8217;s a sweet, spicy, and refreshing drink that&#8217;s perfect for the first day of summer. This &hellip;">
+  <meta name="description" content="You&#8217;ve got a CampaignMonitor mailing list and you&#8217;re using their API to add/update/remove subscribers as they sign up for your app and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,51 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/">Quick and Dirty CampaignMonitor Webhook Management</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-24T16:33:00-07:00" pubdate data-updated="true">Jun 24<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>You&#8217;ve got a CampaignMonitor mailing list and you&#8217;re using their API to add/update/remove subscribers as they sign up for your app and opt-in to your mailing list. Great. But you also want to know when they unsubscribe from your newsletter, or when an existing user subscribes via a separate newsletter form on your website, and be able to keep that information sync&#8217;d with your user database.</p>
+
+<p>CampaignMonitor provides the ability to create <a href="http://www.campaignmonitor.com/api/webhooks/">Webhooks</a> that will drive an HTTP POST callback to your app when subscribe/unsubscribe events happen. Once you dive into this, you&#8217;ll realize that you also need a way to deploy and update your webhooks. They only allow you to do this through their API &#8211; there is no GUI for it.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/06/24/quick-and-dirty-campaignmonitor-webhook-management/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -800,51 +845,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/">Show jQuery Mobile Page Loading With Text and Spinner</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-06-30T21:47:00-07:00" pubdate data-updated="true">Jun 30<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I like jQuery Mobile&#8217;s page loading spinner. When you transition between pages it displays a nice subtle spinner while the page loads, only if the page load takes more than a configured number of milliseconds.</p>
-
-<p>So, I wanted to use their page-loading spinner for in-page wait times in my app. The user clicks something, I do some AJAX stuff and show them a nice spinner with a message telling them what&#8217;s going on until the results come back. jQuery Mobile has javascript functions for this called <code>$.mobile.showPageLoadingMsg</code> and <code>$.hidePageLoadingMsg</code>. The problem is, you can either show a spinner only, or a text-message only. You can&#8217;t show both a spinner <em>and</em> a text message, even though they clearly support it. Well, you <em>can</em> do that if you have the global setting <code>$.mobile.loadingMessageTextVisible = true</code>, but then you get a text with your normal page-load spinners.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -867,6 +867,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/31/on-retirement/">On Retirement</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/05/28/if-i-were-22/">If I Were 22</a>
       </li>
     
@@ -880,10 +884,6 @@
     
       <li class="post">
         <a href="/blog/2014/01/24/defeating-the-infamous-chef-3694-warning/">Defeating The Infamous CHEF-3694 Warning</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/11/11/optimistic-locking-with-couchbase-and-ruby/">Optimistic Locking With Couchbase and Ruby</a>
       </li>
     
   </ul>

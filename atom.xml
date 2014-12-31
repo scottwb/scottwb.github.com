@@ -4,7 +4,7 @@
   <title><![CDATA[Scott W. Bradley]]></title>
   <link href="http://scottwb.com/atom.xml" rel="self"/>
   <link href="http://scottwb.com/"/>
-  <updated>2014-05-28T11:41:49-07:00</updated>
+  <updated>2014-12-31T15:03:39-08:00</updated>
   <id>http://scottwb.com/</id>
   <author>
     <name><![CDATA[Scott W. Bradley]]></name>
@@ -12,6 +12,34 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[On Retirement]]></title>
+    <link href="http://scottwb.com/blog/2014/12/31/on-retirement/"/>
+    <updated>2014-12-31T01:03:00-08:00</updated>
+    <id>http://scottwb.com/blog/2014/12/31/on-retirement</id>
+    <content type="html"><![CDATA[<p><img src="http://scottwb.com/images/posts/2014-12-31-on-retirement/coins.jpg"></p>
+
+<p>Over the holidays, I had a conversation with my extended family about planning for retirement. We looked at standard retirement savings formulas and some aggressive monthly savings numbers. We computed what starting an aggressive savings plan at age 40, and retiring at age 65 would look like, when you hope to live to 85 years old. That&#8217;s 25 years of working and saving enough to live off of for another 20 years. It turns out that, even assuming good investment rates of return, it&#8217;s pretty hard to do much better than living for 20 years on a fixed income of half your age-40 salary. That&#8217;s pretty scary&#8230;</p>
+
+<!-- MORE -->
+
+
+<p>My fear is that planning for a fixed retirement income of half what I earn now seems really low <em>today</em> not to mention 25, 35, and 45 years from now..and I don’t want to live with <em>half</em> the means in 25 years. I want to live at <em>double</em>. I want to enjoy a big house where my kids and grandkids can visit, take family vacations, send my kids to college without them having to go $300K into debt, and be able to take care of my aging parents if necessary.</p>
+
+<p>I see people from my parents&#8217; generation who retired on fixed income. While it&#8217;s great that they came up in a time where you had pensions and guarantees of a certain amount of fixed income and social security, it still seems really stressful. They have the same income for the rest of their lives, it&#8217;s a tight budget from day one, and their spending power decreases dramatically every year under inflation. They can&#8217;t afford to fly to a family wedding, go out to eat with friends, etc. It&#8217;s a weird thing to look forward to. You have this picture of retirement being a relaxation period where you can do all the things you always wanted to but couldn&#8217;t because you were working&#8230;and now you have the time but you can&#8217;t afford those things. Bleak picture of the twilight years, if you ask me.</p>
+
+<p>The conclusion that I&#8217;ve come to accept is that <strong><em>retiring at age 65 is ridiculous</em></strong>. Not only because of what our quick-and-dirty retirement spreadsheet shows, but because of the increases in life expectancy over the last few decades and how the mind and body thrive on having a sense of purpose. I remember when my dad&#8217;s dad retired (I was younger than 10, so my memory may be inaccurate) and I heard the adults saying that statistically, men who retire before age 62 die within 5 years. He didn&#8217;t, but we saw how he decayed shortly after retirement. Maybe the memories of WWII had something to do with it. Maybe that’s just how everyone is at age 80. I don’t know. But I see a history of US presidents starting a presidency beyond our &#8220;normal&#8221; retirement age (Reagan was 69) and doing one of the highest-stress, most-demanding jobs on Earth for 8 more years. If the leader of the free world can work until 77 years old&#8230;</p>
+
+<p>I think a retirement age of 65 was designed for when we had a life expectancy of roughly 65, and was meant for when you were no longer able to be a productive member of society, to give you a year or two of rest before you die. But that time span has grown from 2 years to 20 years with increased life expectancy, and our financial planning hasn&#8217;t. Trying to save enough money to live comfortably for 20 years with no income seems unachievable without a windfall.</p>
+
+<p>Scary indeed. Most industries don&#8217;t hire 70-year-olds who expect higher paychecks, better health care benefits, and more vacation than kids just out of college do, especially when those twenty-somethings are seen as better investments for companies in the long run. Our employment rate doesn&#8217;t seem like it could keep up with extending everyone&#8217;s working years by 20 years. That leaves me with the only conclusion being that I have to <strong>OWN</strong> something — a business, investments, real-estate, something — that makes money.</p>
+
+<p>Over my Christmas break I read Peter Thiel&#8217;s new book <em><a href="http://www.amazon.com/gp/product/B00J6YBOFQ/ref=as_li_tl?ie=UTF8&amp;camp=1789&amp;creative=390957&amp;creativeASIN=B00J6YBOFQ&amp;linkCode=as2&amp;tag=sleepcodin-20&amp;linkId=FHA5UOASSDX75WZS">Zero to One: Notes on Startups, or How to Build the Future</a></em>. There&#8217;s a chapter about the difference between <em>Definite Optimism</em> and <em>Indefinite Optimism</em>. Indefinite optimism assumes that things will generally always get better, but that we just don&#8217;t know how or when, so let’s just invest in things across the board and wander into the future. Definite optimism picks a goal and figures out how to make it happen, assuming we will always find a way. One example of indefinite optimism is the US economy since the 1980s, where all our growth comes from the financial sector, speculation, Wall Street, etc. As opposed to the 1940’s - 1960’s where our definite optimism saw problems and came up with answers — invent a nuke, put a man on the moon, etc. It’s amazing to think how small the budget and timeline was for putting a man on the moon compared to the indefinite expenditures and loose goals of today — decade-long oil wars for some nebulous positive outcome that may eventually happen, $19B acquisitions of messaging apps for sending each other cat pictures with no real value.</p>
+
+<p>This all makes me think that the new way to think about retirement is to just find a problem and fix it. Make it your life&#8217;s goal. It’s the only thing I can actually grasp at. I just don’t know yet what that problem is, and it still seems like a gamble&#8230;</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[If I Were 22]]></title>
@@ -2483,39 +2511,6 @@
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Show jQuery Mobile Page Loading With Text And Spinner]]></title>
-    <link href="http://scottwb.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner/"/>
-    <updated>2012-06-30T21:47:00-07:00</updated>
-    <id>http://scottwb.com/blog/2012/06/30/show-jquery-mobile-page-loading-with-text-and-spinner</id>
-    <content type="html"><![CDATA[<p>I like jQuery Mobile&#8217;s page loading spinner. When you transition between pages it displays a nice subtle spinner while the page loads, only if the page load takes more than a configured number of milliseconds.</p>
-
-<p>So, I wanted to use their page-loading spinner for in-page wait times in my app. The user clicks something, I do some AJAX stuff and show them a nice spinner with a message telling them what&#8217;s going on until the results come back. jQuery Mobile has javascript functions for this called <code>$.mobile.showPageLoadingMsg</code> and <code>$.hidePageLoadingMsg</code>. The problem is, you can either show a spinner only, or a text-message only. You can&#8217;t show both a spinner <em>and</em> a text message, even though they clearly support it. Well, you <em>can</em> do that if you have the global setting <code>$.mobile.loadingMessageTextVisible = true</code>, but then you get a text with your normal page-load spinners.</p>
-
-<!-- MORE -->
-
-
-<p>I&#8217;ve created a workaround for this and included it in my <a href="https://github.com/scottwb/jquery.mobile.utils">jquery.mobile.utils</a> library. Using this you can call:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// Params: jqm theme swatch, and message text</span>
-</span><span class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">mobile</span><span class="p">.</span><span class="nx">utils</span><span class="p">.</span><span class="nx">showWaitBox</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;Hang on while I do work...&quot;</span><span class="p">);</span>
-</span><span class='line'><span class="c1">// ... some time later...</span>
-</span><span class='line'><span class="nx">$</span><span class="p">.</span><span class="nx">mobile</span><span class="p">.</span><span class="nx">utils</span><span class="p">.</span><span class="nx">hideWaitBox</span><span class="p">();</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>That will let you leave the standard textless page-loading spinenrs alone, but be able to show a nice themed wait box with a spinner while your app is doing something the user needs to wait for, that looks like this:</p>
-
-<p><img class="center" src="http://img.skitch.com/20120701-met428ntqsxrest228pxgrrxjs.png"></p>
-
-<p>To use these methods, download the JavaScript or CoffeeScript version of the jquery.mobile.utils library from the <a href="https://github.com/scottwb/jquery.mobile.utils">project&#8217;s github page</a> and include it in your jQuery Mobile page after <code>jquery.mobile-1.1.0.js</code> is loaded.</p>
 ]]></content>
   </entry>
   
